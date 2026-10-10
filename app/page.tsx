@@ -1,4 +1,32 @@
+import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { logout } from "@/app/login/actions";
+import { createClient } from "@/lib/supabase/server";
+
 export default function Home() {
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <BoardgamingHome />
+    </Suspense>
+  );
+}
+
+function HomeFallback() {
+  return (
+    <div className="flex min-h-full flex-1 items-center justify-center bg-zinc-950 text-sm text-zinc-400">
+      Načítání…
+    </div>
+  );
+}
+
+async function BoardgamingHome() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+
+  if (!data?.claims) {
+    redirect("/login");
+  }
+
   return (
     <div className="relative isolate flex min-h-full flex-1 flex-col overflow-hidden bg-zinc-950 text-zinc-100">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -6,6 +34,15 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(56,189,248,0.12),_transparent_50%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black_38%,transparent_78%)]" />
       </div>
+
+      <form action={logout} className="absolute right-6 top-6 z-10">
+        <button
+          type="submit"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
+        >
+          Odhlásit se
+        </button>
+      </form>
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 py-20">
         <p className="mb-5 text-xs font-medium uppercase tracking-[0.28em] text-emerald-400/85">
