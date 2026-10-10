@@ -42,9 +42,11 @@ export async function updateSession(request: NextRequest) {
   // Do not run code between createServerClient and getClaims().
   const { data } = await supabase.auth.getClaims();
   const isAuthenticated = Boolean(data?.claims);
-  const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
+  const pathname = request.nextUrl.pathname;
+  const isPublicAuthRoute =
+    pathname.startsWith("/login") || pathname.startsWith("/auth");
 
-  if (!isAuthenticated && !isLoginRoute) {
+  if (!isAuthenticated && !isPublicAuthRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.search = "";
@@ -54,7 +56,7 @@ export async function updateSession(request: NextRequest) {
     );
   }
 
-  if (isAuthenticated && isLoginRoute) {
+  if (isAuthenticated && pathname.startsWith("/login")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
     redirectUrl.search = "";
