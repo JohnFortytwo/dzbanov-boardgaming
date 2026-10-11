@@ -11,6 +11,8 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
+    "csv-parser": "^3.2.1",
+    "dotenv": "^18.0.7",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"

@@ -1,0 +1,685 @@
+Datum,Výsledek,Hráčů,Hráč 1,Hráč 2,Hráč 3,Hráč 4,Hráč 5,Povol 1,Povol 2,Povol 3,Povol 4,Povol 5,Změna z,Změna do,Změna z,Změna do,Obtížnost,Mod,žlutá,Červená,Modrá,Černá,Fialová,Barva kmen
+5.5.2015,Prohra - Pandemie,3,Dorian,Snow,Gart,,,disp,med,inf,,,,,,,Velmi náročná,Klasika,Vymýceno,Vynalezeno,Nic,Vynalezeno,,
+5.5.2015,Prohra - Pandemie,3,Dorian,Snow,Gart,,,epid,všest,oper,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+5.5.2015,Výhra,3,Dorian,Snow,Gart,,,všest,arch,terka,,,terka,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.5.2015,Výhra,3,Dorian,Snow,Gart,,,všest,arch,věd,,,arch,výzk,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.5.2015,Výhra,4,Dorian,Snow,Gart,Usha,,mech,inf,epid,terka,,mech,věd,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.5.2015,Prohra - Pandemie,4,Dorian,Snow,Gart,Usha,,disp,epid,terka,arch,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,
+12.5.2015,Výhra,3,Dorian,Usha,Snow,,,výzk,inf,všest,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+12.5.2015,Výhra,4,Dorian,Usha,Snow,Gart,,epid,oper,výzk,věd,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.5.2015,Prohra - Kostky,4,Dorian,Usha,Snow,Gart,,všest,disp,epid,terka,,,,,,Středně náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,
+12.5.2015,Prohra - Karty,4,Dorian,Usha,Snow,Gart,,oper,med,všest,věd,,,,,,Středně náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vymýceno,,
+12.5.2015,Výhra,4,Dorian,Usha,Snow,Gart,,mech,oper,výzk,disp,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+17.5.2015,Výhra,3,Ruiner,Dorian,Gart,,,med,disp,terka,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+17.5.2015,Výhra,3,Ruiner,Dorian,Gart,,,všest,věd,inf,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+17.5.2015,Výhra,3,Ruiner,Dorian,Gart,,,inf,med,epid,,,inf,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+17.5.2015,Prohra - Kostky,3,Ruiner,Dorian,Gart,,,všest,oper,mech,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Nic,,Červená
+17.5.2015,Výhra,4,Ruiner,Dorian,Gart,Usha,,disp,oper,výzk,arch,,arch,med,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.5.2015,Prohra - Kostky,4,Ruiner,Dorian,Gart,Usha,,všest,mech,arch,věd,,,,,,Středně náročná,Mutace,Nic,Nic,Vynalezeno,Nic,Nic,
+17.5.2015,Výhra,4,Ruiner,Dorian,Gart,Usha,,mech,výzk,inf,terka,,mech,med,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.5.2015,Výhra,3,Ruiner,Dorian,Gart,,,věd,mech,med,,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.5.2015,Výhra,4,Ruiner,Dorian,Gart,Usha,,oper,disp,epid,med,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+19.5.2015,Výhra,5,Dorian,Ruiner,Snow,Gart,Usha,arch,oper,med,epid,terka,oper,výzk,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+19.5.2015,Prohra - Karty,4,Dorian,Ruiner,Snow,Gart,,oper,mech,inf,výzk,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Nic,Vynalezeno,
+19.5.2015,Výhra,5,Dorian,Usha,Ruiner,Snow,Gart,výzk,věd,inf,arch,med,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+19.5.2015,Výhra,5,Dorian,Usha,Ruiner,Snow,Gart,inf,terka,všest,oper,disp,terka,výzk,,,Středně náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.5.2015,Prohra - Karty,4,Dorian,Usha,Ruiner,Gart,,mech,všest,inf,oper,,,,,,Velmi náročná,Klasika,Vymýceno,Nic,Vynalezeno,Vynalezeno,,
+24.5.2015,Prohra - Kostky,4,Dorian,Usha,Ruiner,Gart,,disp,oper,med,epid,,oper,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+24.5.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,disp,med,inf,věd,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.5.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,arch,věd,mech,disp,,arch,med,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+24.5.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,mech,oper,inf,všest,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+24.5.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,oper,epid,disp,arch,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+24.5.2015,Prohra - Pandemie,4,Dorian,Gart,Usha,Ruiner,,arch,epid,mech,výzk,,,,,,Velmi náročná,Klasika,Nic,Nic,Vynalezeno,Nic,,
+26.5.2015,Výhra,4,Dorian,Gart,Usha,Snow,,výzk,disp,med,inf,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+26.5.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,výzk,arch,epid,disp,,,,,,Středně náročná,Mutace,Nic,Vynalezeno,Nic,Vynalezeno,Nic,
+26.5.2015,Výhra,4,Dorian,Gart,Usha,Snow,,terka,oper,výzk,epid,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+26.5.2015,Výhra,4,Dorian,Gart,Usha,Snow,,terka,med,arch,oper,,terka,věd,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+26.5.2015,Výhra,4,Dorian,Gart,Usha,Snow,,výzk,všest,inf,epid,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.6.2015,Prohra - Pandemie,4,Dorian,Gart,Usha,Snow,,inf,disp,všest,oper,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Nic,,
+9.6.2015,Prohra - Karty,4,Dorian,Gart,Usha,Snow,,med,výzk,epid,oper,,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Nic,,
+9.6.2015,Výhra,4,Dorian,Gart,Usha,Snow,,med,inf,epid,všest,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.6.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,disp,výzk,arch,mech,,,,,,Středně náročná,Combo,Nic,Vynalezeno,Nic,Nic,Nic,
+9.6.2015,Výhra,3,Dorian,Gart,Snow,,,výzk,věd,mech,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Černá
+9.6.2015,Prohra - Pandemie,3,Dorian,Gart,Snow,,,med,výzk,disp,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Vynalezeno,,
+13.6.2015,Výhra,3,Ruiner,Gart,Usha,,,výzk,mech,med,,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+13.6.2015,Výhra,3,Gart,Usha,Ruiner,,,oper,arch,med,,,arch,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+13.6.2015,Prohra - Karty,3,Ruiner,Gart,Usha,,,věd,mech,inf,,,,,,,Středně náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+14.6.2015,Výhra,3,Dorian,Gart,Usha,,,mech,terka,arch,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+14.6.2015,Prohra - Pandemie,2,Dorian,Gart,,,,všest,arch,,,,arch,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Nic,Nic,,Černá
+14.6.2015,Výhra,3,Dorian,Gart,Usha,,,všest,terka,epid,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+14.6.2015,Výhra,3,Dorian,Gart,Usha,,,výzk,epid,arch,,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+14.6.2015,Výhra,2,Dorian,Gart,,,,všest,oper,,,,,,,,Středně náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+14.6.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,výzk,disp,všest,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Nic,Nic,Vynalezeno,
+14.6.2015,Výhra,2,Dorian,Gart,,,,mech,všest,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,
+14.6.2015,Výhra,2,Dorian,Gart,,,,terka,inf,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+14.6.2015,Výhra,2,Dorian,Gart,,,,arch,výzk,,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Žlutá
+19.6.2015,Výhra,2,Dorian,Gart,,,,epid,věd,,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+19.6.2015,Výhra,3,Dorian,Gart,Usha,,,arch,epid,věd,,,,,,,Středně náročná,Mutace,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,
+19.6.2015,Výhra,2,Dorian,Gart,,,,disp,věd,,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Červená
+19.6.2015,Výhra,2,Dorian,Gart,,,,mech,oper,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Žlutá
+19.6.2015,Výhra,2,Dorian,Gart,,,,oper,výzk,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+20.6.2015,Výhra,2,Dorian,Gart,,,,arch,med,,,,arch,věd,,,Velmi náročná,Klasika,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,
+20.6.2015,Výhra,3,Dorian,Usha,Gart,,,oper,věd,epid,,,epid,výzk,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+20.6.2015,Výhra,2,Dorian,Gart,,,,terka,oper,,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Červená
+20.6.2015,Prohra - Karty,2,Dorian,Gart,,,,med,inf,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vymýceno,Vymýceno,Vymýceno,Nic,
+20.6.2015,Výhra,2,Dorian,Gart,,,,med,arch,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+20.6.2015,Výhra,3,Dorian,Gart,Usha,,,inf,med,terka,,,med,výzk,,,Středně náročná,Combo,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Černá
+20.6.2015,Prohra - Pandemie,3,Dorian,Usha,Gart,,,med,všest,mech,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Nic,,
+20.6.2015,Výhra,3,Dorian,Usha,Gart,,,všest,mech,disp,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+20.6.2015,Výhra,2,Dorian,Gart,,,,arch,epid,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Černá
+20.6.2015,Prohra - Kostky,2,Dorian,Gart,,,,výzk,med,,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vymýceno,Nic,Vynalezeno,,Černá
+20.6.2015,Prohra - Kostky,2,Dorian,Gart,,,,oper,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Žlutá
+20.6.2015,Prohra - Kostky,2,Gart,Dorian,,,,věd,arch,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Nic,,Červená
+21.6.2015,Prohra - Pandemie,2,Dorian,Gart,,,,mech,oper,,,,oper,věd,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,Žlutá
+21.6.2015,Výhra,2,Dorian,Gart,,,,všest,arch,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+21.6.2015,Výhra,2,Dorian,Gart,,,,med,disp,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,Žlutá
+21.6.2015,Výhra,2,Dorian,Gart,,,,inf,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Červená
+21.6.2015,Výhra,3,Dorian,Gart,Usha,,,všest,disp,oper,,,všest,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+21.6.2015,Prohra - Kostky,2,Dorian,Gart,,,,věd,mech,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Nic,Nic,,Žlutá
+21.6.2015,Výhra,2,Dorian,Gart,,,,terka,disp,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Žlutá
+21.6.2015,Výhra,2,Dorian,Gart,,,,všest,inf,,,,všest,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+21.6.2015,Výhra,2,Dorian,Gart,,,,arch,terka,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+21.6.2015,Výhra,3,Usha,Gart,Dorian,,,arch,epid,věd,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+21.6.2015,Prohra - Pandemie,2,Dorian,Gart,,,,med,oper,,,,,,,,Velmi náročná,Mutace,Vymýceno,Nic,Vymýceno,Nic,Nic,
+21.6.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,terka,med,mech,,,,,,,Velmi náročná,Mutace,Nic,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+21.6.2015,Výhra,2,Dorian,Gart,,,,inf,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+23.6.2015,Prohra - Pandemie,4,Dorian,Snow,Gart,Usha,,oper,inf,disp,výzk,,,,,,Velmi náročná,Klasika,Vymýceno,Vynalezeno,Nic,Nic,,
+30.6.2015,Výhra,4,Usha,Snow,Ruiner,Gart,,oper,inf,mech,všest,,oper,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+30.6.2015,Prohra - Pandemie,3,Snow,Ruiner,Gart,,,oper,všest,mech,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Nic,Vynalezeno,Vymýceno,
+30.6.2015,Výhra,4,Usha,Snow,Ruiner,Gart,,výzk,terka,oper,věd,,,,,,Středně náročná,Mutace,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,
+30.6.2015,Výhra,3,Usha,Snow,Ruiner,,,věd,mech,arch,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+3.7.2015,Výhra,3,Gart,Snow,Ruiner,,,výzk,oper,mech,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+3.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,arch,věd,med,mech,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.7.2015,Výhra,3,Gart,Snow,Ruiner,,,oper,věd,med,,,oper,disp,,,Velmi náročná,Klasika,Vymýceno,Vymýceno,Vynalezeno,Vymýceno,,
+5.7.2015,Prohra - Kostky,4,Gart,Usha,Snow,Ruiner,,med,terka,oper,arch,,oper,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+5.7.2015,Prohra - Kostky,4,Gart,Usha,Snow,Ruiner,,terka,arch,všest,výzk,,,,,,Velmi náročná,Klasika,Vynalezeno,Nic,Nic,Nic,,
+5.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,terka,výzk,inf,všest,,terka,med,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.7.2015,Prohra - Pandemie,4,Gart,Usha,Snow,Ruiner,,disp,arch,epid,všest,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Nic,Vymýceno,,
+5.7.2015,Prohra - Pandemie,3,Gart,Snow,Ruiner,,,arch,med,terka,,,,,,,Velmi náročná,Klasika,Vynalezeno,Nic,Nic,Vynalezeno,,
+5.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,disp,terka,věd,oper,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+6.7.2015,Prohra - Pandemie,4,Gart,Usha,Snow,Ruiner,,disp,věd,oper,všest,,všest,med,,,Velmi náročná,Klasika,Nic,Vymýceno,Nic,Vynalezeno,,
+6.7.2015,Prohra - Pandemie,4,Gart,Usha,Snow,Ruiner,,disp,arch,epid,terka,,,,,,Velmi náročná,Klasika,Nic,Nic,Nic,Nic,,
+6.7.2015,Prohra - Kostky,4,Gart,Usha,Snow,Ruiner,,terka,všest,epid,výzk,,všest,med,,,Velmi náročná,Klasika,Vymýceno,Vynalezeno,Nic,Nic,,
+6.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,disp,všest,med,mech,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+6.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,výzk,mech,med,arch,,mech,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+6.7.2015,Výhra,4,Gart,Usha,Snow,Ruiner,,epid,inf,oper,výzk,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+10.7.2015,Výhra,3,Gart,Dorian,Usha,,,med,inf,terka,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+10.7.2015,Výhra,2,Dorian,Gart,,,,disp,mech,,,,disp,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+11.7.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,terka,výzk,epid,,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+11.7.2015,Prohra - Kostky,2,Dorian,Gart,,,,disp,výzk,,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vymýceno,,
+11.7.2015,Výhra,2,Dorian,Gart,,,,všest,inf,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+11.7.2015,Výhra,3,Dorian,Gart,Usha,,,věd,arch,med,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,Červená
+12.7.2015,Prohra - Karty,3,Dorian,Gart,Usha,,,oper,epid,všest,,,epid,věd,,,Středně náročná,Mutace,Vynalezeno,Nic,Vymýceno,Vynalezeno,Vymýceno,
+12.7.2015,Výhra,3,Dorian,Gart,Usha,,,epid,oper,výzk,,,epid,věd,,,Středně náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,
+12.7.2015,Prohra - Kostky,2,Dorian,Gart,,,,inf,mech,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+12.7.2015,Prohra - Kostky,2,Dorian,Gart,,,,mech,disp,,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+12.7.2015,Výhra,3,Dorian,Usha,Gart,,,věd,oper,arch,,,,,,,Středně náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+12.7.2015,Prohra - Pandemie,3,Dorian,Usha,Gart,,,všest,výzk,mech,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Vynalezeno,
+12.7.2015,Prohra - Kostky,3,Dorian,Usha,Gart,,,terka,věd,med,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Nic,
+14.7.2015,Prohra - Kostky,3,Dorian,Snow,Gart,,,inf,všest,oper,,,,,,,Velmi náročná,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+14.7.2015,Výhra,3,Dorian,Snow,Gart,,,výzk,inf,oper,,,výzk,med,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vymýceno,,
+14.7.2015,Výhra,4,Dorian,Gart,Usha,Snow,,med,epid,arch,oper,,,,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+14.7.2015,Prohra - Pandemie,4,Dorian,Usha,Gart,Snow,,výzk,mech,inf,věd,,mech,disp,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Červená
+21.7.2015,Prohra - Pandemie,2,Ruiner,Gart,,,,inf,oper,,,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+21.7.2015,Výhra,3,Ruiner,Gart,Usha,,,med,inf,věd,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+21.7.2015,Výhra,2,Ruiner,Gart,,,,výzk,arch,,,,,,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+21.7.2015,Výhra,2,Ruiner,Gart,,,,věd,inf,,,,,,,,Středně náročná,Mutace,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,
+26.7.2015,Výhra,3,Ruiner,Usha,Gart,,,med,arch,oper,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+28.7.2015,Výhra,3,Ruiner,Usha,Gart,,,disp,mech,terka,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.7.2015,Výhra,3,Dorian,Ruiner,Gart,,,věd,terka,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.7.2015,Prohra - Pandemie,4,Dorian,Ruiner,Usha,Gart,,terka,disp,epid,oper,,epid,med,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Vymýceno,,Modrá
+28.7.2015,Prohra - Kostky,4,Dorian,Ruiner,Usha,Gart,,oper,disp,terka,arch,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Černá
+30.7.2015,Prohra - Pandemie,2,Ruiner,Usha,,,,výzk,všest,,,,,,,,Velmi náročná,Klasika,Nic,Vymýceno,Nic,Vynalezeno,,
+30.7.2015,Výhra,2,Ruiner,Usha,,,,věd,všest,,,,věd,med,,,Velmi náročná,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+30.7.2015,Prohra - Pandemie,2,Ruiner,Usha,,,,výzk,epid,,,,,,,,Velmi náročná,Klasika,Nic,Nic,Vynalezeno,Nic,,
+30.7.2015,Prohra - Kostky,2,Ruiner,Usha,,,,věd,inf,,,,,,,,Velmi náročná,Klasika,Nic,Vymýceno,Vynalezeno,Nic,,
+30.7.2015,Prohra - Pandemie,2,Ruiner,Usha,,,,mech,inf,,,,,,,,Velmi náročná,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+30.7.2015,Výhra,2,Ruiner,Usha,,,,výzk,věd,,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+31.7.2015,Výhra,5,Ruiner,Usha,Snow,Gart,Dorian,epid,výzk,arch,disp,terka,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+31.7.2015,Prohra - Pandemie,3,Ruiner,Snow,Dorian,,,výzk,arch,inf,,,,,,,Velmi náročná,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+31.7.2015,Prohra - Kostky,3,Ruiner,Snow,Dorian,,,med,disp,arch,,,,,,,Velmi náročná,Klasika,Nic,Nic,Vymýceno,Vynalezeno,,
+31.7.2015,Výhra,3,Ruiner,Snow,Dorian,,,všest,věd,med,,,,,,,Velmi náročná,Klasika,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,,
+1.8.2015,Výhra,4,Ruiner,Snow,Usha,Gart,,všest,disp,oper,med,,disp,věd,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+1.8.2015,Prohra - Kostky,4,Ruiner,Snow,Usha,Gart,,epid,inf,výzk,věd,,epid,med,,,Velmi náročná,Mutace,Nic,Nic,Vymýceno,Vynalezeno,Nic,
+1.8.2015,Výhra,4,Ruiner,Snow,Usha,Gart,,všest,disp,oper,arch,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+1.8.2015,Výhra,5,Dorian,Gart,Usha,Ruiner,Snow,terka,arch,výzk,med,oper,med,disp,,,Středně náročná,Zhoubný kmen,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,,Žlutá
+1.8.2015,Prohra - Kostky,3,Dorian,Gart,Snow,,,všest,věd,epid,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Nic,,
+2.8.2015,Prohra - Pandemie,3,Ruiner,Snow,Gart,,,terka,výzk,disp,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+2.8.2015,Výhra,4,Dorian,Ruiner,Snow,Gart,,terka,všest,věd,inf,,všest,med,,,Středně náročná,Combo,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Červená
+2.8.2015,Výhra,4,Dorian,Ruiner,Gart,Snow,,terka,med,disp,všest,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+2.8.2015,Výhra,4,Dorian,Gart,Snow,Ruiner,,med,terka,věd,výzk,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,
+2.8.2015,Prohra - Kostky,2,Dorian,Snow,,,,med,věd,,,,,,,,Legendární,Klasika,Vymýceno,Nic,Nic,Vynalezeno,,
+2.8.2015,Výhra,2,Dorian,Snow,,,,terka,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.8.2015,Prohra - Karty,2,Dorian,Gart,,,,med,všest,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.8.2015,Prohra - Kostky,2,Dorian,Gart,,,,arch,disp,,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+4.8.2015,Výhra,2,Dorian,Gart,,,,med,terka,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.8.2015,Prohra - Kostky,2,Dorian,Gart,,,,med,všest,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Žlutá
+4.8.2015,Prohra - Pandemie,2,Dorian,Gart,,,,disp,terka,,,,disp,věd,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,Modrá
+4.8.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,epid,všest,inf,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Nic,Nic,,
+9.8.2015,Výhra,2,Dorian,Gart,,,,arch,všest,,,,všest,med,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,všest,věd,terka,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+9.8.2015,Výhra,4,Dorian,Gart,Ruiner,Usha,,terka,med,výzk,všest,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+9.8.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,disp,výzk,arch,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Vynalezeno,,
+9.8.2015,Výhra,4,Dorian,Gart,Ruiner,Usha,,věd,výzk,med,mech,,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,
+9.8.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,disp,terka,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+14.8.2015,Prohra - Pandemie,3,Dorian,Ruiner,Gart,,,disp,věd,arch,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+15.8.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,arch,oper,terka,oper,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+16.8.2015,Prohra - Kostky,3,Dorian,Ruiner,Gart,,,epid,všest,disp,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Nic,,
+16.8.2015,Výhra,4,Dorian,Usha,Gart,Ruiner,,mech,inf,věd,epid,,epid,disp,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+16.8.2015,Výhra,4,Dorian,Usha,Gart,Ruiner,,epid,inf,všest,věd,,inf,arch,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+16.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,med,věd,mech,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+16.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,arch,inf,disp,,,,,,,Velmi náročná,Mutace,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.8.2015,Výhra,2,Gart,Ruiner,,,,med,arch,,,,,,,,Legendární,Klasika,Vymýceno,Vymýceno,Vynalezeno,Vymýceno,,
+17.8.2015,Výhra,3,Gart,Ruiner,Usha,,,disp,výzk,arch,,,arch,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+18.8.2015,Výhra,3,Gart,Ruiner,Usha,,,epid,med,mech,,,epid,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Žlutá
+18.8.2015,Výhra,3,Gart,Ruiner,Usha,,,inf,arch,med,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,
+18.8.2015,Prohra - Pandemie,2,Gart,Ruiner,Usha,,,výzk,mech,oper,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vymýceno,Nic,,
+18.8.2015,Prohra - Pandemie,2,Gart,Ruiner,,,,výzk,epid,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+18.8.2015,Prohra - Pandemie,3,Ruiner,Gart,,,,arch,oper,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+19.8.2015,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,epid,arch,oper,,,,,,,Velmi náročná,Klasika,Nic,Nic,Nic,Nic,,
+19.8.2015,Výhra,3,Ruiner,Gart,Usha,,,všest,terka,výzk,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+20.8.2015,Výhra,2,Ruiner,Gart,,,,terka,disp,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+20.8.2015,Prohra - Karty,3,Ruiner,Gart,Usha,,,med,disp,terka,,,,,,,Velmi náročná,Mutace,Vymýceno,Nic,Vynalezeno,Vymýceno,Vymýceno,
+21.8.2015,Výhra,3,Ruiner,Gart,Usha,,,inf,výzk,disp,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,
+21.8.2015,Výhra,3,Ruiner,Gart,Usha,,,věd,terka,oper,,,,,,,Velmi náročná,Klasika,Vymýceno,Vymýceno,Vynalezeno,Vymýceno,,
+24.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,inf,med,všest,,,všest,výzk,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+24.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,med,epid,inf,,,epid,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+24.8.2015,Prohra - Karty,4,Dorian,Ruiner,Usha,Gart,,inf,oper,med,arch,,,,,,Středně náročná,Klasika,Nic,Vynalezeno,Vymýceno,Vymýceno,,
+25.8.2015,Prohra - Kostky,3,Dorian,Usha,Gart,,,disp,terka,med,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Nic,Vymýceno,,Černá
+25.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,věd,disp,inf,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+26.8.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,všest,terka,epid,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vymýceno,Vynalezeno,
+26.8.2015,Výhra,3,Dorian,Gart,Ruiner,,,všest,disp,terka,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+27.8.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,terka,epid,med,věd,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+27.8.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,arch,věd,všest,,,,,,,Velmi náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Nic,Nic,Modrá
+27.8.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,terka,epid,mech,,,,,,,Velmi náročná,Combo,Nic,Nic,Vynalezeno,Vynalezeno,Nic,Červená
+27.8.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,oper,epid,disp,,,,,,,Velmi náročná,Combo,Nic,Nic,Vynalezeno,Nic,Nic,
+1.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,arch,výzk,oper,,,oper,med,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+1.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,arch,výzk,věd,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+1.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,inf,med,výzk,,,,,,,Velmi náročná,Combo,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+7.9.2015,Výhra,2,Dorian,Gart,,,,terka,oper,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+7.9.2015,Výhra,3,Dorian,Gart,Usha,,,všest,arch,inf,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+7.9.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,terka,epid,inf,,,,,,,Velmi náročná,Mutace,Nic,Vynalezeno,Vynalezeno,Vynalezeno,Nic,
+7.9.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,věd,mech,arch,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Nic,Nic,
+7.9.2015,Výhra,2,Dorian,Gart,,,,terka,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+7.9.2015,Výhra,2,Dorian,Gart,,,,inf,věd,,,,inf,výzk,,,Velmi náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Červená
+13.9.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,epid,výzk,arch,,,epid,med,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,Černá
+13.9.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,terka,arch,oper,epid,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Černá
+13.9.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,med,oper,arch,,,oper,výzk,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Vynalezeno,
+13.9.2015,Prohra - Pandemie,4,Dorian,Gart,Usha,Ruiner,,disp,oper,epid,mech,,,,,,Velmi náročná,Mutace,Nic,Nic,Nic,Nic,Nic,
+13.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,disp,med,terka,,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,
+13.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,med,věd,arch,,,,,,,Velmi náročná,Mutace,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,
+13.9.2015,Výhra,3,Dorian,Ruiner,Usha,,,med,výzk,terka,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+13.9.2015,Prohra - Kostky,3,Dorian,Ruiner,Usha,,,disp,med,oper,,,oper,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Nic,
+15.9.2015,Výhra,3,Dorian,Ruiner,Gart,,,med,disp,epid,,,epid,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,
+15.9.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,disp,všest,epid,mech,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Nic,Vynalezeno,,Žlutá
+15.9.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,oper,mech,arch,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Nic,Nic,Nic,,Modrá
+15.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,terka,epid,věd,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+22.9.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,epid,všest,oper,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Nic,
+22.9.2015,Prohra - Karty,4,Dorian,Gart,Usha,Ruiner,,oper,epid,věd,všest,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Nic,Vynalezeno,
+22.9.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,disp,epid,výzk,,,,,,,Velmi náročná,Mutace,Nic,Vynalezeno,Nic,Nic,Nic,
+22.9.2015,Výhra,3,Dorian,Gart,Ruiner,,,inf,disp,arch,,,,,,,Legendární,Klasika,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,,
+26.9.2015,Prohra - Karty,4,Dorian,Ruiner,Gart,Usha,,arch,věd,epid,disp,,epid,med,,,Velmi náročná,Mutace,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,Nic,
+26.9.2015,Prohra - Kostky,3,Dorian,Ruiner,Gart,,,všest,výzk,terka,,,,,,,Velmi náročná,Mutace,Vymýceno,Nic,Vynalezeno,Vynalezeno,Nic,
+26.9.2015,Výhra,3,Dorian,Ruiner,Usha,,,med,mech,všest,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+26.9.2015,Prohra - Kostky,3,Dorian,Ruiner,Usha,,,disp,epid,arch,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+27.9.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,věd,všest,med,arch,,arch,disp,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,
+27.9.2015,Výhra,4,Dorian,Usha,Ruiner,Gart,,epid,všest,inf,věd,,všest,výzk,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+27.9.2015,Prohra - Kostky,3,Dorian,Ruiner,Gart,,,inf,mech,výzk,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Nic,,Červená
+27.9.2015,Výhra,3,Dorian,Ruiner,Gart,,,mech,inf,disp,,,disp,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+27.9.2015,Prohra - Pandemie,3,Dorian,Ruiner,Gart,,,všest,terka,inf,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Modrá
+28.9.2015,Prohra - Kostky,4,Dorian,Usha,Ruiner,Gart,,inf,epid,terka,mech,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Černá
+28.9.2015,Výhra,3,Dorian,Ruiner,Gart,,,epid,inf,terka,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+28.9.2015,Prohra - Kostky,3,Dorian,Ruiner,Gart,,,všest,disp,výzk,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,Černá
+4.10.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,epid,věd,oper,disp,,epid,med,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Nic,,Žlutá
+4.10.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,terka,arch,všest,oper,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Černá
+4.10.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,mech,všest,oper,výzk,,mech,epid,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Modrá
+4.10.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,mech,epid,disp,,,mech,inf,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Nic,,Modrá
+4.10.2015,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,všest,med,oper,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Černá
+4.10.2015,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,terka,disp,epid,,,epid,med,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Vynalezeno,,
+7.10.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,terka,inf,arch,oper,,oper,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Nic,,Červená
+7.10.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,mech,epid,terka,oper,,epid,inf,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Nic,,Černá
+7.10.2015,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,výzk,inf,med,terka,,inf,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Černá
+14.10.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,epid,disp,věd,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Nic,,Modrá
+14.10.2015,Výhra,3,Dorian,Gart,Usha,,,med,oper,terka,,,oper,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Žlutá
+14.10.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,epid,oper,arch,,,oper,věd,,,Velmi náročná,Mutace,Nic,Vynalezeno,Vynalezeno,Vynalezeno,Nic,
+14.10.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,disp,arch,epid,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Nic,,
+20.10.2015,Prohra - Pandemie,4,Dorian,Gart,Usha,Ruiner,,výzk,věd,med,inf,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Červená
+20.10.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,terka,věd,disp,inf,,věd,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+20.10.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,věd,arch,terka,epid,,epid,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+20.10.2015,Výhra,4,Dorian,Gart,Usha,Ruiner,,oper,terka,výzk,všest,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+20.10.2015,Výhra,3,Dorian,Gart,Ruiner,,,mech,výzk,arch,,,arch,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+3.11.2015,Výhra,3,Gart,Usha,Snow,,,terka,všest,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.11.2015,Prohra - Pandemie,5,Dorian,Snow,Ruiner,Gart,Usha,disp,věd,epid,mech,oper,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Nic,,
+10.11.2015,Prohra - Pandemie,2,Gart,Snow,,,,med,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vymýceno,,
+10.11.2015,Prohra - Karty,4,Dorian,Snow,Gart,Ruiner,,inf,terka,med,mech,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+14.11.2015,Prohra - Kostky,2,Dorian,Gart,,,,arch,inf,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+14.11.2015,Prohra - Pandemie,2,Dorian,Gart,,,,med,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vymýceno,Nic,,
+14.11.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,výzk,disp,všest,,,všest,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+15.11.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,věd,terka,oper,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Nic,Nic,,
+15.11.2015,Výhra,3,Dorian,Gart,Usha,,,terka,oper,med,,,,,,,Středně náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+15.11.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,arch,mech,terka,,,,,,,Středně náročná,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+16.11.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,inf,epid,věd,,,epid,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+16.11.2015,Prohra - Kostky,3,Dorian,Gart,Usha,,,terka,výzk,oper,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Nic,Vynalezeno,,Modrá
+16.11.2015,Prohra - Pandemie,2,Dorian,Gart,,,,med,všest,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Vynalezeno,,
+16.11.2015,Prohra - Pandemie,2,Dorian,Gart,,,,výzk,inf,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+16.11.2015,Prohra - Pandemie,2,Dorian,Gart,,,,inf,epid,,,,epid,arch,,,Legendární,Klasika,Vynalezeno,Nic,Vymýceno,Nic,,
+17.11.2015,Výhra,2,Usha,Gart,,,,epid,věd,,,,epid,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+17.11.2015,Prohra - Karty,3,Dorian,Gart,Usha,,,inf,arch,všest,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+17.11.2015,Prohra - Pandemie,2,Dorian,Gart,,,,terka,věd,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Vynalezeno,,
+17.11.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,mech,arch,věd,,,,,,,Velmi náročná,Mutace,Vynalezeno,,Vynalezeno,Vynalezeno,Nic,,
+25.11.2015,Prohra - Pandemie,4,Usha,Ruiner,Snow,Gart,,všest,věd,arch,disp,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+1.12.2015,Výhra,2,Dorian,Gart,,,,mech,inf,,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.12.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,oper,věd,výzk,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+1.12.2015,Prohra - Pandemie,3,Dorian,Gart,Usha,,,terka,disp,všest,,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Vynalezeno,Nic,,
+12.12.2015,Výhra,3,Dorian,Gart,Usha,,,epid,výzk,oper,,,epid,med,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.12.2015,Výhra,2,Dorian,Gart,,,,oper,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+12.12.2015,Výhra,2,Dorian,Gart,,,,mech,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.12.2015,Prohra - Pandemie,2,Dorian,Gart,,,,epid,arch,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,,Vynalezeno,
+28.12.2015,Prohra - Kostky,4,Dorian,Gart,Snow,Ruiner,,mech,med,věd,epid,,mech,výzk,,,Velmi náročná,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+28.12.2015,Prohra - Kostky,4,Gart,Snow,Usha,Ruiner,,epid,arch,mech,inf,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Vynalezeno,Nic,,
+29.12.2015,Výhra,3,Dorian,Gart,Snow,,,věd,arch,oper,,,arch,med,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+29.12.2015,Výhra,4,Dorian,Ruiner,Gart,Snow,,výzk,arch,všest,terka,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+31.12.2015,Výhra,5,Snow,Gart,Zelwa,Usha,Ruiner,epid,disp,všest,mech,arch,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+1.1.2016,Prohra - Kostky,3,Dorian,Ruiner,Gart,,,oper,epid,věd,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Nic,Nic,
+1.1.2016,Výhra,3,Dorian,Ruiner,Gart,,,terka,epid,med,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+2.1.2016,Výhra,4,Gart,Zelwa,Ruiner,Snow,,arch,epid,oper,disp,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.1.2016,Výhra,2,Dorian,Gart,,,,terka,med,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+12.1.2016,Prohra - Pandemie,2,Dorian,Gart,,,,mech,arch,,,,mech,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+12.1.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,med,arch,oper,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Žlutá
+12.1.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,všest,inf,mech,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,
+26.1.2016,Prohra - Pandemie,2,Dorian,Gart,,,,věd,arch,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+26.1.2016,Výhra,3,Dorian,Gart,Usha,,,disp,mech,epid,,,mech,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+26.1.2016,Výhra,3,Dorian,Gart,Usha,,,terka,arch,mech,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Žlutá
+26.1.2016,Výhra,3,Dorian,Gart,Usha,,,arch,epid,věd,,,epid,výzk,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+2.2.2016,Výhra,3,Dorian,Gart,Ruiner,,,inf,arch,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+2.2.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,arch,terka,výzk,mech,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+6.2.2016,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,mech,terka,med,,,,,,,Legendární,Klasika,Nic,Nic,Vymýceno,Nic,,
+6.2.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,mech,arch,terka,,,mech,věd,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Nic,,
+6.2.2016,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,arch,věd,výzk,,,,,,,Legendární,Klasika,Vymýceno,Vymýceno,Nic,Nic,,
+6.2.2016,Výhra,3,Dorian,Gart,Ruiner,,,oper,inf,mech,,,oper,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+6.2.2016,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,epid,disp,výzk,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Nic,Nic,
+9.2.2016,Prohra - Pandemie,3,Dorian,Snow,Gart,,,výzk,mech,disp,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+9.2.2016,Výhra,3,Dorian,Snow,Gart,,,mech,všest,terka,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.2.2016,Prohra - Pandemie,4,Dorian,Usha,Snow,Gart,,epid,věd,mech,disp,,,,,,Velmi náročná,Klasika,Nic,Vynalezeno,Nic,Vynalezeno,,
+14.2.2016,Výhra,3,Dorian,Ruiner,Gart,,,arch,všest,disp,,,disp,med,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,
+14.2.2016,Výhra,3,Dorian,Ruiner,Gart,,,med,věd,arch,,,arch,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+14.2.2016,Výhra,3,Dorian,Ruiner,Gart,,,inf,disp,mech,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,
+14.2.2016,Výhra,3,Dorian,Ruiner,Gart,,,arch,výzk,med,,,,,,,Středně náročná,Combo,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,
+14.2.2016,Prohra - Pandemie,4,Dorian,Gart,Usha,Ruiner,,věd,arch,výzk,terka,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+28.2.2016,Výhra,4,Dorian,Snow,Gart,Ruiner,,arch,med,inf,věd,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.2.2016,Prohra - Karty,4,Dorian,Snow,Usha,Ruiner,,výzk,mech,všest,inf,,výzk,věd,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Nic,,Černá
+28.2.2016,Výhra,4,Dorian,Snow,Gart,Ruiner,,arch,všest,epid,věd,,epid,výzk,,,Středně náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+1.3.2016,Výhra,3,Dorian,Gart,Ruiner,,,mech,med,výzk,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.3.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,výzk,epid,všest,med,,epid,disp,,,Středně náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+8.3.2016,Výhra,3,Dorian,Gart,Snow,,,epid,výzk,terka,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+8.3.2016,Výhra,4,Dorian,Gart,Ruiner,Snow,,mech,oper,věd,výzk,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+15.3.2016,Výhra,4,Dorian,Gart,Ruiner,Snow,,výzk,med,věd,disp,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+18.3.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,věd,inf,mech,,,inf,výzk,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+18.3.2016,Výhra,3,Dorian,Gart,Usha,,,výzk,mech,med,,,mech,oper,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+18.3.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,věd,terka,výzk,,,věd,mech,,,Velmi náročná,Mutace,Nic,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+24.3.2016,Výhra,2,Ruiner,Gart,,,,věd,arch,,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.3.2016,Výhra,2,Ruiner,Gart,,,,všest,epid,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+26.3.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,arch,inf,mech,disp,,arch,věd,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+28.3.2016,Výhra,4,Dorian,Usha,Gart,Ruiner,,arch,med,epid,věd,,epid,výzk,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+5.4.2016,Výhra,2,Ruiner,Gart,,,,terka,disp,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.4.2016,Výhra,3,Dorian,Gart,Ruiner,,,epid,všest,terka,,,,,,,Velmi náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Červená
+5.4.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,mech,terka,oper,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+5.4.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,výzk,med,terka,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vymýceno,Nic,,
+12.4.2016,Výhra,3,Dorian,Gart,Ruiner,,,terka,všest,inf,,,inf,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.4.2016,Výhra,4,Dorian,Gart,Ruiner,Usha,,mech,epid,med,terka,,epid,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+19.4.2016,Výhra,4,Dorian,Ruiner,Snow,Gart,,disp,inf,oper,terka,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+22.4.2016,Výhra,4,Dorian,Ruiner,Usha,Gart,,věd,epid,terka,všest,,věd,med,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+22.4.2016,Výhra,3,Dorian,Ruiner,Gart,,,věd,med,epid,,,věd,výzk,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+23.4.2016,Výhra,3,Dorian,Gart,Ruiner,,,oper,terka,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+23.4.2016,Prohra - Pandemie,4,Dorian,Usha,Ruiner,Gart,,arch,výzk,epid,všest,,arch,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,,Vynalezeno,Vynalezeno,,Černá
+24.4.2016,Výhra,4,Dorian,Usha,Ruiner,Gart,,oper,terka,všest,med,,všest,věd,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,Červená
+24.4.2016,Výhra,3,Dorian,Ruiner,Gart,,,inf,disp,arch,,,disp,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.4.2016,Výhra,4,Dorian,Usha,Ruiner,Gart,,věd,epid,inf,arch,,epid,výzk,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+24.4.2016,Prohra - Pandemie,3,Dorian,Usha,Ruiner,,,epid,oper,všest,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Červená
+24.4.2016,Prohra - Pandemie,3,Dorian,Usha,Ruiner,,,arch,výzk,oper,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Nic,,
+24.4.2016,Výhra,4,Dorian,Usha,Ruiner,Gart,,mech,inf,terka,oper,,mech,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+10.5.2016,Výhra,3,Dorian,Gart,Ruiner,,,epid,výzk,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+10.5.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,terka,disp,mech,výzk,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Nic,Nic,
+10.5.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,všest,výzk,věd,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Nic,,
+17.5.2016,Výhra,3,Gart,Ruiner,Snow,,,mech,výzk,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+17.5.2016,Výhra,4,Dorian,Ruiner,Snow,Usha,,věd,oper,disp,inf,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+31.5.2016,Výhra,2,Ruiner,Usha,,,,terka,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+31.5.2016,Výhra,4,Ruiner,Usha,Gart,Dorian,,epid,mech,med,věd,,epid,disp,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Modrá
+7.6.2016,Výhra,2,Ruiner,Gart,,,,výzk,terka,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+7.6.2016,Prohra - Kostky,3,Ruiner,Gart,Usha,,,epid,výzk,mech,,,,,,,Velmi náročná,Mutace,Vymýceno,Nic,Nic,Vynalezeno,Vynalezeno,
+7.6.2016,Výhra,3,Ruiner,Gart,Usha,,,med,věd,terka,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+10.6.2016,Prohra - Kostky,2,Ruiner,Gart,,,,terka,věd,,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Vynalezeno,,
+11.6.2016,Prohra - Pandemie,3,Ruiner,Gart,Snow,,,inf,terka,mech,,,inf,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+11.6.2016,Výhra,3,Ruiner,Gart,Snow,,,inf,med,terka,,,med,mech,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+11.6.2016,Prohra - Kostky,3,Ruiner,Snow,Usha,,,inf,disp,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Nic,Nic,,
+11.6.2016,Výhra,3,Gart,Snow,Ruiner,,,med,oper,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+11.6.2016,Prohra - Pandemie,3,Usha,Snow,Ruiner,,,výzk,terka,všest,,,,,,,Velmi náročná,Mutace,Nic,Nic,Nic,Vynalezeno,Nic,
+11.6.2016,Prohra - Pandemie,3,Usha,Snow,Ruiner,,,inf,terka,věd,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+11.6.2016,Prohra - Pandemie,3,Gart,Snow,Ruiner,,,výzk,epid,všest,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Nic,,
+11.6.2016,Prohra - Kostky,3,Gart,Snow,Ruiner,,,všest,inf,arch,,,,,,,Legendární,Klasika,Nic,Vymýceno,Vynalezeno,Nic,,
+11.6.2016,Výhra,3,Gart,Snow,Ruiner,,,mech,inf,věd,,,mech,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Modrá
+11.6.2016,Výhra,3,Usha,Snow,Ruiner,,,všest,epid,med,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+11.6.2016,Prohra - Pandemie,4,Usha,Gart,Snow,Ruiner,,věd,arch,terka,epid,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,
+11.6.2016,Prohra - Kostky,3,Gart,Snow,Ruiner,,,mech,med,výzk,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vymýceno,,Červená
+11.6.2016,Výhra,3,Gart,Snow,Ruiner,,,věd,oper,inf,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+11.6.2016,Výhra,3,Gart,Snow,Ruiner,,,mech,epid,oper,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+11.6.2016,Prohra - Pandemie,3,Gart,Snow,Ruiner,,,oper,terka,disp,,,disp,med,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Vymýceno,,
+11.6.2016,Výhra,3,Gart,Snow,Ruiner,,,disp,výzk,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+11.6.2016,Prohra - Kostky,3,Gart,Snow,Ruiner,,,oper,terka,med,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vymýceno,,
+14.6.2016,Výhra,3,Dorian,Ruiner,Gart,,,med,všest,terka,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+14.6.2016,Prohra - Pandemie,4,Dorian,Usha,Ruiner,Gart,,inf,arch,věd,med,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Červená
+24.6.2016,Prohra - Pandemie,2,Ruiner,Gart,,,,epid,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vymýceno,,
+25.6.2016,Prohra - Kostky,2,Ruiner,Gart,,,,oper,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Vynalezeno,,
+25.6.2016,Prohra - Kostky,2,Ruiner,Gart,,,,oper,věd,,,,,,,,Legendární,Klasika,Nic,Vymýceno,Vynalezeno,Vynalezeno,,
+25.6.2016,Výhra,3,Ruiner,Gart,Usha,,,výzk,věd,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+25.6.2016,Výhra,2,Ruiner,Gart,,,,výzk,věd,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+25.6.2016,Prohra - Kostky,3,Ruiner,Gart,Usha,,,arch,výzk,epid,,,epid,med,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Nic,
+25.6.2016,Prohra - Pandemie,2,Ruiner,Gart,,,,mech,výzk,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Nic,Nic,Vymýceno,
+25.6.2016,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,epid,všest,výzk,,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Nic,Nic,Nic,
+25.6.2016,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,inf,věd,mech,,,mech,med,,,Velmi náročná,Mutace,Nic,Nic,Nic,Vynalezeno,Nic,
+26.6.2016,Výhra,2,Ruiner,Gart,,,,oper,inf,,,,inf,med,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+26.6.2016,Výhra,2,Ruiner,Gart,,,,všest,oper,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vymýceno,Vymýceno,Vymýceno,,Modrá
+26.6.2016,Prohra - Kostky,3,Ruiner,Gart,Usha,,,výzk,terka,věd,,,terka,med,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Vynalezeno,,
+26.6.2016,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,terka,epid,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+28.6.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,mech,disp,arch,věd,,mech,med,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+28.6.2016,Prohra - Pandemie,4,Dorian,Gart,Usha,Ruiner,,disp,epid,arch,věd,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Nic,Vynalezeno,Vynalezeno,
+28.6.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Ruiner,,inf,epid,arch,výzk,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Nic,,Modrá
+2.7.2016,Prohra - Pandemie,4,Dorian,Usha,Gart,Ruiner,,věd,med,disp,mech,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vymýceno,Vymýceno,,
+2.7.2016,Výhra,4,Dorian,Usha,Gart,Ruiner,,epid,med,disp,oper,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.7.2016,Výhra,2,Ruiner,Gart,,,,výzk,inf,,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.7.2016,Výhra,2,Ruiner,Gart,,,,výzk,všest,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Červená
+3.7.2016,Výhra,3,Dorian,Gart,Ruiner,,,terka,med,disp,,,,,,,Velmi náročná,Mutace,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,
+4.7.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,disp,arch,věd,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Vynalezeno,,
+4.7.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,mech,výzk,oper,med,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+4.7.2016,Prohra - Kostky,3,Dorian,Usha,Ruiner,,,oper,terka,věd,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+4.7.2016,Prohra - Pandemie,2,Dorian,Usha,,,,arch,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Žlutá
+5.7.2016,Prohra - Pandemie,2,Ruiner,Gart,,,,terka,epid,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Žlutá
+6.7.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,oper,mech,epid,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Nic,Vynalezeno,,Červená
+6.7.2016,Prohra - Pandemie,4,Dorian,Gart,Ruiner,Usha,,epid,věd,terka,med,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Červená
+6.7.2016,Prohra - Karty,4,Dorian,Gart,Ruiner,Usha,,disp,všest,epid,med,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Modrá
+7.7.2016,Výhra,3,Dorian,Ruiner,Gart,,,oper,výzk,terka,,,oper,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Modrá
+7.7.2016,Výhra,4,Dorian,Usha,Ruiner,Gart,,mech,oper,věd,med,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,Černá
+8.7.2016,Výhra,2,Ruiner,Gart,,,,mech,arch,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+8.7.2016,Prohra - Pandemie,2,Ruiner,Gart,,,,epid,mech,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Nic,Vynalezeno,,Červená
+8.7.2016,Prohra - Pandemie,3,Ruiner,Gart,Dorian,,,inf,arch,terka,,,arch,věd,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Nic,,Červená
+8.7.2016,Výhra,3,Dorian,Gart,Ruiner,,,věd,epid,výzk,,,epid,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+8.7.2016,Prohra - Kostky,4,Dorian,Usha,Ruiner,Gart,,všest,terka,oper,epid,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Žlutá
+8.7.2016,Výhra,4,Dorian,Usha,Ruiner,Gart,,med,všest,věd,oper,,věd,výzk,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,Černá
+8.7.2016,Prohra - Pandemie,3,Dorian,Usha,Ruiner,,,věd,oper,všest,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vymýceno,,Modrá
+19.7.2016,Prohra - Pandemie,4,Dorian,Gart,Ruiner,Snow,,věd,terka,oper,výzk,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Modrá
+19.7.2016,Výhra,3,Dorian,Gart,Snow,,,disp,med,výzk,,,med,věd,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+23.7.2016,Prohra - Pandemie,2,Dorian,Gart,,,,věd,epid,,,,epid,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Černá
+23.7.2016,Prohra - Kostky,2,Dorian,Usha,,,,oper,mech,,,,oper,věd,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Nic,,Černá
+23.7.2016,Prohra - Pandemie,2,Dorian,Gart,,,,disp,mech,,,,mech,med,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Nic,,Modrá
+23.7.2016,Výhra,2,Dorian,Gart,,,,med,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,,Modrá
+23.7.2016,Prohra - Pandemie,2,Dorian,Gart,,,,mech,terka,,,,mech,med,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vynalezeno,,Černá
+23.7.2016,Výhra,2,Dorian,Gart,,,,disp,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+23.7.2016,Prohra - Kostky,3,Dorian,Gart,Usha,,,inf,disp,mech,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Červená
+24.7.2016,Výhra,2,Dorian,Gart,,,,disp,věd,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+24.7.2016,Výhra,2,Dorian,Gart,,,,inf,mech,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+24.7.2016,Výhra,3,Dorian,Gart,Usha,,,terka,oper,arch,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+24.7.2016,Prohra - Kostky,3,Dorian,Gart,Usha,,,med,výzk,mech,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vymýceno,Nic,,Černá
+24.7.2016,Výhra,2,Dorian,Gart,,,,věd,výzk,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+24.7.2016,Výhra,2,Dorian,Gart,,,,med,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Červená
+24.7.2016,Výhra,2,Dorian,Gart,,,,všest,mech,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+24.7.2016,Výhra,3,Dorian,Gart,Usha,,,arch,terka,epid,,,epid,med,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+24.7.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,všest,oper,arch,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+24.7.2016,Výhra,3,Dorian,Gart,Usha,,,terka,epid,inf,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+29.7.2016,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,věd,epid,výzk,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+30.7.2016,Prohra - Kostky,2,Usha,Gart,,,,výzk,plán,,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+30.7.2016,Prohra - Pandemie,2,Gart,Usha,,,,disp,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+30.7.2016,Prohra - Pandemie,2,Usha,Gart,,,,plán,arch,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Vynalezeno,,
+30.7.2016,Prohra - Pandemie,2,Gart,Usha,,,,disp,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Nic,,
+30.7.2016,Výhra,2,Usha,Gart,,,,epid,výzk,,,,epid,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+30.7.2016,Výhra,2,Usha,Gart,,,,med,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+30.7.2016,Prohra - Pandemie,2,Usha,Gart,,,,výzk,mech,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+31.7.2016,Výhra,2,Usha,Gart,,,,všest,věd,,,,všest,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+31.7.2016,Prohra - Pandemie,2,Usha,Gart,,,,plán,arch,,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+1.8.2016,Výhra,2,Usha,Gart,,,,věd,inf,,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.8.2016,Prohra - Pandemie,2,Usha,Gart,,,,q,disp,,,,q,med,,,Legendární,Klasika,Vymýceno,Nic,Nic,Nic,,
+1.8.2016,Výhra,3,Usha,Gart,Ivoš,,,všest,oper,plán,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.8.2016,Prohra - Pandemie,3,Usha,Gart,Ivoš,,,všest,inf,epid,,,epid,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,Modrá
+2.8.2016,Výhra,2,Gart,Ivoš,,,,věd,mech,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+2.8.2016,Prohra - Kostky,3,Usha,Gart,Ivoš,,,epid,med,arch,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Nic,,Černá
+2.8.2016,Výhra,3,Usha,Gart,Ivoš,,,inf,q,výzk,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+2.8.2016,Výhra,4,Dorian,Ivoš,Usha,Gart,,věd,mech,všest,oper,,mech,q,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,
+3.8.2016,Výhra,2,Usha,Gart,,,,terka,disp,,,,disp,q,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.8.2016,Výhra,2,Usha,Gart,,,,mech,arch,,,,arch,výzk,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.8.2016,Výhra,3,Dorian,Ivoš,Gart,,,věd,med,terka,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+3.8.2016,Výhra,3,Dorian,Ivoš,Gart,,,výzk,epid,q,,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+3.8.2016,Prohra - Kostky,3,Dorian,Ivoš,Gart,,,plán,všest,věd,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Červená
+4.8.2016,Prohra - Kostky,2,Dorian,Gart,,,,terka,věd,,,,,,,,Legendární,Klasika,Vymýceno,Nic,Vynalezeno,Vynalezeno,,
+4.8.2016,Prohra - Pandemie,3,Dorian,Usha,Gart,,,arch,oper,epid,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Nic,,
+4.8.2016,Prohra - Pandemie,3,Dorian,Usha,Gart,,,q,mech,oper,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Nic,,
+4.8.2016,Prohra - Kostky,2,Dorian,Gart,,,,terka,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+4.8.2016,Výhra,2,Dorian,Gart,,,,inf,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+4.8.2016,Výhra,2,Dorian,Gart,,,,arch,epid,,,,epid,med,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+4.8.2016,Výhra,2,Dorian,Gart,,,,disp,inf,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+4.8.2016,Prohra - Pandemie,2,Dorian,Gart,,,,výzk,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+4.8.2016,Výhra,2,Dorian,Gart,,,,mech,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+4.8.2016,Prohra - Pandemie,2,Dorian,Gart,,,,epid,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vymýceno,,
+4.8.2016,Výhra,3,Dorian,Gart,Usha,,,mech,výzk,terka,,,mech,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.8.2016,Výhra,3,Dorian,Usha,Gart,,,mech,q,všest,,,všest,med,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+4.8.2016,Výhra,3,Dorian,Gart,Usha,,,inf,disp,výzk,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.8.2016,Prohra - Kostky,2,Dorian,Gart,,,,věd,q,,,,,,,,Velmi náročná,Mutace,Nic,Vymýceno,Vynalezeno,Nic,Nic,
+5.8.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,q,terka,věd,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Vynalezeno,
+5.8.2016,Výhra,3,Dorian,Gart,Usha,,,výzk,všest,mech,,,všest,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+5.8.2016,Výhra,3,Dorian,Gart,Usha,,,med,věd,q,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+5.8.2016,Výhra,2,Dorian,Gart,,,,mech,arch,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+5.8.2016,Prohra - Kostky,2,Dorian,Gart,,,,mech,plán,,,,,,,,Středně náročná,Combo,Nic,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Černá
+5.8.2016,Výhra,2,Dorian,Gart,,,,inf,epid,,,,epid,věd,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Žlutá
+5.8.2016,Prohra - Pandemie,2,Dorian,Gart,,,,disp,výzk,,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Červená
+5.8.2016,Výhra,2,Dorian,Gart,,,,terka,mech,,,,,,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Černá
+5.8.2016,Výhra,3,Dorian,Gart,Usha,,,terka,inf,plán,,,inf,med,,,Středně náročná,Combo,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,Černá
+6.8.2016,Výhra,2,Dorian,Gart,,,,arch,q,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+6.8.2016,Výhra,2,Dorian,Gart,,,,epid,med,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Červená
+6.8.2016,Výhra,3,Dorian,Usha,Gart,,,všest,plán,inf,,,plán,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Černá
+6.8.2016,Prohra - Kostky,3,Dorian,Usha,Gart,,,arch,věd,disp,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+6.8.2016,Výhra,3,Dorian,Usha,Gart,,,terka,epid,q,,,epid,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+6.8.2016,Prohra - Pandemie,2,Dorian,Gart,,,,inf,věd,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Nic,,
+6.8.2016,Výhra,2,Dorian,Gart,,,,plán,výzk,,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+6.8.2016,Výhra,2,Dorian,Gart,,,,mech,med,,,,,,,,Legendární,Klasika,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,,
+6.8.2016,Prohra - Kostky,3,Dorian,Usha,Gart,,,výzk,oper,bio,,,,,,,Středně náročná,Bioterorista,Nic,Vymýceno,Vynalezeno,Nic,,
+7.8.2016,Výhra,2,Dorian,Gart,,,,med,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+7.8.2016,Výhra,2,Dorian,Gart,,,,všest,disp,,,,všest,med,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+7.8.2016,Výhra,2,Dorian,Gart,,,,mech,epid,,,,,,,,Velmi náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+7.8.2016,Výhra,2,Dorian,Gart,,,,disp,plán,,,,,,,,Středně náročná,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+18.8.2016,Prohra - Pandemie,2,Dorian,Gart,,,,věd,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+18.8.2016,Výhra,2,Dorian,Gart,,,,inf,disp,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+18.8.2016,Výhra,3,Dorian,Gart,Usha,,,terka,disp,med,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+19.8.2016,Výhra,2,Dorian,Gart,,,,terka,epid,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,
+19.8.2016,Výhra,2,Dorian,Gart,,,,všest,výzk,,,,všest,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+14.9.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,q,epid,mech,plán,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+14.9.2016,Výhra,3,Dorian,Gart,Ruiner,,,mech,disp,všest,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+20.9.2016,Prohra - Kostky,2,Gart,Usha,,,,věd,rejža,,,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Vynalezeno,Vynalezeno,,
+20.9.2016,Prohra - Kostky,2,Gart,Usha,,,,pilot,oper,,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+21.9.2016,Prohra - Kostky,3,Dorian,Gart,Usha,,,plán,inf,disp,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Nic,Nic,Nic,,
+21.9.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,inf,oper,mech,,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Vynalezeno,Vynalezeno,,
+28.9.2016,Výhra,3,Dorian,Gart,Usha,,,oper,pilot,plán,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.9.2016,Prohra - Karty,3,Dorian,Gart,Usha,,,plán,q,med,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Vymýceno,Nic,
+28.9.2016,Prohra - Pandemie,2,Dorian,Gart,,,,epid,pilot,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Nic,Vynalezeno,Nic,
+29.9.2016,Výhra,2,Dorian,Gart,,,,med,věd,,,,,,,,Velmi náročná,Mutace,Vymýceno,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,
+29.9.2016,Výhra,2,Dorian,Gart,,,,pilot,věd,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+29.9.2016,Výhra,2,Dorian,Gart,,,,výzk,med,,,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+29.9.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,vir,q,oper,,,q,výzk,,,Středně náročná,Worldwide M.,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Vynalezeno,
+29.9.2016,Výhra,3,Dorian,Gart,Usha,,,rejža,pilot,epid,,,,,,,Středně náročná,Worldwide M.,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,
+30.9.2016,Výhra,2,Dorian,Gart,,,,oper,rejža,,,,,,,,Středně náročná,Worldwide M.,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,
+30.9.2016,Prohra - Pandemie,2,Dorian,Gart,,,,pilot,výzk,,,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Nic,Vynalezeno,,
+30.9.2016,Prohra - Kostky,2,Dorian,Gart,,,,pilot,oper,,,,,,,,Velmi náročná,Laboratoř,Nic,Vynalezeno,Nic,Nic,,
+30.9.2016,Prohra - Pandemie,3,Dorian,Gart,Usha,,,inf,epid,lokál,,,,,,,Velmi náročná,Laboratoř,Nic,Vynalezeno,Vynalezeno,Nic,,
+30.9.2016,Prohra - Kostky,2,Dorian,Gart,,,,výzk,lokál,,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Nic,Nic,,
+30.9.2016,Výhra,2,Dorian,Gart,,,,všest,vir,,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.10.2016,Výhra,3,Dorian,Gart,Usha,,,disp,výzk,inf,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.10.2016,Výhra,3,Dorian,Gart,Usha,,,pilot,q,lokál,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.10.2016,Prohra - Kostky,3,Dorian,Gart,Usha,,,disp,pilot,plán,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+1.10.2016,Výhra,3,Dorian,Gart,Usha,,,všest,disp,výzk,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.10.2016,Výhra,2,Dorian,Gart,,,,všest,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+1.10.2016,Prohra - Kostky,2,Dorian,Gart,,,,mech,epid,,,,,,,,Velmi náročná,Laboratoř,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,
+4.10.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,lokál,vir,výzk,pilot,,,,,,Velmi náročná,Laboratoř,Vymýceno,Nic,Vynalezeno,Nic,,
+4.10.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,oper,disp,věd,epid,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Nic,Nic,,
+4.10.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,arch,plán,lokál,oper,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Nic,Vymýceno,Nic,,
+4.10.2016,Prohra - Kostky,4,Dorian,Gart,Usha,Snow,,lokál,věd,plán,inf,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Nic,Vynalezeno,Nic,,
+5.11.2016,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,věd,lokál,disp,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+5.11.2016,Výhra,3,Ruiner,Gart,Usha,,,oper,disp,vir,,,disp,výzk,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+5.11.2016,Prohra - Kostky,3,Ruiner,Gart,Usha,,,lokál,q,vir,,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Vynalezeno,Vynalezeno,,
+8.11.2016,Prohra - Kostky,2,Gart,Snow,,,,disp,oper,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+8.11.2016,Výhra,3,Dorian,Snow,Gart,,,věd,výzk,rejža,,,věd,med,,,Velmi náročná,Laboratoř,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+8.11.2016,Prohra - Pandemie,4,Dorian,Snow,Gart,Usha,,arch,všest,mech,vir,,,,,,Velmi náročná,Laboratoř,Nic,Nic,Vynalezeno,Vynalezeno,,
+15.11.2016,Výhra,4,Dorian,Gart,Usha,Ruiner,,vir,rejža,q,med,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+15.11.2016,Výhra,3,Dorian,Gart,Ruiner,,,lokál,pilot,disp,,,lokál,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+29.12.2016,Prohra - Pandemie,3,Dorian,Gart,Snow,,,arch,epid,vir,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+29.12.2016,Prohra - Pandemie,4,Dorian,Snow,Thunder,Gart,,věd,arch,med,disp,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Vynalezeno,,
+29.12.2016,Výhra,4,Dorian,Snow,Thunder,Gart,,věd,oper,vir,inf,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+29.12.2016,Výhra,4,Dorian,Snow,Thunder,Gart,,terka,med,arch,disp,,,,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+31.12.2016,Výhra,3,Dorian,Gart,Snow,,,rejža,arch,disp,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+31.12.2016,Výhra,3,Dorian,Gart,Snow,,,oper,q,inf,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,
+17.1.2017,Prohra - Kostky,4,Ruiner,Snow,Gart,Usha,,terka,arch,oper,epid,,,,,,Velmi náročná,Mutace,Nic,Nic,Vynalezeno,Nic,Vynalezeno,
+17.1.2017,Prohra - Pandemie,4,Ruiner,Snow,Gart,Usha,,věd,inf,výzk,lokál,,,,,,Velmi náročná,Mutace,Nic,Nic,Nic,Nic,Vynalezeno,
+17.1.2017,Výhra,4,Ruiner,Snow,Gart,Usha,,arch,výzk,pilot,q,,,,,,Velmi náročná,Mutace,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,
+7.3.2017,Prohra - Kostky,3,Dorian,Gart,Ruiner,,,lokál,věd,výzk,,,lokál,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+14.3.2017,Výhra,4,Dorian,Gart,Usha,Ruiner,,rejža,med,pilot,q,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+15.4.2017,Výhra,3,Dorian,Zelwa,Usha,,,med,lokál,arch,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,
+15.4.2017,Prohra - Karty,3,Dorian,Gart,Thunder,,,rejža,med,všest,,,,,,,Středně náročná,Worldwide M.,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Vynalezeno,
+15.4.2017,Výhra,3,Dorian,Gart,Thunder,,,věd,epid,rejža,,,epid,med,,,Středně náročná,Worldwide M.,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+16.4.2017,Prohra - Karty,3,Dorian,Gart,Usha,,,výzk,arch,rejža,,,,,,,Středně náročná,Worldwide M.,Vymýceno,Vynalezeno,Vynalezeno,Nic,Vynalezeno,
+17.4.2017,Výhra,4,Dorian,Gart,Zelwa,Thunder,,plán,všest,rejža,věd,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+17.4.2017,Výhra,4,Dorian,Gart,Zelwa,Thunder,,lokál,epid,oper,všest,,lokál,plán,epid,med,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Modrá
+17.4.2017,Výhra,4,Dorian,Gart,Zelwa,Thunder,,věd,epid,rejža,plán,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+22.4.2017,Výhra,4,Dorian,Gart,Usha,Ruiner,,oper,q,výzk,vir,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+22.4.2017,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,rejža,epid,disp,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Žlutá
+9.5.2017,Výhra,3,Dorian,Gart,Usha,,,vir,terka,oper,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.5.2017,Prohra - Kostky,3,Dorian,Gart,Usha,,,pilot,mech,rejža,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Nic,Nic,,Žlutá
+9.5.2017,Prohra - Kostky,3,Dorian,Gart,Usha,,,inf,epid,arch,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,Žlutá
+17.5.2017,Prohra - Pandemie,3,Dorian,Gart,Usha,,,disp,epid,vir,,,epid,med,,,Legendární,Klasika,Nic,Nic,Vymýceno,Nic,,
+17.5.2017,Prohra - Kostky,3,Dorian,Gart,Usha,,,disp,lokál,mech,,,lokál,med,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+17.5.2017,Výhra,3,Dorian,Gart,Usha,,,rejža,oper,disp,,,oper,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+24.5.2017,Prohra - Karty,4,Dorian,Gart,Ruiner,Usha,,všest,lokál,mech,pilot,,lokál,věd,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+30.5.2017,Výhra,3,Gart,Usha,Snow,,,výzk,oper,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+30.5.2017,Prohra - Karty,4,Ruiner,Gart,Usha,Snow,,všest,plán,mech,med,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Vynalezeno,Vynalezeno,
+30.5.2017,Prohra - Karty,3,Ruiner,Gart,Usha,,,inf,med,vir,,,,,,,Velmi náročná,Mutace,Vynalezeno,Nic,Vynalezeno,Nic,Nic,
+6.6.2017,Prohra - Karty,4,Dorian,Ruiner,Gart,Usha,,mech,vir,inf,q,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,Modrá
+6.6.2017,Výhra,3,Dorian,Ruiner,Gart,,,výzk,rejža,q,,,rejža,věd,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Červená
+22.6.2017,Výhra,2,Dorian,Gart,,,,arch,věd,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+22.6.2017,Prohra - Kostky,2,Dorian,Gart,,,,epid,oper,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vymýceno,Nic,,
+23.6.2017,Výhra,3,Dorian,Gart,Usha,,,lokál,med,vir,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+23.6.2017,Výhra,3,Dorian,Gart,Usha,,,q,plán,pilot,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vymýceno,Vynalezeno,Vymýceno,,
+23.6.2017,Prohra - Pandemie,2,Dorian,Gart,,,,věd,inf,,,,inf,arch,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Nic,
+23.6.2017,Výhra,2,Dorian,Gart,,,,oper,med,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+23.6.2017,Výhra,3,Dorian,Gart,Usha,,,výzk,q,rejža,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.6.2017,Výhra,2,Dorian,Gart,,,,q,epid,,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+24.6.2017,Prohra - Karty,2,Dorian,Gart,,,,med,plán,,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vynalezeno,Vymýceno,,
+24.6.2017,Výhra,2,Dorian,Gart,,,,epid,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+24.6.2017,Prohra - Kostky,2,Dorian,Gart,,,,výzk,disp,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Nic,,Červená
+24.6.2017,Výhra,3,Dorian,Usha,Gart,,,pilot,výzk,med,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,Červená
+24.6.2017,Prohra - Kostky,2,Dorian,Gart,,,,disp,rejža,,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Vynalezeno,Vymýceno,Nic,,Žlutá
+24.6.2017,Výhra,3,Dorian,Gart,Usha,,,lokál,výzk,q,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Červená
+24.6.2017,Prohra - Pandemie,2,Dorian,Gart,,,,vir,epid,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Nic,Nic,,
+25.6.2017,Prohra - Pandemie,3,Dorian,Usha,Gart,,,výzk,inf,všest,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Černá
+25.6.2017,Výhra,3,Dorian,Usha,Gart,,,všest,inf,pilot,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Červená
+25.6.2017,Prohra - Pandemie,2,Dorian,Gart,,,,terka,všest,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Nic,Vynalezeno,,Modrá
+25.6.2017,Prohra - Pandemie,2,Dorian,Gart,,,,všest,plán,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Červená
+25.6.2017,Prohra - Kostky,2,Dorian,Gart,,,,terka,epid,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Žlutá
+25.6.2017,Prohra - Kostky,2,Dorian,Gart,,,,oper,lokál,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Černá
+1.7.2017,Prohra - Pandemie,2,Gart,Usha,,,,vir,výzk,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Nic,Vynalezeno,,Červená
+1.7.2017,Výhra,2,Gart,Usha,,,,terka,rejža,,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vymýceno,Vynalezeno,Vynalezeno,,Červená
+3.7.2017,Prohra - Pandemie,2,Gart,Usha,,,,arch,všest,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+3.7.2017,Výhra,2,Gart,Usha,,,,terka,věd,,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+3.7.2017,Výhra,2,Gart,Usha,,,,oper,všest,,,,všest,arch,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+18.7.2017,Výhra,3,Dorian,Gart,Usha,,,arch,terka,výzk,,,arch,q,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+18.7.2017,Výhra,3,Dorian,Gart,Ruiner,,,q,arch,vir,,,vir,med,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+18.7.2017,Výhra,4,Dorian,Ruiner,Gart,Usha,,pilot,mech,plán,med,,mech,věd,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,
+22.7.2017,Prohra - Kostky,2,Dorian,Gart,,,,q,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+22.7.2017,Prohra - Pandemie,2,Dorian,Gart,,,,arch,všest,,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+22.7.2017,Prohra - Pandemie,2,Dorian,Gart,,,,rejža,pilot,,,,,,,,Legendární,Klasika,Vymýceno,Nic,Vynalezeno,Vynalezeno,,
+22.7.2017,Prohra - Pandemie,2,Dorian,Gart,,,,lokál,arch,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+22.7.2017,Výhra,2,Dorian,Gart,,,,plán,lokál,,,,plán,věd,lokál,med,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+22.7.2017,Výhra,3,Dorian,Gart,Usha,,,věd,oper,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+22.7.2017,Výhra,2,Dorian,Gart,,,,q,věd,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+22.7.2017,Výhra,3,Dorian,Gart,Usha,,,oper,epid,q,,,oper,výzk,epid,plán,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+23.7.2017,Výhra,3,Dorian,Gart,Usha,,,inf,med,arch,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+23.7.2017,Prohra - Karty,3,Dorian,Gart,Usha,,,disp,inf,rejža,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Nic,Nic,,Červená
+23.7.2017,Prohra - Kostky,2,Dorian,Gart,,,,inf,výzk,,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Černá
+23.7.2017,Prohra - Kostky,2,Dorian,Gart,,,,výzk,rejža,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Nic,,Modrá
+23.7.2017,Výhra,2,Dorian,Gart,,,,mech,terka,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Černá
+23.7.2017,Výhra,2,Dorian,Gart,,,,inf,vir,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Černá
+23.7.2017,Výhra,2,Dorian,Gart,,,,arch,med,,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+24.7.2017,Výhra,4,Dorian,Zelwa,Thunder,Gart,,oper,rejža,všest,inf,,oper,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Modrá
+25.7.2017,Výhra,2,Dorian,Gart,,,,výzk,epid,,,,epid,med,,,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+25.7.2017,Výhra,4,Dorian,Zelwa,Thunder,Gart,,terka,lokál,věd,inf,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,
+26.7.2017,Výhra,4,Dorian,Gart,Usha,Thunder,,oper,rejža,q,pilot,,oper,lokál,,,Velmi náročná,Laboratoř,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,
+26.7.2017,Výhra,3,Dorian,Thunder,Zelwa,,,arch,med,rejža,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+28.7.2017,Výhra,3,Gart,Thunder,Zelwa,,,cont,inf,epid,,,cont,výzk,epid,med,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+29.7.2017,Výhra,4,Dorian,Gart,Snow,CJ,,výzk,rejža,pilot,lokál,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+29.7.2017,Výhra,4,Dorian,CJ,Zelwa,Thunder,,mech,věd,arch,inf,,mech,výzk,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+14.8.2017,Výhra,4,Dorian,Gart,Ivoš,Usha,,výzk,q,všest,vir,,všest,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+14.8.2017,Prohra - Kostky,3,Dorian,Gart,Ivoš,,,arch,rejža,inf,,,inf,výzk,,,Legendární,Klasika,Nic,Nic,Nic,Vynalezeno,,
+14.8.2017,Prohra - Pandemie,3,Dorian,Gart,Ivoš,,,rejža,terka,plán,,,,,,,Legendární,Klasika,Nic,Nic,Vynalezeno,Vynalezeno,,
+14.8.2017,Výhra,3,Dorian,Gart,Ivoš,,,mech,med,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vymýceno,Vynalezeno,,
+14.8.2017,Výhra,3,Dorian,Gart,Ivoš,,,lokál,oper,výzk,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+15.8.2017,Prohra - Pandemie,3,Dorian,Gart,Ivoš,,,disp,mech,lokál,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Vynalezeno,,
+15.8.2017,Výhra,3,Dorian,Usha,Gart,,,pilot,výzk,med,,,výzk,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+15.8.2017,Výhra,3,Dorian,Usha,Gart,,,oper,lokál,med,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+15.8.2017,Výhra,2,Dorian,Gart,,,,plán,všest,,,,plán,výzk,všest,med,Velmi náročná,Zhoubný kmen,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,Černá
+16.8.2017,Prohra - Kostky,2,Dorian,Gart,,,,oper,lokál,,,,,,,,Velmi náročná,Mutace,Nic,Vynalezeno,Nic,Nic,Nic,
+16.8.2017,Prohra - Pandemie,2,Dorian,Gart,,,,věd,lokál,,,,,,,,Velmi náročná,Mutace,Nic,Vymýceno,Nic,Nic,Vynalezeno,
+16.8.2017,Výhra,2,Dorian,Gart,,,,oper,vir,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+16.8.2017,Výhra,3,Dorian,Ruiner,Gart,,,epid,vir,pilot,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+16.8.2017,Výhra,3,Dorian,Ruiner,Gart,,,med,inf,pilot,,,inf,plán,plán,výzk,Velmi náročná,Mutace,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.8.2017,Výhra,2,Dorian,Gart,,,,inf,rejža,,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+17.8.2017,Výhra,2,Dorian,Usha,,,,mech,med,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+17.8.2017,Výhra,2,Dorian,Gart,,,,q,med,,,,,,,,Legendární,Klasika,Vymýceno,Vymýceno,Vymýceno,Vynalezeno,,
+17.8.2017,Výhra,3,Dorian,Gart,Ruiner,,,vir,plán,lokál,,,lokál,výzk,výzk,věd,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+29.8.2017,Prohra - Pandemie,2,Ruiner,Gart,,,,vir,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Nic,,
+29.8.2017,Prohra - Pandemie,3,Ruiner,Gart,Usha,,,oper,q,rejža,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+5.9.2017,Výhra,3,Dorian,Gart,Usha,,,inf,arch,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+5.9.2017,Výhra,3,Dorian,Gart,Usha,,,disp,inf,výzk,,,,,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.9.2017,Prohra - Pandemie,4,Dorian,Ruiner,Gart,Usha,,pilot,inf,všest,vir,,všest,výzk,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+28.9.2017,Výhra,3,Dorian,Gart,Usha,,,inf,arch,věd,,,,,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.9.2017,Výhra,3,Dorian,Usha,Gart,,,med,q,výzk,,,výzk,disp,,,Velmi náročná,Laboratoř,Vynalezeno,Vynalezeno,Vymýceno,Vymýceno,,
+28.9.2017,Prohra - Pandemie,2,Dorian,Gart,,,,disp,všest,,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Nic,Nic,,
+28.9.2017,Výhra,2,Dorian,Gart,,,,všest,věd,,,,všest,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+28.9.2017,Výhra,2,Dorian,Gart,,,,plán,výzk,,,,plán,med,výzk,věd,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+30.9.2017,Výhra,3,Dorian,Thunder,Gart,,,pilot,plán,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+30.9.2017,Prohra - Pandemie,3,Dorian,Thunder,Gart,,,terka,arch,oper,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Vynalezeno,,Černá
+30.9.2017,Výhra,3,Dorian,Thunder,Usha,,,terka,pilot,mech,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+30.9.2017,Výhra,3,Dorian,Thunder,Gart,,,oper,pilot,arch,,,arch,výzk,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,Černá
+30.9.2017,Výhra,3,Dorian,Thunder,Usha,,,výzk,disp,všest,,,,,,,Velmi náročná,Mutace,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,
+10.10.2017,Prohra - Pandemie,3,Dorian,Gart,Usha,,,disp,arch,všest,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Nic,,
+10.10.2017,Výhra,3,Dorian,Gart,Usha,,,mech,terka,med,,,mech,výzk,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+17.10.2017,Prohra - Kostky,3,Dorian,Gart,Usha,,,plán,oper,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+17.10.2017,Výhra,3,Dorian,Gart,Usha,,,arch,výzk,med,,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+2.11.2017,Výhra,3,Dorian,Gart,Usha,,,vir,všest,med,,,všest,výzk,,,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+2.11.2017,Výhra,4,Dorian,Gart,Usha,Ruiner,,disp,pilot,lokál,věd,,lokál,q,,,Velmi náročná,Laboratoř,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,
+12.11.2017,Výhra,3,Gart,Usha,Ruiner,,,disp,věd,všest,,,všest,výzk,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+12.11.2017,Prohra - Pandemie,3,Gart,Usha,Ruiner,,,disp,vir,věd,,,vir,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+23.11.2017,Výhra,2,Gart,Ruiner,,,,med,výzk,,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+23.11.2017,Výhra,4,Dorian,Gart,Usha,Ruiner,,věd,rejža,pilot,všest,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Černá
+14.12.2017,Výhra,2,Ruiner,Gart,,,,rejža,med,,,,rejža,věd,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+27.12.2017,Výhra,3,Dorian,Gart,Ruiner,,,plán,výzk,terka,,,výzk,med,terka,disp,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
+27.12.2017,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,inf,epid,všest,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Žlutá
+27.12.2017,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,arch,disp,lokál,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Vynalezeno,Vymýceno,,Modrá
+27.12.2017,Výhra,3,Dorian,Gart,Ruiner,,,med,epid,věd,,,epid,disp,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vymýceno,,Černá
+27.12.2017,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,plán,disp,mech,,,,,,,Velmi náročná,Zhoubný kmen,Nic,Nic,Nic,Nic,,Žlutá
+28.12.2017,Výhra,3,Dorian,Gart,Ruiner,,,oper,pilot,disp,,,oper,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+30.12.2017,Výhra,3,Dorian,Gart,Thunder,,,oper,disp,věd,,,,,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vymýceno,Vynalezeno,,Žlutá
+30.12.2017,Prohra - Kostky,4,Dorian,Thunder,Gart,Usha,,oper,epid,terka,vir,,,,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,Černá
+31.12.2017,Výhra,3,Dorian,Gart,Thunder,,,mech,terka,rejža,,,terka,med,,,Velmi náročná,Zhoubný kmen,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,Modrá
+31.12.2017,Výhra,3,Dorian,Gart,Thunder,,,oper,pilot,věd,,,oper,med,,,Velmi náročná,Zhoubný kmen,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,Žlutá
+1.1.2018,Výhra,3,Zelwa,Gart,Thunder,,,lokál,inf,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+12.4.2018,Prohra - Pandemie,3,Dorian,Gart,Usha,,,q,lokál,všest,,,q,výzk,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+12.4.2018,Prohra - Pandemie,3,Dorian,Gart,Usha,,,mech,epid,výzk,,,,,,,Legendární,Klasika,Vynalezeno,Nic,Vynalezeno,Vynalezeno,,
+12.4.2018,Výhra,3,Dorian,Gart,Usha,,,med,výzk,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Vynalezeno,Vynalezeno,,
+26.5.2018,Výhra,3,Dorian,Gart,Usha,,,věd,pilot,inf,,,inf,výzk,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+26.5.2018,Prohra - Pandemie,3,Dorian,Usha,Gart,,,terka,všest,epid,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+26.5.2018,Prohra - Pandemie,3,Dorian,Usha,Gart,,,výzk,věd,arch,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Nic,Nic,,
+26.5.2018,Prohra - Pandemie,3,Dorian,Usha,Gart,,,plán,výzk,rejža,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Nic,Vynalezeno,,
+26.5.2018,Prohra - Pandemie,3,Dorian,Usha,Gart,,,plán,všest,q,,,,,,,Legendární,Klasika,Vynalezeno,Vymýceno,Nic,Nic,,
+26.5.2018,Výhra,3,Dorian,Gart,Usha,,,rejža,oper,pilot,,,oper,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vymýceno,,
+26.5.2018,Prohra - Pandemie,3,Dorian,Gart,Usha,,,všest,lokál,med,,,,,,,Legendární,Klasika,Nic,Vynalezeno,Vymýceno,Nic,,
+27.5.2018,Výhra,3,Dorian,Usha,Gart,,,plán,rejža,med,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+27.5.2018,Výhra,3,Dorian,Usha,Gart,,,všest,vir,oper,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vymýceno,Vynalezeno,,
+9.6.2018,Prohra - Pandemie,4,Dorian,Gart,Thunder,Ruiner,,terka,vir,věd,epid,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Nic,Vynalezeno,,
+9.6.2018,Výhra,3,Dorian,Thunder,Usha,,,epid,vir,pilot,,,,,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Vynalezeno,,
+9.6.2018,Prohra - Pandemie,3,Dorian,Gart,Ruiner,,,epid,výzk,med,,,,,,,Legendární,Klasika,Nic,Nic,Nic,Nic,,
+9.6.2018,Prohra - Karty,4,Dorian,Gart,Thunder,Ruiner,,inf,věd,vir,lokál,,lokál,med,,,Legendární,Klasika,Vynalezeno,Vynalezeno,Vynalezeno,Nic,,
+9.6.2018,Výhra,4,Dorian,Thunder,Gart,Ruiner,,plán,epid,med,oper,,oper,q,q,výzk,Legendární,Klasika,Vymýceno,Vynalezeno,Vynalezeno,Vynalezeno,,
