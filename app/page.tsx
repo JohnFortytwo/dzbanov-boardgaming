@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
+import { ResetAchievementsButton } from "@/app/components/ResetAchievementsButton";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { logout } from "@/app/login/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +42,7 @@ async function BoardgamingHome() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black_38%,transparent_78%)]" />
       </div>
 
-      <div className="absolute right-6 top-6 z-10 flex items-center gap-4">
+      <div className="absolute right-6 top-6 z-10 flex items-start gap-4">
         <div className="text-right">
           <SignedInUser email={email} />
           <Link
@@ -50,6 +51,7 @@ async function BoardgamingHome() {
           >
             Změnit heslo
           </Link>
+          <ResetAchievementsButton />
         </div>
         <form action={logout}>
           <button

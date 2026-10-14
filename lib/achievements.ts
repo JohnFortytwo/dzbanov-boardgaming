@@ -19,10 +19,14 @@ const emptyAchievements: UserAchievements = {
   has_achievement_ano: false,
 };
 
-const listeners = new Set<(flag: AchievementFlag) => void>();
+type AchievementUpdate =
+  | { type: "grant"; flag: AchievementFlag }
+  | { type: "reset" };
+
+const listeners = new Set<(update: AchievementUpdate) => void>();
 
 export function subscribeAchievement(
-  listener: (flag: AchievementFlag) => void,
+  listener: (update: AchievementUpdate) => void,
 ) {
   listeners.add(listener);
   return () => {
@@ -77,7 +81,35 @@ export async function setUserAchievement(flag: AchievementFlag) {
     };
   }
 
-  listeners.forEach((listener) => listener(flag));
+  listeners.forEach((listener) => listener({ type: "grant", flag }));
+
+  return { ok: true as const };
+}
+
+export async function resetUserAchievements() {
+  const supabase = createClient();
+  const { data, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !data.user) {
+    return {
+      ok: false as const,
+      error: "Pro reset achievementů se musíte přihlásit.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ has_achievement_42: false, has_achievement_ano: false })
+    .eq("id", data.user.id);
+
+  if (error) {
+    return {
+      ok: false as const,
+      error: "Achievementy se nepodařilo resetovat.",
+    };
+  }
+
+  listeners.forEach((listener) => listener({ type: "reset" }));
 
   return { ok: true as const };
 }

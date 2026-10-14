@@ -45,8 +45,16 @@ export function SignedInUser({ email }: { email: string }) {
   }, []);
 
   useEffect(() => {
-    return subscribeAchievement((flag) => {
-      setAchievements((current) => ({ ...current, [flag]: true }));
+    return subscribeAchievement((update) => {
+      if (update.type === "reset") {
+        setAchievements({
+          has_achievement_42: false,
+          has_achievement_ano: false,
+        });
+        return;
+      }
+
+      setAchievements((current) => ({ ...current, [update.flag]: true }));
     });
   }, []);
 
