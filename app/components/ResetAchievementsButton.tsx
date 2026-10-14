@@ -36,19 +36,23 @@ export function ResetAchievementsButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          setError(null);
-          setOpen(true);
-        }}
-        className="mt-2 ml-auto block w-fit max-w-64 rounded-full border border-red-400/30 bg-transparent px-3 py-1.5 text-right text-xs font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-200"
-      >
-        Očistit hříchy (Resetovat achievementy)
-      </button>
-      {error && !open ? (
-        <p className="mt-1 max-w-64 text-xs text-red-300">{error}</p>
-      ) : null}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => {
+            setError(null);
+            setOpen(true);
+          }}
+          className="inline-flex items-center rounded-full border border-red-400/30 bg-transparent px-4 py-2 text-xs font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-200"
+        >
+          Očistit hříchy (Resetovat achievementy)
+        </button>
+        {error && !open ? (
+          <p className="absolute right-0 top-full mt-1 w-max max-w-64 text-xs text-red-300">
+            {error}
+          </p>
+        ) : null}
+      </div>
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
