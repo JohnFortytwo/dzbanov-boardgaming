@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
+import { SignedInUser } from "@/app/components/SignedInUser";
 import { logout } from "@/app/login/actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,11 +43,7 @@ async function BoardgamingHome() {
 
       <div className="absolute right-6 top-6 z-10 flex items-center gap-4">
         <div className="text-right">
-          {email ? (
-            <p className="max-w-48 truncate text-xs font-medium text-zinc-300">
-              {email}
-            </p>
-          ) : null}
+          <SignedInUser email={email} />
           <Link
             href="/password"
             className="text-xs text-emerald-400/90 transition hover:text-emerald-300"
@@ -74,8 +72,8 @@ async function BoardgamingHome() {
           Ekosystém pro evidenci, analýzu a digitalizaci herních výsledků
         </p>
 
-        <section className="mt-16 w-full max-w-xl">
-          <article className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-10">
+        <section className="mt-16 grid w-full items-stretch gap-6 md:grid-cols-2">
+          <article className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-10">
             <div className="mb-6 flex items-center justify-between gap-4">
               <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-emerald-300">
                 Modul
@@ -86,7 +84,7 @@ async function BoardgamingHome() {
             <h2 className="text-3xl font-semibold tracking-tight text-white">
               Pandemic
             </h2>
-            <p className="mt-3 text-base leading-7 text-zinc-400">
+            <p className="mt-3 flex-1 text-base leading-7 text-zinc-400">
               Evidence partií, analýza výsledků a digitalizace herního postupu
               proti šířícím se nákazám.
             </p>
@@ -99,6 +97,8 @@ async function BoardgamingHome() {
               Vstoupit do Pandemicu
             </button>
           </article>
+
+          <DraciDoupeModal />
         </section>
       </main>
     </div>
