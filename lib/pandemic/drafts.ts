@@ -215,6 +215,17 @@ export function matchRoleCode(raw: string | null, roles: CodeLabel[]): string | 
   return matchCatalogCode(canonical, roles);
 }
 
+function foldPlayerName(value: string) {
+  return foldCode(value).replace(/\s+/g, "");
+}
+
+function matchPlayerId(rawName: string | null, players: PlayerOption[]): string | null {
+  if (!rawName) return null;
+  const folded = foldPlayerName(rawName);
+  if (!folded) return null;
+  return players.find((player) => foldPlayerName(player.name) === folded)?.id ?? null;
+}
+
 export function emptyPlayer(order: number): DraftPlayer {
   return {
     raw_name: null,
@@ -258,6 +269,8 @@ export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): Draft
     players: sourcePlayers.map((player, index) => ({
       ...player,
       player_order: index + 1,
+      matched_player_id:
+        player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
       role_code: matchRoleCode(player.role_code, catalogs.roles),
     })),
     role_changes: data.role_changes.map((change, index) => ({

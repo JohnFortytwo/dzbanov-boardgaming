@@ -135,7 +135,7 @@ export function TranscriptionWorkspace() {
     }));
   }
 
-  async function createPlayer(playerIndex: number, name: string) {
+  async function createPlayer(name: string) {
     const payload = await postCatalog("/api/pandemic/players", { name });
     const player = payload.player;
     if (!player?.id || !player.name) {
@@ -148,10 +148,9 @@ export function TranscriptionWorkspace() {
         (item) => item.name,
       ),
     }));
-    updatePlayer(playerIndex, { matched_player_id: player.id });
   }
 
-  async function createRole(name: string, apply: (code: string) => void) {
+  async function createRole(name: string) {
     const payload = await postCatalog("/api/pandemic/roles", { name });
     const role = payload.role;
     if (!role?.code) {
@@ -164,7 +163,6 @@ export function TranscriptionWorkspace() {
         (item) => item.name_cs,
       ),
     }));
-    apply(role.code);
   }
 
   async function approve() {
@@ -332,7 +330,7 @@ export function TranscriptionWorkspace() {
           >
             {catalogs.players.length === 0 ? (
               <p className="text-sm text-zinc-500">
-                Seznam hráčů je prázdný. Nového hráče přidáte tlačítkem u řádku.
+                Seznam hráčů je prázdný. Nového hráče založíte tlačítkem pod seznamem.
               </p>
             ) : null}
             <div className="space-y-3">
@@ -349,7 +347,6 @@ export function TranscriptionWorkspace() {
                       onChange={(matched_player_id) =>
                         updatePlayer(playerIndex, { matched_player_id })
                       }
-                      onCreate={(name) => createPlayer(playerIndex, name)}
                     />
                     <CodeSelect
                       label={`Role ${playerIndex + 1}`}
@@ -357,17 +354,6 @@ export function TranscriptionWorkspace() {
                       options={roleLabels(catalogs.roles || [])}
                       placeholder="Role"
                       onChange={(role_code) => updatePlayer(playerIndex, { role_code })}
-                      extra={
-                        <QuickCreate
-                          label="+ Nová role"
-                          placeholder="Název role"
-                          onCreate={(name) =>
-                            createRole(name, (role_code) =>
-                              updatePlayer(playerIndex, { role_code }),
-                            )
-                          }
-                        />
-                      }
                     />
                     <button
                       type="button"
@@ -389,20 +375,32 @@ export function TranscriptionWorkspace() {
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              disabled={form.players.length >= 5}
-              onClick={() =>
-                updateForm({
-                  ...form,
-                  players: [...form.players, emptyPlayer(form.players.length + 1)],
-                })
-              }
-              tabIndex={skipTab}
-              className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Přidat hráče
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={form.players.length >= 5}
+                onClick={() =>
+                  updateForm({
+                    ...form,
+                    players: [...form.players, emptyPlayer(form.players.length + 1)],
+                  })
+                }
+                tabIndex={skipTab}
+                className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Přidat hráče
+              </button>
+              <QuickCreate
+                label="+ Nový hráč"
+                placeholder="Jméno hráče"
+                onCreate={createPlayer}
+              />
+              <QuickCreate
+                label="+ Nová role"
+                placeholder="Název role"
+                onCreate={createRole}
+              />
+            </div>
 
             <div className="space-y-3 border-t border-white/10 pt-4">
               <h3 className="text-sm font-medium text-zinc-300">Změny rolí</h3>
@@ -780,7 +778,6 @@ function CodeSelect({
   optional = false,
   placeholder,
   swatch,
-  extra,
   priority = [],
   disabled = false,
 }: {
@@ -791,7 +788,6 @@ function CodeSelect({
   optional?: boolean;
   placeholder?: string;
   swatch?: string;
-  extra?: ReactNode;
   priority?: string[];
   disabled?: boolean;
 }) {
@@ -831,10 +827,7 @@ function CodeSelect({
         {swatch ? <span className={`h-2.5 w-2.5 rounded-full ${swatch}`} /> : null}
         {label}
       </span>
-      <div className="flex flex-wrap items-start gap-2">
-        <div className="min-w-48 flex-1">{control}</div>
-        {extra}
-      </div>
+      {control}
     </div>
   );
 }
@@ -844,13 +837,11 @@ function PlayerSelect({
   value,
   players,
   onChange,
-  onCreate,
 }: {
   label?: string;
   value: string | null;
   players: PlayerOption[];
   onChange: (value: string | null) => void;
-  onCreate?: (name: string) => Promise<void>;
 }) {
   const options =
     value && !players.some((player) => player.id === value)
@@ -860,27 +851,18 @@ function PlayerSelect({
   return (
     <div className="space-y-1">
       <span className="block text-xs font-medium text-zinc-300">{label}</span>
-      <div className="flex flex-wrap items-start gap-2">
-        <select
-          value={value ?? ""}
-          onChange={(event) => onChange(event.target.value || null)}
-          className={`${fieldClassName} min-w-48 flex-1`}
-        >
-          <option value="">Vyberte hráče</option>
-          {options.map((player) => (
-            <option key={player.id} value={player.id}>
-              {player.name}
-            </option>
-          ))}
-        </select>
-        {onCreate ? (
-          <QuickCreate
-            label="+ Nový hráč"
-            placeholder="Jméno hráče"
-            onCreate={onCreate}
-          />
-        ) : null}
-      </div>
+      <select
+        value={value ?? ""}
+        onChange={(event) => onChange(event.target.value || null)}
+        className={fieldClassName}
+      >
+        <option value="">Vyberte hráče</option>
+        {options.map((player) => (
+          <option key={player.id} value={player.id}>
+            {player.name}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
