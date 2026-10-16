@@ -7,6 +7,7 @@ import { SubCropImage, type CropBox } from "./sub-crop-image";
 import {
   emptyDraftData,
   emptyPlayer,
+  foldCode,
   presentDraft,
   prepareDraft,
   type CodeLabel,
@@ -20,7 +21,9 @@ import {
 } from "@/lib/pandemic/drafts";
 
 const fieldClassName =
-  "scheme-dark h-12 w-full rounded-2xl border border-white/10 bg-zinc-950/60 px-4 text-sm text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
+  "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
+
+const skipTab = -1;
 
 const emptyCatalogs: PandemicCatalogs = {
   players: [],
@@ -241,7 +244,8 @@ export function TranscriptionWorkspace() {
               setNotice(null);
             }}
             disabled={!draft || index === 0 || saving}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            tabIndex={skipTab}
+            className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             Předchozí
           </button>
@@ -253,7 +257,8 @@ export function TranscriptionWorkspace() {
               setNotice(null);
             }}
             disabled={!draft || index >= drafts.length - 1 || saving}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            tabIndex={skipTab}
+            className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             Další
           </button>
@@ -261,7 +266,8 @@ export function TranscriptionWorkspace() {
             type="button"
             onClick={() => void approve()}
             disabled={!draft || saving}
-            className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+            tabIndex={skipTab}
+            className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Ukládám…" : "Schválit a uložit do databáze"}
           </button>
@@ -337,18 +343,21 @@ export function TranscriptionWorkspace() {
               label="Výsledek"
               value={form.result_code}
               options={catalogs.gameResults}
+              priority={["Výhra"]}
               onChange={(result_code) => updateForm({ ...form, result_code })}
             />
             <CodeSelect
               label="Obtížnost"
               value={form.difficulty_code}
               options={catalogs.difficulties}
+              priority={["Legendární", "Velmi náročná"]}
               onChange={(difficulty_code) => updateForm({ ...form, difficulty_code })}
             />
             <CodeSelect
               label="Režim"
               value={form.game_mode_code}
               options={catalogs.gameModes}
+              priority={["Klasika", "Zhoubný kmen", "Mutace"]}
               onChange={(game_mode_code) => updateForm({ ...form, game_mode_code })}
             />
           </SectionBlock>
@@ -405,7 +414,8 @@ export function TranscriptionWorkspace() {
                           players: form.players.filter((_, current) => current !== playerIndex),
                         })
                       }
-                      className="h-12 self-end rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-400 transition hover:border-red-400/40 hover:text-red-300"
+                      tabIndex={skipTab}
+                      className="h-9 self-end rounded-full border border-white/10 px-3 text-xs font-medium text-zinc-400 transition hover:border-red-400/40 hover:text-red-300"
                     >
                       Odebrat
                     </button>
@@ -425,6 +435,7 @@ export function TranscriptionWorkspace() {
                   players: [...form.players, emptyPlayer(form.players.length + 1)],
                 })
               }
+              tabIndex={skipTab}
               className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Přidat hráče
@@ -472,15 +483,17 @@ export function TranscriptionWorkspace() {
                         ),
                       })
                     }
-                    className="h-12 self-end rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-400 transition hover:border-red-400/40 hover:text-red-300"
+                    tabIndex={skipTab}
+                    className="h-9 self-end rounded-full border border-white/10 px-3 text-xs font-medium text-zinc-400 transition hover:border-red-400/40 hover:text-red-300"
                   >
                     Odebrat změnu
                   </button>
                 </div>
               ))}
+              {form.role_changes.length < 2 ? (
               <button
                 type="button"
-                disabled={form.role_changes.length >= 6}
+                tabIndex={skipTab}
                 onClick={() =>
                   updateForm({
                     ...form,
@@ -499,6 +512,7 @@ export function TranscriptionWorkspace() {
               >
                 Přidat změnu role
               </button>
+              ) : null}
             </div>
           </SectionBlock>
 
@@ -535,7 +549,10 @@ export function TranscriptionWorkspace() {
           </SectionBlock>
 
           <details className="rounded-3xl border border-white/10 bg-white/5 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl">
-            <summary className="cursor-pointer list-none px-5 py-4 text-sm font-medium text-zinc-200 sm:px-6 [&::-webkit-details-marker]:hidden">
+            <summary
+              tabIndex={skipTab}
+              className="cursor-pointer list-none px-5 py-4 text-sm font-medium text-zinc-200 sm:px-6 [&::-webkit-details-marker]:hidden"
+            >
               <span className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
                 Kompletní náhled karty s možností zoomu
               </span>
@@ -604,13 +621,13 @@ function SectionBlock({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-6">
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-5">
       <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
         {title}
       </h2>
-      <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">
+      <div className="mt-3 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+        <div className="flex flex-col gap-3">{children}</div>
         <SubCropImage src={src} box={box} alt={alt} />
-        <div className="flex flex-col gap-4">{children}</div>
       </div>
     </section>
   );
@@ -624,8 +641,8 @@ function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="block text-sm font-medium text-zinc-300">{label}</span>
+    <label className="block space-y-1">
+      <span className="block text-xs font-medium text-zinc-300">{label}</span>
       {children}
     </label>
   );
@@ -633,7 +650,19 @@ function Field({
 
 function withCurrentOption(options: CodeLabel[], current: string | null) {
   if (!current || options.some((option) => option.code === current)) return options;
-  return [{ code: current, name_cs: current }, ...options];
+  return [...options, { code: current, name_cs: current }];
+}
+
+function orderCatalog(options: CodeLabel[], priority: string[]) {
+  if (priority.length === 0) return options;
+  const rank = new Map(priority.map((name, index) => [foldCode(name), index]));
+  return [...options].sort((left, right) => {
+    const leftRank =
+      rank.get(foldCode(left.name_cs)) ?? rank.get(foldCode(left.code)) ?? priority.length;
+    const rightRank =
+      rank.get(foldCode(right.name_cs)) ?? rank.get(foldCode(right.code)) ?? priority.length;
+    return leftRank - rightRank;
+  });
 }
 
 function CodeSelect({
@@ -645,6 +674,7 @@ function CodeSelect({
   placeholder,
   swatch,
   extra,
+  priority = [],
 }: {
   label: string;
   value: string | null;
@@ -654,12 +684,15 @@ function CodeSelect({
   placeholder?: string;
   swatch?: string;
   extra?: ReactNode;
+  priority?: string[];
 }) {
+  const ordered = orderCatalog(withCurrentOption(options, value), priority);
+  const emptyLabel = optional ? "Neurčeno" : placeholder ?? "Vyberte";
   const control =
     options.length === 0 ? (
       <input
         value={value ?? ""}
-        placeholder={optional ? "Neurčeno" : placeholder ?? "Kód"}
+        placeholder={emptyLabel}
         onChange={(event) => onChange(event.target.value.trim() || null)}
         className={fieldClassName}
       />
@@ -669,18 +702,19 @@ function CodeSelect({
         onChange={(event) => onChange(event.target.value || null)}
         className={fieldClassName}
       >
-        <option value="">{optional ? "Neurčeno" : placeholder ?? "Vyberte"}</option>
-        {withCurrentOption(options, value).map((option) => (
+        {priority.length === 0 ? <option value="">{emptyLabel}</option> : null}
+        {ordered.map((option) => (
           <option key={option.code} value={option.code}>
             {option.name_cs}
           </option>
         ))}
+        {priority.length > 0 ? <option value="">{emptyLabel}</option> : null}
       </select>
     );
 
   return (
-    <div className="space-y-2">
-      <span className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+    <div className="space-y-1">
+      <span className="flex items-center gap-2 text-xs font-medium text-zinc-300">
         {swatch ? <span className={`h-2.5 w-2.5 rounded-full ${swatch}`} /> : null}
         {label}
       </span>
@@ -709,8 +743,8 @@ function PlayerSelect({
       : players;
 
   return (
-    <div className="space-y-2">
-      <span className="block text-sm font-medium text-zinc-300">Hráč</span>
+    <div className="space-y-1">
+      <span className="block text-xs font-medium text-zinc-300">Hráč</span>
       <div className="flex flex-wrap items-start gap-2">
         <select
           value={value ?? ""}
@@ -770,8 +804,9 @@ function QuickCreate({
     return (
       <button
         type="button"
+        tabIndex={skipTab}
         onClick={() => setOpen(true)}
-        className="inline-flex h-12 shrink-0 items-center rounded-full border border-emerald-400/30 px-3 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10"
+        className="inline-flex h-9 shrink-0 items-center rounded-full border border-emerald-400/30 px-3 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10"
       >
         {label}
       </button>
@@ -796,20 +831,22 @@ function QuickCreate({
         />
         <button
           type="button"
+          tabIndex={skipTab}
           disabled={pending || name.trim().length === 0}
           onClick={() => void submit()}
-          className="inline-flex h-12 items-center rounded-full bg-emerald-500 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:opacity-60"
+          className="inline-flex h-9 items-center rounded-full bg-emerald-500 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:opacity-60"
         >
           {pending ? "Ukládám…" : "Přidat"}
         </button>
         <button
           type="button"
+          tabIndex={skipTab}
           onClick={() => {
             setOpen(false);
             setError(null);
             setName("");
           }}
-          className="inline-flex h-12 items-center rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
+          className="inline-flex h-9 items-center rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
         >
           Zrušit
         </button>

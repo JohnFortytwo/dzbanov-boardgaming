@@ -87,6 +87,7 @@ export function CardPreview({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => zoomBy(-0.25)}
               disabled={!src || broken || scale <= MIN_SCALE}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
@@ -98,6 +99,7 @@ export function CardPreview({
             </span>
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => zoomBy(0.25)}
               disabled={!src || broken || scale >= MAX_SCALE}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
@@ -106,6 +108,7 @@ export function CardPreview({
             </button>
             <button
               type="button"
+              tabIndex={-1}
               onClick={resetZoom}
               disabled={!src || broken || (scale === 1 && pan.x === 0 && pan.y === 0)}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
@@ -179,6 +182,7 @@ export function CardPreview({
         >
           <button
             type="button"
+            tabIndex={-1}
             onClick={() => setOpen(false)}
             className="absolute top-6 right-6 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-zinc-200 transition hover:border-white/20 hover:text-white"
           >

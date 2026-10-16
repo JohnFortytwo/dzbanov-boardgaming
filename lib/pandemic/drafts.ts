@@ -395,8 +395,8 @@ export function prepareDraft(value: DraftData): {
     }
   });
 
-  if (draft.role_changes.length > 6) {
-    errors.push("Partie může mít nejvýše šest změn rolí.");
+  if (draft.role_changes.length > 2) {
+    errors.push("Partie může mít nejvýše dvě změny rolí.");
   }
 
   draft.role_changes.forEach((change, index) => {
