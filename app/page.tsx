@@ -80,7 +80,7 @@ async function BoardgamingHome() {
               <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-emerald-300">
                 Modul
               </span>
-              <span className="text-xs text-zinc-500">Připravujeme</span>
+              <span className="text-xs text-zinc-500">Evidence</span>
             </div>
 
             <h2 className="text-3xl font-semibold tracking-tight text-white">
@@ -91,13 +91,12 @@ async function BoardgamingHome() {
               proti šířícím se nákazám.
             </p>
 
-            <button
-              type="button"
-              disabled
-              className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 opacity-70"
+            <Link
+              href="/pandemic"
+              className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
             >
               Vstoupit do Pandemicu
-            </button>
+            </Link>
           </article>
 
           <DraciDoupeModal />
