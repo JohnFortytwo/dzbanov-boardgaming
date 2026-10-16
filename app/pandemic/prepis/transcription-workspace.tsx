@@ -8,6 +8,8 @@ import {
   emptyDraftData,
   emptyPlayer,
   foldCode,
+  modeAllowsPurple,
+  modeAllowsVirulentStrain,
   presentDraft,
   prepareDraft,
   type CodeLabel,
@@ -40,7 +42,7 @@ const diseases = [
   { key: "red_disease", label: "Červená", dot: "bg-red-500", optional: false },
   { key: "blue_disease", label: "Modrá", dot: "bg-sky-500", optional: false },
   { key: "black_disease", label: "Černá", dot: "bg-zinc-100", optional: false },
-  { key: "purple_disease", label: "Fialová", dot: "bg-purple-500", optional: true },
+  { key: "purple_disease", label: "Fialová", dot: "bg-purple-500", optional: false },
 ] as const;
 
 const cardBoxes = {
@@ -309,7 +311,16 @@ export function TranscriptionWorkspace() {
               label="Režim"
               value={form.game_mode_code}
               options={sortWithPriority(catalogs.gameModes, ["Klasika", "Zhoubný kmen", "Mutace"])}
-              onChange={(game_mode_code) => updateForm({ ...form, game_mode_code })}
+              onChange={(game_mode_code) =>
+                updateForm({
+                  ...form,
+                  game_mode_code,
+                  purple_disease: modeAllowsPurple(game_mode_code) ? form.purple_disease : null,
+                  virulent_strain_color: modeAllowsVirulentStrain(game_mode_code)
+                    ? form.virulent_strain_color
+                    : null,
+                })
+              }
             />
           </SectionBlock>
 
@@ -343,7 +354,7 @@ export function TranscriptionWorkspace() {
                     <CodeSelect
                       label={`Role ${playerIndex + 1}`}
                       value={player.role_code}
-                      options={catalogs.roles || []}
+                      options={roleLabels(catalogs.roles || [])}
                       placeholder="Role"
                       onChange={(role_code) => updatePlayer(playerIndex, { role_code })}
                       extra={
@@ -410,7 +421,7 @@ export function TranscriptionWorkspace() {
                   <CodeSelect
                     label="Z role"
                     value={change.from_role_code}
-                    options={catalogs.roles || []}
+                    options={roleLabels(catalogs.roles || [])}
                     placeholder="Z role"
                     onChange={(from_role_code) =>
                       updateRoleChange(changeIndex, { from_role_code })
@@ -419,7 +430,7 @@ export function TranscriptionWorkspace() {
                   <CodeSelect
                     label="Na roli"
                     value={change.to_role_code}
-                    options={catalogs.roles || []}
+                    options={roleLabels(catalogs.roles || [])}
                     placeholder="Na roli"
                     onChange={(to_role_code) =>
                       updateRoleChange(changeIndex, { to_role_code })
@@ -475,26 +486,33 @@ export function TranscriptionWorkspace() {
             alt={`Stavy nemocí na kartě hry ${index + 1}`}
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {diseases.map((disease) => (
-                <CodeSelect
-                  key={disease.key}
-                  label={disease.label}
-                  swatch={disease.dot}
-                  optional={disease.optional}
-                  value={form[disease.key]}
-                  options={catalogs.diseaseStates || []}
-                  onChange={(value) =>
-                    updateForm({ ...form, [disease.key]: value } as DraftData)
-                  }
-                />
-              ))}
+              {diseases.map((disease) => {
+                const inactive = disease.key === "purple_disease" && !modeAllowsPurple(form.game_mode_code);
+                return (
+                  <CodeSelect
+                    key={disease.key}
+                    label={disease.label}
+                    swatch={disease.dot}
+                    optional={inactive || disease.optional}
+                    disabled={inactive}
+                    value={inactive ? null : form[disease.key]}
+                    options={catalogs.diseaseStates || []}
+                    onChange={(value) =>
+                      updateForm({ ...form, [disease.key]: value ?? null })
+                    }
+                  />
+                );
+              })}
               <CodeSelect
                 label="Barva kmene"
-                optional
-                value={form.virulent_strain_color}
+                optional={!modeAllowsVirulentStrain(form.game_mode_code)}
+                disabled={!modeAllowsVirulentStrain(form.game_mode_code)}
+                value={
+                  modeAllowsVirulentStrain(form.game_mode_code) ? form.virulent_strain_color : null
+                }
                 options={catalogs.virulentStrainColors || []}
                 onChange={(virulent_strain_color) =>
-                  updateForm({ ...form, virulent_strain_color })
+                  updateForm({ ...form, virulent_strain_color: virulent_strain_color ?? null })
                 }
               />
             </div>
@@ -710,6 +728,13 @@ function Field({
   );
 }
 
+function roleLabels(roles: CodeLabel[]): CodeLabel[] {
+  return roles.map((role) => ({
+    code: role.code,
+    name_cs: role.code.toUpperCase(),
+  }));
+}
+
 function sortWithPriority(options: CodeLabel[] = [], priorityOrder: string[] = []): CodeLabel[] {
   if (!options || options.length === 0) return [];
   const priorityItems: CodeLabel[] = [];
@@ -757,6 +782,7 @@ function CodeSelect({
   swatch,
   extra,
   priority = [],
+  disabled = false,
 }: {
   label: string;
   value: string | null;
@@ -767,30 +793,35 @@ function CodeSelect({
   swatch?: string;
   extra?: ReactNode;
   priority?: string[];
+  disabled?: boolean;
 }) {
-  const ordered = orderCatalog(withCurrentOption(options, value), priority);
+  const selected = value ?? "";
+  const ordered = orderCatalog(withCurrentOption(options, selected || null), priority);
   const emptyLabel = optional ? "Neurčeno" : placeholder ?? "Vyberte";
+  const emptyFirst = selected === "" || priority.length === 0;
   const control =
     options.length === 0 ? (
       <input
-        value={value ?? ""}
+        value={selected}
+        disabled={disabled}
         placeholder={emptyLabel}
         onChange={(event) => onChange(event.target.value.trim() || null)}
         className={fieldClassName}
       />
     ) : (
       <select
-        value={value ?? ""}
+        value={selected}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value || null)}
         className={fieldClassName}
       >
-        {priority.length === 0 ? <option value="">{emptyLabel}</option> : null}
+        {emptyFirst ? <option value="">{emptyLabel}</option> : null}
         {ordered.map((option) => (
           <option key={option.code} value={option.code}>
             {option.name_cs}
           </option>
         ))}
-        {priority.length > 0 ? <option value="">{emptyLabel}</option> : null}
+        {emptyFirst ? null : <option value="">{emptyLabel}</option>}
       </select>
     );
 

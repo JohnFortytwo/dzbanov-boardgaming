@@ -130,6 +130,30 @@ const MODE_ALIASES: Record<string, string[]> = {
   mutation: ["mutace"],
 };
 
+const PURPLE_MODES = new Set([
+  "mut",
+  "mutace",
+  "mutation",
+  "combo",
+  "wwm",
+  "worldwide",
+  "worldwide m",
+  "worldwide m.",
+]);
+
+const VIRULENT_MODES = new Set(["virulent", "vir", "zhoubny kmen", "combo"]);
+
+export function modeAllowsPurple(mode: string | null) {
+  if (!mode) return false;
+  const folded = foldCode(mode);
+  return PURPLE_MODES.has(folded) || folded.startsWith("worldwide");
+}
+
+export function modeAllowsVirulentStrain(mode: string | null) {
+  if (!mode) return false;
+  return VIRULENT_MODES.has(foldCode(mode));
+}
+
 const DISEASE_ALIASES: Record<string, string[]> = {
   cured: ["vynalezeno", "vyleceno"],
   eradicated: ["vymyceno"],
@@ -200,6 +224,11 @@ export function emptyPlayer(order: number): DraftPlayer {
   };
 }
 
+function presentDisease(raw: string | null, states: CodeLabel[]) {
+  if (!raw || foldCode(raw) === "cured") return null;
+  return matchCatalogCode(raw, states, DISEASE_ALIASES);
+}
+
 export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): DraftData {
   const sourcePlayers =
     data.players.length > 0
@@ -216,15 +245,11 @@ export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): Draft
       DIFFICULTY_ALIASES,
     ),
     game_mode_code: matchCatalogCode(data.game_mode_code, catalogs.gameModes, MODE_ALIASES),
-    yellow_disease: matchCatalogCode(data.yellow_disease, catalogs.diseaseStates, DISEASE_ALIASES),
-    red_disease: matchCatalogCode(data.red_disease, catalogs.diseaseStates, DISEASE_ALIASES),
-    blue_disease: matchCatalogCode(data.blue_disease, catalogs.diseaseStates, DISEASE_ALIASES),
-    black_disease: matchCatalogCode(data.black_disease, catalogs.diseaseStates, DISEASE_ALIASES),
-    purple_disease: matchCatalogCode(
-      data.purple_disease,
-      catalogs.diseaseStates,
-      DISEASE_ALIASES,
-    ),
+    yellow_disease: presentDisease(data.yellow_disease, catalogs.diseaseStates),
+    red_disease: presentDisease(data.red_disease, catalogs.diseaseStates),
+    blue_disease: presentDisease(data.blue_disease, catalogs.diseaseStates),
+    black_disease: presentDisease(data.black_disease, catalogs.diseaseStates),
+    purple_disease: presentDisease(data.purple_disease, catalogs.diseaseStates),
     virulent_strain_color: matchCatalogCode(
       data.virulent_strain_color,
       catalogs.virulentStrainColors,
@@ -370,6 +395,18 @@ export function prepareDraft(value: DraftData): {
     if (!draft[key as keyof DraftData]) {
       errors.push(`Vyberte stav ${label}.`);
     }
+  }
+
+  if (modeAllowsPurple(draft.game_mode_code)) {
+    if (!draft.purple_disease) errors.push("Vyberte stav fialové nemoci.");
+  } else {
+    draft.purple_disease = null;
+  }
+
+  if (modeAllowsVirulentStrain(draft.game_mode_code)) {
+    if (!draft.virulent_strain_color) errors.push("Vyberte barvu kmene.");
+  } else {
+    draft.virulent_strain_color = null;
   }
 
   if (draft.players.length === 0) {
