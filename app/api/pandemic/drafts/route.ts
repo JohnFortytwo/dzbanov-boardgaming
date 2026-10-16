@@ -98,7 +98,7 @@ async function loadCatalogs(
 }
 
 export async function GET() {
-  const { response } = await requireUser();
+  const { supabase, response } = await requireUser();
   if (response) return response;
 
   const { data, error } = await supabaseAdmin
@@ -138,7 +138,7 @@ export async function GET() {
       return left.game_order - right.game_order;
     });
 
-  const catalogs = await loadCatalogs(supabaseAdmin);
+  const catalogs = await loadCatalogs(supabase as unknown as typeof supabaseAdmin);
 
   return Response.json({ drafts, catalogs });
 }

@@ -296,22 +296,19 @@ export function TranscriptionWorkspace() {
             <CodeSelect
               label="Výsledek"
               value={form.result_code}
-              options={catalogs.gameResults}
-              priority={["Výhra"]}
+              options={sortWithPriority(catalogs.gameResults, ["Výhra"])}
               onChange={(result_code) => updateForm({ ...form, result_code })}
             />
             <CodeSelect
               label="Obtížnost"
               value={form.difficulty_code}
-              options={catalogs.difficulties}
-              priority={["Legendární", "Velmi náročná"]}
+              options={sortWithPriority(catalogs.difficulties, ["Legendární", "Velmi náročná"])}
               onChange={(difficulty_code) => updateForm({ ...form, difficulty_code })}
             />
             <CodeSelect
               label="Režim"
               value={form.game_mode_code}
-              options={catalogs.gameModes}
-              priority={["Klasika", "Zhoubný kmen", "Mutace"]}
+              options={sortWithPriority(catalogs.gameModes, ["Klasika", "Zhoubný kmen", "Mutace"])}
               onChange={(game_mode_code) => updateForm({ ...form, game_mode_code })}
             />
           </SectionBlock>
@@ -337,7 +334,7 @@ export function TranscriptionWorkspace() {
                     <PlayerSelect
                       label={`Hráč ${playerIndex + 1}`}
                       value={player.matched_player_id}
-                      players={catalogs.players}
+                      players={catalogs.players || []}
                       onChange={(matched_player_id) =>
                         updatePlayer(playerIndex, { matched_player_id })
                       }
@@ -346,7 +343,7 @@ export function TranscriptionWorkspace() {
                     <CodeSelect
                       label={`Role ${playerIndex + 1}`}
                       value={player.role_code}
-                      options={catalogs.roles}
+                      options={catalogs.roles || []}
                       placeholder="Role"
                       onChange={(role_code) => updatePlayer(playerIndex, { role_code })}
                       extra={
@@ -405,7 +402,7 @@ export function TranscriptionWorkspace() {
                 >
                   <PlayerSelect
                     value={change.matched_player_id}
-                    players={playersInGame(form, catalogs.players)}
+                    players={playersInGame(form, catalogs.players || [])}
                     onChange={(matched_player_id) =>
                       updateRoleChange(changeIndex, { matched_player_id })
                     }
@@ -413,7 +410,7 @@ export function TranscriptionWorkspace() {
                   <CodeSelect
                     label="Z role"
                     value={change.from_role_code}
-                    options={catalogs.roles}
+                    options={catalogs.roles || []}
                     placeholder="Z role"
                     onChange={(from_role_code) =>
                       updateRoleChange(changeIndex, { from_role_code })
@@ -422,7 +419,7 @@ export function TranscriptionWorkspace() {
                   <CodeSelect
                     label="Na roli"
                     value={change.to_role_code}
-                    options={catalogs.roles}
+                    options={catalogs.roles || []}
                     placeholder="Na roli"
                     onChange={(to_role_code) =>
                       updateRoleChange(changeIndex, { to_role_code })
@@ -485,7 +482,7 @@ export function TranscriptionWorkspace() {
                   swatch={disease.dot}
                   optional={disease.optional}
                   value={form[disease.key]}
-                  options={catalogs.diseaseStates}
+                  options={catalogs.diseaseStates || []}
                   onChange={(value) =>
                     updateForm({ ...form, [disease.key]: value } as DraftData)
                   }
@@ -495,7 +492,7 @@ export function TranscriptionWorkspace() {
                 label="Barva kmene"
                 optional
                 value={form.virulent_strain_color}
-                options={catalogs.virulentStrainColors}
+                options={catalogs.virulentStrainColors || []}
                 onChange={(virulent_strain_color) =>
                   updateForm({ ...form, virulent_strain_color })
                 }
@@ -711,6 +708,26 @@ function Field({
       {children}
     </label>
   );
+}
+
+function sortWithPriority(options: CodeLabel[] = [], priorityOrder: string[] = []): CodeLabel[] {
+  if (!options || options.length === 0) return [];
+  const priorityItems: CodeLabel[] = [];
+
+  priorityOrder.forEach((p) => {
+    const found = options.find(
+      (o) => o.name_cs.toLowerCase() === p.toLowerCase() || o.code.toLowerCase() === p.toLowerCase(),
+    );
+    if (found && !priorityItems.some((i) => i.code === found.code)) {
+      priorityItems.push(found);
+    }
+  });
+
+  const otherItems = options.filter(
+    (o) => !priorityItems.some((i) => i.code === o.code),
+  );
+
+  return [...priorityItems, ...otherItems];
 }
 
 function withCurrentOption(options: CodeLabel[], current: string | null) {
