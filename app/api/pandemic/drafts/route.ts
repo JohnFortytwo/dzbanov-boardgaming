@@ -200,7 +200,7 @@ export async function POST(request: Request) {
     return Response.json({ error: errors[0], errors }, { status: 400 });
   }
 
-  // Zápis schválené hry do ostré tabulky pandemic_games (včetně pole note)
+  // Zápis schválené hry do ostré tabulky pandemic_games
   const { data: game, error: gameError } = await supabaseAdmin
     .from("pandemic_games")
     .insert({
@@ -215,6 +215,7 @@ export async function POST(request: Request) {
       purple_disease: draft.purple_disease,
       virulent_strain_color: draft.virulent_strain_color,
       note: draft.note ?? null,
+      source: "PDF_scan_confirmed",
     })
     .select("id")
     .single();
