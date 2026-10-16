@@ -703,9 +703,11 @@ function SectionBlock({
       <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
         {title}
       </h2>
-      <div className="mt-3 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+      <div className="mt-3 grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-3">{children}</div>
-        <SubCropImage src={src} box={box} alt={alt} />
+        <div className="w-3/4 lg:w-full">
+          <SubCropImage src={src} box={box} alt={alt} />
+        </div>
       </div>
     </section>
   );

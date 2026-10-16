@@ -16,11 +16,10 @@ const tiles = [
   {
     href: "/pandemic/statistiky",
     title: "Statistiky",
-    description:
-      "Grafy a přehledy výher, úspěšnosti hráčů a obtížností.",
-    status: "Rozpracováno",
+    description: "Počty her, role, nemoci a změny rolí ze schválených partií.",
+    status: "Základní přehled",
     action: "Otevřít statistiky",
-    ready: false,
+    ready: true,
   },
   {
     href: "/pandemic/prepis",

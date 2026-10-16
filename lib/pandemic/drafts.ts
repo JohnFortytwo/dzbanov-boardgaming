@@ -104,12 +104,18 @@ const ROLE_ALIAS_TO_CODE: Record<string, string> = {
   dis: "disp",
   med: "med",
   ved: "věd",
+  vyz: "výzk",
   plan: "plán",
   oper: "oper",
   pilot: "pilot",
   arch: "arch",
   epid: "epid",
   q: "q",
+  lok: "lokál",
+  rej: "rejža",
+  ter: "terka",
+  vse: "všest",
+  vsest: "všest",
 };
 
 const RESULT_ALIASES: Record<string, string[]> = {
@@ -209,10 +215,91 @@ export function roleCodeFromName(name: string) {
   return ROLE_ALIAS_TO_CODE[foldCode(trimmed)] ?? trimmed.toLocaleLowerCase("cs");
 }
 
+function uniqueRole(roles: CodeLabel[]): CodeLabel | null {
+  const unique = [...new Map(roles.map((role) => [role.code, role])).values()];
+  return unique.length === 1 ? unique[0] : null;
+}
+
+function roleByFoldedCode(roles: CodeLabel[], folded: string): CodeLabel | null {
+  return (
+    roles.find(
+      (role) => foldCode(role.code) === folded || foldCode(role.name_cs) === folded,
+    ) ?? null
+  );
+}
+
 export function matchRoleCode(raw: string | null, roles: CodeLabel[]): string | null {
   if (!raw) return null;
-  const canonical = ROLE_ALIAS_TO_CODE[foldCode(raw)] ?? raw.trim();
-  return matchCatalogCode(canonical, roles);
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const folded = foldCode(trimmed);
+
+  const alias = ROLE_ALIAS_TO_CODE[folded];
+  if (alias) {
+    const aliased = roleByFoldedCode(roles, foldCode(alias));
+    if (aliased) return aliased.code;
+  }
+
+  const exact = roleByFoldedCode(roles, folded);
+  if (exact) return exact.code;
+
+  if (folded.length >= 3 && roles.length > 0) {
+    const byCode = uniqueRole(
+      roles.filter((role) => {
+        const code = foldCode(role.code);
+        return code.startsWith(folded) || (code.length >= 3 && folded.startsWith(code));
+      }),
+    );
+    if (byCode) return byCode.code;
+
+    const byName = uniqueRole(
+      roles.filter((role) => foldCode(role.name_cs).startsWith(folded)),
+    );
+    if (byName) return byName.code;
+  }
+
+  return alias ?? trimmed;
+}
+
+function splitRoleChain(raw: string): string[] | null {
+  if (!raw.includes("/")) return null;
+  const parts = raw
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length < 2) return null;
+  return parts.slice(0, 3);
+}
+
+function presentPlayerRole(raw: string | null, roles: CodeLabel[]): string | null {
+  if (!raw) return null;
+  const chain = splitRoleChain(raw);
+  return matchRoleCode(chain ? chain[0] : raw, roles);
+}
+
+function inferRoleChanges(players: DraftPlayer[], roles: CodeLabel[]): DraftRoleChange[] {
+  const changes: DraftRoleChange[] = [];
+
+  for (const player of players) {
+    if (!player.role_code || changes.length >= 2) continue;
+    const chain = splitRoleChain(player.role_code);
+    if (!chain) continue;
+
+    const codes = chain.map((part) => matchRoleCode(part, roles));
+    for (let step = 1; step < codes.length && changes.length < 2; step += 1) {
+      const fromRole = codes[step - 1];
+      const toRole = codes[step];
+      if (!fromRole || !toRole || fromRole === toRole) continue;
+      changes.push({
+        matched_player_id: player.matched_player_id,
+        from_role_code: fromRole,
+        to_role_code: toRole,
+        change_order: changes.length + 1,
+      });
+    }
+  }
+
+  return changes;
 }
 
 function foldPlayerName(value: string) {
@@ -271,9 +358,20 @@ export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): Draft
       player_order: index + 1,
       matched_player_id:
         player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
-      role_code: matchRoleCode(player.role_code, catalogs.roles),
+      role_code: presentPlayerRole(player.role_code, catalogs.roles),
     })),
-    role_changes: data.role_changes.map((change, index) => ({
+    role_changes: (
+      data.role_changes.length > 0
+        ? data.role_changes
+        : inferRoleChanges(
+            sourcePlayers.map((player) => ({
+              ...player,
+              matched_player_id:
+                player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
+            })),
+            catalogs.roles,
+          )
+    ).map((change, index) => ({
       ...change,
       change_order: index + 1,
       from_role_code: matchRoleCode(change.from_role_code, catalogs.roles),
