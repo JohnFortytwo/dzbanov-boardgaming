@@ -158,3 +158,54 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Neplatné tělo požadavku." }, { status: 400 });
+  }
+
+  const payload = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+  const id = typeof payload.id === "string" ? payload.id : "";
+
+  if (!/^[0-9a-f-]{36}$/i.test(id)) {
+    return Response.json({ error: "Chybí identifikátor draftu." }, { status: 400 });
+  }
+
+  const { data: existing, error: existingError } = await supabaseAdmin
+    .from("a4_draft_games")
+    .select("id, is_verified, draft_data")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (existingError) {
+    return Response.json(
+      { error: "Draft se nepodařilo načíst." },
+      { status: 500 },
+    );
+  }
+
+  if (!existing) {
+    return Response.json({ error: "Draft už neexistuje." }, { status: 404 });
+  }
+
+  if (existing.is_verified) {
+    return Response.json({ error: "Tato hra už je schválená." }, { status: 409 });
+  }
+
+  const stored = normalizeDraftData(existing.draft_data);
+  const incoming = normalizeDraftData(payload.draft_data);
+  incoming.card_image_url = stored.card_image_url;
+
+  const { draft, errors } = prepareDraft(incoming);
+  if (errors.length > 0) {
+    return Response.json({ error: errors[0], errors }, { status: 400 });
+  }
+
+  // Zápis schválené hry do ostré tabulky pandemic_games (včetně pole note)
+  const { data: game, error: gameError } = await supabaseAdmin
+    .from("pandemic_games")
+    .insert({
+      played_at: draft.played_at,
+      result_code: draft.result_code,
+      difficulty_code: draft.difficulty_code,
+      game_mode_code: draft.game_mode_code,
+      yellow_disease: draft.yellow
