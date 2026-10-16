@@ -91,6 +91,158 @@ function asString(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+export function foldCode(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+const ROLE_ALIAS_TO_CODE: Record<string, string> = {
+  dis: "disp",
+  med: "med",
+  ved: "věd",
+  plan: "plán",
+  oper: "oper",
+  pilot: "pilot",
+  arch: "arch",
+  epid: "epid",
+  q: "q",
+};
+
+const RESULT_ALIASES: Record<string, string[]> = {
+  victory: ["vyhra"],
+  defeat: ["prohra"],
+  loss: ["prohra"],
+};
+
+const DIFFICULTY_ALIASES: Record<string, string[]> = {
+  standard: ["standardni"],
+  legendary: ["legendarni"],
+  heroic: ["hrdinska"],
+};
+
+const MODE_ALIASES: Record<string, string[]> = {
+  base: ["klasika"],
+  virulent: ["zhoubny kmen"],
+  mutation: ["mutace"],
+};
+
+const DISEASE_ALIASES: Record<string, string[]> = {
+  cured: ["vynalezeno", "vyleceno"],
+  eradicated: ["vymyceno"],
+  none: ["nic"],
+};
+
+const COLOR_ALIASES: Record<string, string[]> = {
+  yellow: ["zluta"],
+  red: ["cervena"],
+  blue: ["modra"],
+  black: ["cerna"],
+  purple: ["fialova"],
+};
+
+export function toIsoDate(value: string | null): string | null {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value) && isIsoDate(value)) return value;
+
+  const match = value.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\.?$/);
+  if (!match) return value;
+
+  const iso = `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+  return isIsoDate(iso) ? iso : value;
+}
+
+export function matchCatalogCode(
+  raw: string | null,
+  options: CodeLabel[],
+  aliases: Record<string, string[]> = {},
+): string | null {
+  if (!raw) return null;
+  const foldedRaw = foldCode(raw);
+  const direct = options.find(
+    (option) => foldCode(option.code) === foldedRaw || foldCode(option.name_cs) === foldedRaw,
+  );
+  if (direct) return direct.code;
+
+  for (const candidate of aliases[foldedRaw] ?? []) {
+    const foldedCandidate = foldCode(candidate);
+    const hit = options.find(
+      (option) =>
+        foldCode(option.code) === foldedCandidate ||
+        foldCode(option.name_cs) === foldedCandidate,
+    );
+    if (hit) return hit.code;
+  }
+
+  return raw.trim();
+}
+
+export function roleCodeFromName(name: string) {
+  const trimmed = name.trim();
+  return ROLE_ALIAS_TO_CODE[foldCode(trimmed)] ?? trimmed.toLocaleLowerCase("cs");
+}
+
+export function matchRoleCode(raw: string | null, roles: CodeLabel[]): string | null {
+  if (!raw) return null;
+  const canonical = ROLE_ALIAS_TO_CODE[foldCode(raw)] ?? raw.trim();
+  return matchCatalogCode(canonical, roles);
+}
+
+export function emptyPlayer(order: number): DraftPlayer {
+  return {
+    raw_name: null,
+    matched_player_id: null,
+    role_code: null,
+    player_order: order,
+  };
+}
+
+export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): DraftData {
+  const sourcePlayers =
+    data.players.length > 0
+      ? data.players
+      : [emptyPlayer(1), emptyPlayer(2), emptyPlayer(3)];
+
+  return {
+    ...data,
+    played_at: toIsoDate(data.played_at),
+    result_code: matchCatalogCode(data.result_code, catalogs.gameResults, RESULT_ALIASES),
+    difficulty_code: matchCatalogCode(
+      data.difficulty_code,
+      catalogs.difficulties,
+      DIFFICULTY_ALIASES,
+    ),
+    game_mode_code: matchCatalogCode(data.game_mode_code, catalogs.gameModes, MODE_ALIASES),
+    yellow_disease: matchCatalogCode(data.yellow_disease, catalogs.diseaseStates, DISEASE_ALIASES),
+    red_disease: matchCatalogCode(data.red_disease, catalogs.diseaseStates, DISEASE_ALIASES),
+    blue_disease: matchCatalogCode(data.blue_disease, catalogs.diseaseStates, DISEASE_ALIASES),
+    black_disease: matchCatalogCode(data.black_disease, catalogs.diseaseStates, DISEASE_ALIASES),
+    purple_disease: matchCatalogCode(
+      data.purple_disease,
+      catalogs.diseaseStates,
+      DISEASE_ALIASES,
+    ),
+    virulent_strain_color: matchCatalogCode(
+      data.virulent_strain_color,
+      catalogs.virulentStrainColors,
+      COLOR_ALIASES,
+    ),
+    players: sourcePlayers.map((player, index) => ({
+      ...player,
+      player_order: index + 1,
+      role_code: matchRoleCode(player.role_code, catalogs.roles),
+    })),
+    role_changes: data.role_changes.map((change, index) => ({
+      ...change,
+      change_order: index + 1,
+      from_role_code: matchRoleCode(change.from_role_code, catalogs.roles),
+      to_role_code: matchRoleCode(change.to_role_code, catalogs.roles),
+    })),
+  };
+}
+
 function asNumber(value: unknown, fallback: number): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) {
@@ -146,7 +298,7 @@ export function normalizeDraftData(value: unknown): DraftData {
 
   return {
     card_image_url: asString(row.card_image_url),
-    played_at: asString(row.played_at),
+    played_at: toIsoDate(asString(row.played_at)),
     result_code: asString(row.result_code),
     difficulty_code: asString(row.difficulty_code),
     game_mode_code: asString(row.game_mode_code),

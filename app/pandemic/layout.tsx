@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { logout } from "@/app/login/actions";
@@ -24,6 +25,7 @@ export default function PandemicLayout({
 }
 
 async function PandemicChrome({ children }: { children: ReactNode }) {
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
 
