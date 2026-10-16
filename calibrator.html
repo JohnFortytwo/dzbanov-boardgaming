@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Pandemic A4 Crop Calibrator</title>
+  <style>
+    body { font-family: sans-serif; background: #1e1e1e; color: #fff; margin: 20px; }
+    .controls { margin-bottom: 15px; display: flex; gap: 15px; align-items: center; }
+    #canvas-container { position: relative; overflow: auto; max-height: 80vh; border: 1px solid #444; background: #111; }
+    canvas { cursor: crosshair; display: block; }
+    textarea { width: 100%; height: 120px; background: #2d2d2d; color: #00ffcc; font-family: monospace; border: 1px solid #555; padding: 10px; }
+    button { padding: 8px 16px; background: #007acc; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: #005999; }
+  </style>
+</head>
+<body>
+  <h2>🎯 Pandemic A4 Crop Calibrator</h2>
+  <div class="controls">
+    <input type="file" id="file-input" accept="image/*">
+    <button onclick="rotateImage()">🔄 Otočit o 90°</button>
+    <button onclick="resetBoxes()">🧹 Vyčistit výběr</button>
+    <span>Označ myší <strong>KARTU 1 (vlevo nahoře)</strong> a potom <strong>KARTU 10 (vpravo dole)</strong>.</span>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <h3>Vygenerované souřadnice do <code>cropper.py</code>:</h3>
+  <textarea id="output" readonly placeholder="Zde se zobrazí vypočítaná procenta po vyznačení KARTY 1 a KARTY 10..."></textarea>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const output = document.getElementById('output');
+
+    let img = new Image();
+    let rotation = 0;
+    let boxes = [];
+    let isDrawing = false;
+    let startX = 0, startY = 0, currentX = 0, currentY = 0;
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        img = new Image();
+        img.onload = () => { rotation = 0; boxes = []; redraw(); };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function rotateImage() {
+      rotation = (rotation + 90) % 360;
+      boxes = [];
+      redraw();
+    }
+
+    function resetBoxes() {
+      boxes = [];
+      redraw();
+      output.value = '';
+    }
+
+    function redraw() {
+      if (!img.src) return;
+
+      const isRotated = (rotation === 90 || rotation === 270);
+      canvas.width = isRotated ? img.height : img.width;
+      canvas.height = isRotated ? img.width : img.height;
+
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.restore();
+
+      // Draw saved boxes
+      boxes.forEach((box, i) => {
+        ctx.strokeStyle = i === 0 ? '#00ff00' : '#ff9900';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(box.x, box.y, box.w, box.h);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.font = '24px sans-serif';
+        ctx.fillText(i === 0 ? 'Karta 1' : 'Karta 10', box.x + 10, box.y + 35);
+      });
+
+      // Draw active dragging box
+      if (isDrawing) {
+        ctx.strokeStyle = '#00ccff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+      }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (boxes.length >= 2) return;
+      const rect = canvas.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      isDrawing = true;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      currentX = e.clientX - rect.left;
+      currentY = e.clientY - rect.top;
+      redraw();
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      const rect = canvas.getBoundingClientRect();
+      const endX = e.clientX - rect.left;
+      const endY = e.clientY - rect.top;
+
+      const box = {
+        x: Math.min(startX, endX),
+        y: Math.min(startY, endY),
+        w: Math.abs(endX - startX),
+        h: Math.abs(endY - startY)
+      };
+
+      if (box.w > 50 && box.h > 50) {
+        boxes.push(box);
+        redraw();
+        calculateCoordinates();
+      }
+    });
+
+    function calculateCoordinates() {
+      if (boxes.length < 2) return;
+      const W = canvas.width;
+      const H = canvas.height;
+
+      const c1 = boxes[0];  // Karta 1
+      const c10 = boxes[1]; // Karta 10
+
+      const colLeftStart = (c1.x / W).toFixed(3);
+      const colLeftEnd = ((c1.x + c1.w) / W).toFixed(3);
+
+      const colRightStart = (c10.x / W).toFixed(3);
+      const colRightEnd = ((c10.x + c10.w) / W).toFixed(3);
+
+      const rowStepY = (c10.y - c1.y) / 4;
+      const cardH = c1.h;
+
+      let rowBoundsCode = 'row_y_bounds = [\n';
+      for (let i = 0; i < 5; i++) {
+        const yStart = ((c1.y + i * rowStepY) / H).toFixed(3);
+        const yEnd = ((c1.y + i * rowStepY + cardH) / H).toFixed(3);
+        rowBoundsCode += `    (${yStart}, ${yEnd}),  # Řádek ${i + 1}\n`;
+      }
+      rowBoundsCode += ']';
+
+      const fullPythonCode = `# Vypočteno z calibrator.html:
+col_x_bounds = [
+    (${colLeftStart}, ${colLeftEnd}),  # Levý sloupec
+    (${colRightStart}, ${colRightEnd})   # Pravý sloupec
+]
+
+${rowBoundsCode}`;
+
+      output.value = fullPythonCode;
+    }
+  </script>
+</body>
+</html>
