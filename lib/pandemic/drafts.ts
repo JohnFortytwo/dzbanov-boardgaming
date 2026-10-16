@@ -24,6 +24,7 @@ export type DraftData = {
   black_disease: string | null;
   purple_disease: string | null;
   virulent_strain_color: string | null;
+  note: string | null;
   players: DraftPlayer[];
   role_changes: DraftRoleChange[];
 };
@@ -118,7 +119,7 @@ const RESULT_ALIASES: Record<string, string[]> = {
 };
 
 const DIFFICULTY_ALIASES: Record<string, string[]> = {
-  standard: ["standardni"],
+  standard: ["legendarni"],
   legendary: ["legendarni"],
   heroic: ["hrdinska"],
 };
@@ -286,6 +287,7 @@ export function emptyDraftData(): DraftData {
     black_disease: null,
     purple_disease: null,
     virulent_strain_color: null,
+    note: null,
     players: [],
     role_changes: [],
   };
@@ -308,6 +310,7 @@ export function normalizeDraftData(value: unknown): DraftData {
     black_disease: asString(row.black_disease),
     purple_disease: asString(row.purple_disease),
     virulent_strain_color: asString(row.virulent_strain_color),
+    note: asString(row.note),
     players: players.map(readPlayer),
     role_changes: roleChanges.map(readRoleChange),
   };
@@ -336,6 +339,7 @@ export function prepareDraft(value: DraftData): {
 } {
   const draft: DraftData = {
     ...value,
+    note: value.note?.trim() || null,
     players: value.players
       .filter(
         (player) =>

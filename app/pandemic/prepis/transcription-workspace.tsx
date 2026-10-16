@@ -217,62 +217,26 @@ export function TranscriptionWorkspace() {
         Zpět na Pandemic
       </Link>
 
-      <section className="mb-6 flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-4 py-4 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
-            Přepis historických her
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
-            {loading
-              ? "Načítám hry…"
-              : drafts.length === 0
-                ? "Žádné hry ke schválení"
-                : `Hra ${index + 1} z ${drafts.length}`}
-          </h1>
-          {draft ? (
-            <p className="mt-1 text-xs text-zinc-500">
-              Karta {draft.game_order} na skenu
-            </p>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setIndex((current) => Math.max(0, current - 1));
-              setFormErrors([]);
-              setNotice(null);
-            }}
-            disabled={!draft || index === 0 || saving}
-            tabIndex={skipTab}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Předchozí
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setIndex((current) => Math.min(drafts.length - 1, current + 1));
-              setFormErrors([]);
-              setNotice(null);
-            }}
-            disabled={!draft || index >= drafts.length - 1 || saving}
-            tabIndex={skipTab}
-            className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Další
-          </button>
-          <button
-            type="button"
-            onClick={() => void approve()}
-            disabled={!draft || saving}
-            tabIndex={skipTab}
-            className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? "Ukládám…" : "Schválit a uložit do databáze"}
-          </button>
-        </div>
-      </section>
+      {!draft ? (
+        <DraftToolbar
+          loading={loading}
+          count={drafts.length}
+          index={index}
+          gameOrder={null}
+          saving={saving}
+          onPrevious={() => {
+            setIndex((current) => Math.max(0, current - 1));
+            setFormErrors([]);
+            setNotice(null);
+          }}
+          onNext={() => {
+            setIndex((current) => Math.min(drafts.length - 1, current + 1));
+            setFormErrors([]);
+            setNotice(null);
+          }}
+          onApprove={() => void approve()}
+        />
+      ) : null}
 
       {notice ? (
         <p className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
@@ -305,16 +269,6 @@ export function TranscriptionWorkspace() {
             void approve();
           }}
         >
-          {formErrors.length > 0 ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-              <ul className="space-y-1">
-                {formErrors.map((error, errorIndex) => (
-                  <li key={`${errorIndex}-${error}`}>{error}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
           <SectionBlock
             title="Datum"
             src={form.card_image_url}
@@ -381,6 +335,7 @@ export function TranscriptionWorkspace() {
                 >
                   <div className="grid gap-3 xl:grid-cols-[1fr_1fr_auto] xl:items-end">
                     <PlayerSelect
+                      label={`Hráč ${playerIndex + 1}`}
                       value={player.matched_player_id}
                       players={catalogs.players}
                       onChange={(matched_player_id) =>
@@ -389,7 +344,7 @@ export function TranscriptionWorkspace() {
                       onCreate={(name) => createPlayer(playerIndex, name)}
                     />
                     <CodeSelect
-                      label="Role"
+                      label={`Role ${playerIndex + 1}`}
                       value={player.role_code}
                       options={catalogs.roles}
                       placeholder="Role"
@@ -546,6 +501,16 @@ export function TranscriptionWorkspace() {
                 }
               />
             </div>
+            <Field label="Poznámka">
+              <textarea
+                value={form.note ?? ""}
+                rows={3}
+                onChange={(event) =>
+                  updateForm({ ...form, note: event.target.value || null })
+                }
+                className={`${fieldClassName} h-auto min-h-20 py-2`}
+              />
+            </Field>
           </SectionBlock>
 
           <details className="rounded-3xl border border-white/10 bg-white/5 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl">
@@ -565,9 +530,109 @@ export function TranscriptionWorkspace() {
               />
             </div>
           </details>
+
+          {formErrors.length > 0 ? (
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              <ul className="space-y-1">
+                {formErrors.map((error, errorIndex) => (
+                  <li key={`${errorIndex}-${error}`}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          <DraftToolbar
+            loading={false}
+            count={drafts.length}
+            index={index}
+            gameOrder={draft.game_order}
+            saving={saving}
+            onPrevious={() => {
+              setIndex((current) => Math.max(0, current - 1));
+              setFormErrors([]);
+              setNotice(null);
+            }}
+            onNext={() => {
+              setIndex((current) => Math.min(drafts.length - 1, current + 1));
+              setFormErrors([]);
+              setNotice(null);
+            }}
+            onApprove={() => void approve()}
+          />
         </form>
       ) : null}
     </main>
+  );
+}
+
+function DraftToolbar({
+  loading,
+  count,
+  index,
+  gameOrder,
+  saving,
+  onPrevious,
+  onNext,
+  onApprove,
+}: {
+  loading: boolean;
+  count: number;
+  index: number;
+  gameOrder: number | null;
+  saving: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+  onApprove: () => void;
+}) {
+  const hasDraft = gameOrder !== null;
+
+  return (
+    <section className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-4 py-4 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
+          Přepis historických her
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
+          {loading
+            ? "Načítám hry…"
+            : count === 0
+              ? "Žádné hry ke schválení"
+              : `Hra ${index + 1} z ${count}`}
+        </h1>
+        {hasDraft ? (
+          <p className="mt-1 text-xs text-zinc-500">Karta {gameOrder} na skenu</p>
+        ) : null}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={!hasDraft || index === 0 || saving}
+          tabIndex={skipTab}
+          className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Předchozí
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={!hasDraft || index >= count - 1 || saving}
+          tabIndex={skipTab}
+          className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Další
+        </button>
+        <button
+          type="button"
+          onClick={onApprove}
+          disabled={!hasDraft || saving}
+          tabIndex={skipTab}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {saving ? "Ukládám…" : "Schválit a uložit do databáze"}
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -727,11 +792,13 @@ function CodeSelect({
 }
 
 function PlayerSelect({
+  label = "Hráč",
   value,
   players,
   onChange,
   onCreate,
 }: {
+  label?: string;
   value: string | null;
   players: PlayerOption[];
   onChange: (value: string | null) => void;
@@ -744,7 +811,7 @@ function PlayerSelect({
 
   return (
     <div className="space-y-1">
-      <span className="block text-xs font-medium text-zinc-300">Hráč</span>
+      <span className="block text-xs font-medium text-zinc-300">{label}</span>
       <div className="flex flex-wrap items-start gap-2">
         <select
           value={value ?? ""}
