@@ -1,20 +1,19 @@
 // app/api/pandemic/drafts/route.ts
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import {
+  assertOwnLock,
+  claimDraftAfter,
+  DraftQueueError,
+  openDraftQueue,
+} from "@/lib/pandemic/draft-queue";
 import {
   normalizeDraftData,
   prepareDraft,
   type CodeLabel,
-  type DraftGame,
   type PandemicCatalogs,
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
-
-// Admin klient pro obcházení RLS na staging i jádrových tabulkách
-const supabaseAdmin = createAdminClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const CODE_TABLES = [
   ["roles", "roles"],
@@ -28,15 +27,39 @@ const CODE_TABLES = [
 async function requireUser() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
+  const userId = typeof data?.claims?.sub === "string" ? data.claims.sub : "";
 
-  if (!data?.claims) {
+  if (!data?.claims || !/^[0-9a-f-]{36}$/i.test(userId)) {
     return {
       supabase,
+      userId: "",
       response: Response.json({ error: "Nejste přihlášeni." }, { status: 401 }),
     };
   }
 
-  return { supabase, response: null };
+  return { supabase, userId, response: null };
+}
+
+function queueError(error: unknown) {
+  if (error instanceof DraftQueueError) {
+    return Response.json({ error: error.message }, { status: error.status });
+  }
+
+  return Response.json({ error: "Frontu přepisu se nepodařilo načíst." }, { status: 500 });
+}
+
+async function nextQueue(userId: string, createdAt: string, gameOrder: number) {
+  try {
+    return await claimDraftAfter(userId, createdAt, gameOrder);
+  } catch {
+    return {
+      draft: null,
+      waiting_count: 0,
+      held_by_others: 0,
+      has_previous: false,
+      has_next: false,
+    };
+  }
 }
 
 async function loadCodes(
@@ -98,49 +121,16 @@ async function loadCatalogs(
 }
 
 export async function GET() {
-  const { supabase, response } = await requireUser();
+  const { supabase, userId, response } = await requireUser();
   if (response) return response;
 
-  const { data, error } = await supabaseAdmin
-    .from("a4_draft_games")
-    .select("id, scan_id, game_order, is_verified, created_at, draft_data")
-    .eq("is_verified", false)
-    .order("created_at", { ascending: true })
-    .order("game_order", { ascending: true });
-
-  if (error) {
-    return Response.json(
-      { error: "Neschválené hry se nepodařilo načíst." },
-      { status: 500 },
-    );
+  try {
+    const queue = await openDraftQueue(userId);
+    const catalogs = await loadCatalogs(supabase as unknown as typeof supabaseAdmin);
+    return Response.json({ ...queue, catalogs });
+  } catch (error) {
+    return queueError(error);
   }
-
-  const drafts: DraftGame[] = (data ?? [])
-    .flatMap((row) => {
-      if (typeof row.id !== "string" || typeof row.scan_id !== "string") {
-        return [];
-      }
-
-      return [
-        {
-          id: row.id,
-          scan_id: row.scan_id,
-          game_order: typeof row.game_order === "number" ? row.game_order : 0,
-          is_verified: Boolean(row.is_verified),
-          created_at: typeof row.created_at === "string" ? row.created_at : "",
-          draft_data: normalizeDraftData(row.draft_data),
-        },
-      ];
-    })
-    .sort((left, right) => {
-      const byCreated = left.created_at.localeCompare(right.created_at);
-      if (byCreated !== 0) return byCreated;
-      return left.game_order - right.game_order;
-    });
-
-  const catalogs = await loadCatalogs(supabase as unknown as typeof supabaseAdmin);
-
-  return Response.json({ drafts, catalogs });
 }
 
 async function rollbackGame(
@@ -153,7 +143,7 @@ async function rollbackGame(
 }
 
 export async function POST(request: Request) {
-  const { response } = await requireUser();
+  const { userId, response } = await requireUser();
   if (response) return response;
 
   let body: unknown;
@@ -172,7 +162,7 @@ export async function POST(request: Request) {
 
   const { data: existing, error: existingError } = await supabaseAdmin
     .from("a4_draft_games")
-    .select("id, is_verified, draft_data")
+    .select("id, is_verified, created_at, game_order, draft_data")
     .eq("id", id)
     .maybeSingle();
 
@@ -189,6 +179,14 @@ export async function POST(request: Request) {
 
   if (existing.is_verified) {
     return Response.json({ error: "Tato hra už je schválená." }, { status: 409 });
+  }
+
+  const ownsLock = await assertOwnLock(userId, id);
+  if (!ownsLock) {
+    return Response.json(
+      { error: "Tuhle kartu už přepisuje někdo jiný." },
+      { status: 409 },
+    );
   }
 
   const stored = normalizeDraftData(existing.draft_data);
@@ -278,6 +276,7 @@ export async function POST(request: Request) {
     })
     .eq("id", id)
     .eq("is_verified", false)
+    .eq("draft_data->_lock->>user_id", userId)
     .select("id");
 
   if (verifyError || !verified?.length) {
@@ -292,7 +291,10 @@ export async function POST(request: Request) {
     );
   }
 
-  return Response.json({ ok: true, game_id: gameId });
+  const createdAt = typeof existing.created_at === "string" ? existing.created_at : "";
+  const gameOrder = typeof existing.game_order === "number" ? existing.game_order : 0;
+  const queue = await nextQueue(userId, createdAt, gameOrder);
+  return Response.json({ ok: true, game_id: gameId, ...queue });
 }
 
 const PUBLIC_SCAN_OBJECT = /\/storage\/v1\/object\/public\/scans\/([^?#]+)/i;
@@ -337,7 +339,7 @@ function objectPathFromCardUrl(value: string | null): string | null {
 }
 
 export async function DELETE(request: Request) {
-  const { response } = await requireUser();
+  const { userId, response } = await requireUser();
   if (response) return response;
 
   let body: unknown;
@@ -356,7 +358,7 @@ export async function DELETE(request: Request) {
 
   const { data: existing, error: existingError } = await supabaseAdmin
     .from("a4_draft_games")
-    .select("id, scan_id, is_verified, draft_data")
+    .select("id, scan_id, is_verified, created_at, game_order, draft_data")
     .eq("id", id)
     .maybeSingle();
 
@@ -378,6 +380,14 @@ export async function DELETE(request: Request) {
     );
   }
 
+  const ownsLock = await assertOwnLock(userId, id);
+  if (!ownsLock) {
+    return Response.json(
+      { error: "Tuhle kartu už přepisuje někdo jiný." },
+      { status: 409 },
+    );
+  }
+
   const cardImageUrl = normalizeDraftData(existing.draft_data).card_image_url;
   const scanId = existing.scan_id;
 
@@ -386,6 +396,7 @@ export async function DELETE(request: Request) {
     .delete()
     .eq("id", id)
     .eq("is_verified", false)
+    .eq("draft_data->_lock->>user_id", userId)
     .select("id");
 
   if (deleteError || !removed?.length) {
@@ -419,9 +430,14 @@ export async function DELETE(request: Request) {
     await supabaseAdmin.from("a4_scans").delete().eq("id", scanId);
   }
 
+  const createdAt = typeof existing.created_at === "string" ? existing.created_at : "";
+  const gameOrder = typeof existing.game_order === "number" ? existing.game_order : 0;
+  const queue = await nextQueue(userId, createdAt, gameOrder);
+
   return Response.json({
     ok: true,
     image_deleted: Boolean(objectPath) && !imageWarning,
     image_warning: imageWarning,
+    ...queue,
   });
 }

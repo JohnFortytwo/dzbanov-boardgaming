@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CardPreview } from "./card-preview";
 import { SubCropImage, type CropBox } from "./sub-crop-image";
 import {
@@ -26,6 +26,37 @@ const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
 
 const skipTab = -1;
+let queueReleaseToken = 0;
+
+function releaseDraftLock(id: string) {
+  const body = JSON.stringify({ action: "release", id });
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    navigator.sendBeacon(
+      "/api/pandemic/drafts/lock",
+      new Blob([body], { type: "application/json" }),
+    );
+    return;
+  }
+
+  void fetch("/api/pandemic/drafts/lock", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive: true,
+  });
+}
+
+function waitingLabel(count: number) {
+  if (count === 1) return "Ve frontě zbývá 1 hra";
+  if (count >= 2 && count <= 4) return `Ve frontě zbývají ${count} hry`;
+  return `Ve frontě zbývá ${count} her`;
+}
+
+function heldLabel(count: number) {
+  if (count === 1) return "1 kartu právě přepisuje někdo jiný.";
+  if (count >= 2 && count <= 4) return `${count} karty právě přepisuje někdo jiný.`;
+  return `${count} karet právě přepisuje někdo jiný.`;
+}
 
 const emptyCatalogs: PandemicCatalogs = {
   players: [],
@@ -53,16 +84,39 @@ const cardBoxes = {
 } as const satisfies Record<string, CropBox>;
 
 export function TranscriptionWorkspace() {
-  const [drafts, setDrafts] = useState<DraftGame[]>([]);
+  const [draft, setDraft] = useState<DraftGame | null>(null);
   const [catalogs, setCatalogs] = useState<PandemicCatalogs>(emptyCatalogs);
   const [edits, setEdits] = useState<Record<string, DraftData>>({});
-  const [index, setIndex] = useState(0);
+  const [waitingCount, setWaitingCount] = useState(0);
+  const [heldByOthers, setHeldByOthers] = useState(0);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [pending, setPending] = useState<null | "approve" | "reject">(null);
+  const [pending, setPending] = useState<null | "approve" | "reject" | "move">(null);
   const saving = pending !== null;
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const draftIdRef = useRef<string | null>(null);
+  draftIdRef.current = draft?.id ?? null;
+
+  function applyQueue(payload: DraftsResponse) {
+    setDraft(payload.draft);
+    setWaitingCount(payload.waiting_count);
+    setHeldByOthers(payload.held_by_others);
+    setHasPrevious(payload.has_previous);
+    setHasNext(payload.has_next);
+    if (payload.catalogs) setCatalogs(payload.catalogs);
+  }
+
+  async function loadQueue() {
+    const response = await fetch("/api/pandemic/drafts");
+    const payload = (await response.json()) as DraftsResponse & { error?: string };
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Neschválené hry se nepodařilo načíst.");
+    }
+    applyQueue(payload);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -71,15 +125,7 @@ export function TranscriptionWorkspace() {
       setLoading(true);
       setLoadError(null);
       try {
-        const response = await fetch("/api/pandemic/drafts");
-        const payload = (await response.json()) as DraftsResponse & { error?: string };
-        if (!response.ok) {
-          throw new Error(payload.error ?? "Neschválené hry se nepodařilo načíst.");
-        }
-        if (cancelled) return;
-        setDrafts(payload.drafts ?? []);
-        setCatalogs(payload.catalogs ?? emptyCatalogs);
-        setIndex(0);
+        await loadQueue();
       } catch (error) {
         if (!cancelled) {
           setLoadError(
@@ -97,7 +143,45 @@ export function TranscriptionWorkspace() {
     };
   }, []);
 
-  const draft = drafts[index] ?? null;
+  useEffect(() => {
+    const token = ++queueReleaseToken;
+    return () => {
+      const id = draftIdRef.current;
+      window.setTimeout(() => {
+        if (queueReleaseToken !== token || !id) return;
+        releaseDraftLock(id);
+      }, 600);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!draft?.id) return;
+    const id = draft.id;
+    const timer = window.setInterval(() => {
+      void fetch("/api/pandemic/drafts/lock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "heartbeat", id }),
+      })
+        .then(async (response) => {
+          if (draftIdRef.current !== id) return;
+          if (!response.ok) {
+            const payload = (await response.json()) as { error?: string };
+            setNotice(payload.error ?? "Tuhle kartu už přepisuje někdo jiný.");
+          }
+          try {
+            await loadQueue();
+          } catch (error) {
+            setLoadError(
+              error instanceof Error ? error.message : "Neschválené hry se nepodařilo načíst.",
+            );
+          }
+        })
+        .catch(() => undefined);
+    }, 60_000);
+
+    return () => window.clearInterval(timer);
+  }, [draft?.id]);
   const form = draft
     ? (edits[draft.id] ?? presentDraft(draft.draft_data, catalogs))
     : emptyDraftData();
@@ -185,13 +269,17 @@ export function TranscriptionWorkspace() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: draft.id, draft_data: prepared.draft }),
       });
-      const payload = (await response.json()) as { error?: string; errors?: string[] };
+      const payload = (await response.json()) as DraftsResponse & {
+        error?: string;
+        errors?: string[];
+      };
       if (!response.ok) {
         setFormErrors(payload.errors?.length ? payload.errors : [payload.error ?? "Uložení se nezdařilo."]);
         return;
       }
 
-      dropDraft(draft.id);
+      forgetEdit(draft.id);
+      applyQueue(payload);
       setNotice("Hra je schválená a uložená v databázi.");
     } catch {
       setFormErrors(["Uložení se nepodařilo. Zkuste to znovu."]);
@@ -200,17 +288,37 @@ export function TranscriptionWorkspace() {
     }
   }
 
-  function dropDraft(id: string) {
-    const nextDrafts = drafts.filter((item) => item.id !== id);
-    setDrafts(nextDrafts);
+  function forgetEdit(id: string) {
     setEdits((current) => {
       const remaining = { ...current };
       delete remaining[id];
       return remaining;
     });
-    setIndex((current) =>
-      nextDrafts.length === 0 ? 0 : Math.min(current, nextDrafts.length - 1),
-    );
+  }
+
+  async function move(direction: "next" | "previous") {
+    if (!draft || saving) return;
+    setPending("move");
+    setFormErrors([]);
+    setNotice(null);
+
+    try {
+      const response = await fetch("/api/pandemic/drafts/lock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: direction, id: draft.id }),
+      });
+      const payload = (await response.json()) as DraftsResponse & { error?: string };
+      if (!response.ok) {
+        setFormErrors([payload.error ?? "Další kartu se nepodařilo otevřít."]);
+        return;
+      }
+      applyQueue(payload);
+    } catch {
+      setFormErrors(["Další kartu se nepodařilo otevřít."]);
+    } finally {
+      setPending(null);
+    }
   }
 
   async function reject() {
@@ -230,7 +338,7 @@ export function TranscriptionWorkspace() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: draft.id }),
       });
-      const payload = (await response.json()) as {
+      const payload = (await response.json()) as DraftsResponse & {
         error?: string;
         image_deleted?: boolean;
         image_warning?: string | null;
@@ -240,7 +348,8 @@ export function TranscriptionWorkspace() {
         return;
       }
 
-      dropDraft(draft.id);
+      forgetEdit(draft.id);
+      applyQueue(payload);
       setNotice(
         payload.image_warning
           ? "Hra byla zamítnuta a smazána z přepisu. Výstřižek v úložišti se nepodařilo odstranit."
@@ -267,21 +376,15 @@ export function TranscriptionWorkspace() {
       {!draft ? (
         <DraftToolbar
           loading={loading}
-          count={drafts.length}
-          index={index}
           gameOrder={null}
+          waitingCount={waitingCount}
+          heldByOthers={heldByOthers}
+          hasPrevious={hasPrevious}
+          hasNext={hasNext}
           saving={saving}
           pending={pending}
-          onPrevious={() => {
-            setIndex((current) => Math.max(0, current - 1));
-            setFormErrors([]);
-            setNotice(null);
-          }}
-          onNext={() => {
-            setIndex((current) => Math.min(drafts.length - 1, current + 1));
-            setFormErrors([]);
-            setNotice(null);
-          }}
+          onPrevious={() => void move("previous")}
+          onNext={() => void move("next")}
           onApprove={() => void approve()}
           onReject={() => void reject()}
         />
@@ -303,10 +406,11 @@ export function TranscriptionWorkspace() {
         <p className="text-sm text-zinc-400">Načítám neschválené drafty…</p>
       ) : null}
 
-      {!loading && !loadError && drafts.length === 0 ? (
+      {!loading && !loadError && !draft ? (
         <article className="rounded-3xl border border-white/10 bg-white/5 p-8 text-sm leading-6 text-zinc-400 backdrop-blur-xl sm:p-10">
-          Ve frontě už není žádná hra k přepisu. Nové drafty se tady objeví po
-          zpracování dalšího A4 skenu.
+          {waitingCount > 0
+            ? "Zbývající karty právě přepisuje někdo jiný."
+            : "Ve frontě už není žádná hra k přepisu. Nové drafty se tady objeví po zpracování dalšího A4 skenu."}
         </article>
       ) : null}
 
@@ -322,7 +426,7 @@ export function TranscriptionWorkspace() {
             title="Datum"
             src={form.card_image_url}
             box={cardBoxes.date}
-            alt={`Datum na kartě hry ${index + 1}`}
+            alt={`Datum na kartě hry ${draft.game_order}`}
           >
             <Field label="Datum">
               <input
@@ -340,7 +444,7 @@ export function TranscriptionWorkspace() {
             title="Výsledek, obtížnost a režim"
             src={form.card_image_url}
             box={cardBoxes.outcome}
-            alt={`Výsledek a obtížnost na kartě hry ${index + 1}`}
+            alt={`Výsledek a obtížnost na kartě hry ${draft.game_order}`}
           >
             <CodeSelect
               label="Výsledek"
@@ -375,7 +479,7 @@ export function TranscriptionWorkspace() {
             title="Hráči a role"
             src={form.card_image_url}
             box={cardBoxes.players}
-            alt={`Hráči a role na kartě hry ${index + 1}`}
+            alt={`Hráči a role na kartě hry ${draft.game_order}`}
           >
             {catalogs.players.length === 0 ? (
               <p className="text-sm text-zinc-500">
@@ -530,7 +634,7 @@ export function TranscriptionWorkspace() {
             title="Stavy nemocí a kmen"
             src={form.card_image_url}
             box={cardBoxes.diseases}
-            alt={`Stavy nemocí na kartě hry ${index + 1}`}
+            alt={`Stavy nemocí na kartě hry ${draft.game_order}`}
           >
             <div className="grid gap-4 sm:grid-cols-2">
               {diseases.map((disease) => {
@@ -588,7 +692,7 @@ export function TranscriptionWorkspace() {
               <CardPreview
                 key={draft.id}
                 src={form.card_image_url}
-                alt={`Náhled karty hry ${index + 1}`}
+                alt={`Náhled karty hry ${draft.game_order}`}
               />
             </div>
           </details>
@@ -605,21 +709,15 @@ export function TranscriptionWorkspace() {
 
           <DraftToolbar
             loading={false}
-            count={drafts.length}
-            index={index}
             gameOrder={draft.game_order}
+            waitingCount={waitingCount}
+            heldByOthers={heldByOthers}
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
             saving={saving}
             pending={pending}
-            onPrevious={() => {
-              setIndex((current) => Math.max(0, current - 1));
-              setFormErrors([]);
-              setNotice(null);
-            }}
-            onNext={() => {
-              setIndex((current) => Math.min(drafts.length - 1, current + 1));
-              setFormErrors([]);
-              setNotice(null);
-            }}
+            onPrevious={() => void move("previous")}
+            onNext={() => void move("next")}
             onApprove={() => void approve()}
             onReject={() => void reject()}
           />
@@ -631,9 +729,11 @@ export function TranscriptionWorkspace() {
 
 function DraftToolbar({
   loading,
-  count,
-  index,
   gameOrder,
+  waitingCount,
+  heldByOthers,
+  hasPrevious,
+  hasNext,
   saving,
   pending,
   onPrevious,
@@ -642,11 +742,13 @@ function DraftToolbar({
   onReject,
 }: {
   loading: boolean;
-  count: number;
-  index: number;
   gameOrder: number | null;
+  waitingCount: number;
+  heldByOthers: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
   saving: boolean;
-  pending: null | "approve" | "reject";
+  pending: null | "approve" | "reject" | "move";
   onPrevious: () => void;
   onNext: () => void;
   onApprove: () => void;
@@ -661,21 +763,18 @@ function DraftToolbar({
           Přepis historických her
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
-          {loading
-            ? "Načítám hry…"
-            : count === 0
-              ? "Žádné hry ke schválení"
-              : `Hra ${index + 1} z ${count}`}
+          {loading ? "Načítám hry…" : hasDraft ? `Karta ${gameOrder}` : "Žádná volná hra"}
         </h1>
-        {hasDraft ? (
-          <p className="mt-1 text-xs text-zinc-500">Karta {gameOrder} na skenu</p>
-        ) : null}
+        <p className="mt-1 text-xs text-zinc-500">
+          {loading ? "Připravuji frontu" : waitingLabel(waitingCount)}
+          {!loading && heldByOthers > 0 ? `. ${heldLabel(heldByOthers)}` : ""}
+        </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onPrevious}
-          disabled={!hasDraft || index === 0 || saving}
+          disabled={!hasDraft || !hasPrevious || saving}
           tabIndex={skipTab}
           className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
@@ -684,7 +783,7 @@ function DraftToolbar({
         <button
           type="button"
           onClick={onNext}
-          disabled={!hasDraft || index >= count - 1 || saving}
+          disabled={!hasDraft || !hasNext || saving}
           tabIndex={skipTab}
           className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         >

@@ -59,8 +59,12 @@ export type PandemicCatalogs = {
 };
 
 export type DraftsResponse = {
-  drafts: DraftGame[];
-  catalogs: PandemicCatalogs;
+  draft: DraftGame | null;
+  waiting_count: number;
+  held_by_others: number;
+  has_previous: boolean;
+  has_next: boolean;
+  catalogs?: PandemicCatalogs;
 };
 
 const DISEASE_LABELS: Record<string, string> = {
