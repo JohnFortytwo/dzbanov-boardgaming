@@ -35,7 +35,7 @@ def process_single_pdf(pdf_path: str):
     
     return True
 
-def process_batch(limit: int = 10):
+def process_batch(limit: int = 5):
     """Projde složku scan_upload, zpracuje max 'limit' PDF souborů a přesune je do scan_used."""
     if not os.path.exists(UPLOAD_DIR):
         print(f"Složka '{UPLOAD_DIR}' neexistuje!")
@@ -47,7 +47,7 @@ def process_batch(limit: int = 10):
     pdf_files.sort()
 
     if not pdf_files:
-        print(f"Ve složce '{UPLOAD_DIR}' nebyly nalezeny žádné PDF souborů.")
+        print(f"Ve složce '{UPLOAD_DIR}' nebyly nalezeny žádné PDF soubory.")
         return
 
     batch_to_process = pdf_files[:limit]
@@ -73,4 +73,4 @@ if __name__ == "__main__":
         else:
             print(f"Předaný argument '{target}' není platný soubor.")
     else:
-        process_batch(limit=10)
+        process_batch(limit=5)

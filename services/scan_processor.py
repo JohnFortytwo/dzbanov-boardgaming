@@ -161,10 +161,23 @@ def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: in
     
     for index, card_bytes in enumerate(cards, start=1):
         card_filename = f"{scan_id}_{index}.png"
-        card_path = os.path.join(output_dir, card_filename)
         
+        # 1. Volitelně uložení zálohy lokálně (můžeš nechat nebo zakomentovat)
+        card_path = os.path.join(output_dir, card_filename)
         img = Image.open(io.BytesIO(card_bytes))
         img.save(card_path, "PNG")
+
+        # 2. Nahrání do Supabase Storage bucketu 'scans'
+        try:
+            supabase.storage.from_("scans").upload(
+                path=card_filename,
+                file=card_bytes,
+                file_options={"content-type": "image/png", "x-upsert": "true"}
+            )
+            card_image_url = supabase.storage.from_("scans").get_public_url(card_filename)
+        except Exception as e:
+            print(f"  [Varování] Nepodařilo se nahradit obrázek v Storage: {e}")
+            card_image_url = f"/scans/{card_filename}" # fallback na lokální cestu
         
         print(f"  -> Zpracovávám kartu {index}/10 přes Gemini OCR...")
         ocr_data = extract_card_ocr(img)
@@ -172,9 +185,7 @@ def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: in
         raw_played_at = ocr_data.get("played_at")
         valid_played_at = validate_iso_date(raw_played_at)
         
-        card_image_url = f"/scans/{card_filename}"
-        
-        # Kompletní draft_data JSON pro frontend
+        # Kompletní draft_data JSON pro frontend s veřejnou cloudovou URL
         draft_json = {
             "card_image_url": card_image_url,
             "played_at": valid_played_at,
@@ -191,7 +202,7 @@ def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: in
             "players": ocr_data.get("players") or [],
             "role_changes": []
         }
-        
+
         draft_records.append({
             "scan_id": scan_id,
             "game_order": index,
