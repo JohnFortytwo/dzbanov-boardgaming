@@ -294,3 +294,134 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true, game_id: gameId });
 }
+
+const PUBLIC_SCAN_OBJECT = /\/storage\/v1\/object\/public\/scans\/([^?#]+)/i;
+
+function objectPathFromCardUrl(value: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  let raw: string | null = null;
+  if (/^https?:\/\//i.test(trimmed)) {
+    const match = trimmed.match(PUBLIC_SCAN_OBJECT);
+    raw = match?.[1] ?? null;
+    if (!raw) return null;
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (base) {
+      try {
+        if (new URL(trimmed).host !== new URL(base).host) return null;
+      } catch {
+        return null;
+      }
+    }
+  } else {
+    const withoutSlash = trimmed.replace(/^\/+/, "");
+    raw = withoutSlash.startsWith("scans/")
+      ? withoutSlash.slice("scans/".length)
+      : withoutSlash;
+  }
+
+  let path: string;
+  try {
+    path = decodeURIComponent(raw).split("?")[0].replace(/^\/+/, "");
+  } catch {
+    return null;
+  }
+
+  if (!path || path.includes("..") || path.includes("\\") || path.endsWith("/")) {
+    return null;
+  }
+
+  return path;
+}
+
+export async function DELETE(request: Request) {
+  const { response } = await requireUser();
+  if (response) return response;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Neplatné tělo požadavku." }, { status: 400 });
+  }
+
+  const payload = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+  const id = typeof payload.id === "string" ? payload.id : "";
+
+  if (!/^[0-9a-f-]{36}$/i.test(id)) {
+    return Response.json({ error: "Chybí identifikátor draftu." }, { status: 400 });
+  }
+
+  const { data: existing, error: existingError } = await supabaseAdmin
+    .from("a4_draft_games")
+    .select("id, scan_id, is_verified, draft_data")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (existingError) {
+    return Response.json(
+      { error: "Draft se nepodařilo načíst." },
+      { status: 500 },
+    );
+  }
+
+  if (!existing || typeof existing.scan_id !== "string") {
+    return Response.json({ error: "Draft už neexistuje." }, { status: 404 });
+  }
+
+  if (existing.is_verified) {
+    return Response.json(
+      { error: "Schválenou hru už nelze z přepisu smazat." },
+      { status: 409 },
+    );
+  }
+
+  const cardImageUrl = normalizeDraftData(existing.draft_data).card_image_url;
+  const scanId = existing.scan_id;
+
+  const { data: removed, error: deleteError } = await supabaseAdmin
+    .from("a4_draft_games")
+    .delete()
+    .eq("id", id)
+    .eq("is_verified", false)
+    .select("id");
+
+  if (deleteError || !removed?.length) {
+    return Response.json(
+      {
+        error: deleteError
+          ? `Draft se nepodařilo smazat. ${deleteError.message}`
+          : "Draft mezitím schválil někdo jiný.",
+      },
+      { status: deleteError ? 500 : 409 },
+    );
+  }
+
+  let imageWarning: string | null = null;
+  const objectPath = objectPathFromCardUrl(cardImageUrl);
+  if (objectPath) {
+    const { error: storageError } = await supabaseAdmin.storage
+      .from("scans")
+      .remove([objectPath]);
+    if (storageError) {
+      imageWarning = storageError.message;
+    }
+  }
+
+  const { count, error: countError } = await supabaseAdmin
+    .from("a4_draft_games")
+    .select("id", { count: "exact", head: true })
+    .eq("scan_id", scanId);
+
+  if (!countError && count === 0) {
+    await supabaseAdmin.from("a4_scans").delete().eq("id", scanId);
+  }
+
+  return Response.json({
+    ok: true,
+    image_deleted: Boolean(objectPath) && !imageWarning,
+    image_warning: imageWarning,
+  });
+}

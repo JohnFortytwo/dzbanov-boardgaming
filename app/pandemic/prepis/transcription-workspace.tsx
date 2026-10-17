@@ -59,7 +59,8 @@ export function TranscriptionWorkspace() {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [pending, setPending] = useState<null | "approve" | "reject">(null);
+  const saving = pending !== null;
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -174,7 +175,7 @@ export function TranscriptionWorkspace() {
       return;
     }
 
-    setSaving(true);
+    setPending("approve");
     setFormErrors([]);
     setNotice(null);
 
@@ -190,21 +191,67 @@ export function TranscriptionWorkspace() {
         return;
       }
 
-      const nextDrafts = drafts.filter((item) => item.id !== draft.id);
-      setDrafts(nextDrafts);
-      setEdits((current) => {
-        const remaining = { ...current };
-        delete remaining[draft.id];
-        return remaining;
-      });
-      setIndex((current) =>
-        nextDrafts.length === 0 ? 0 : Math.min(current, nextDrafts.length - 1),
-      );
+      dropDraft(draft.id);
       setNotice("Hra je schválená a uložená v databázi.");
     } catch {
       setFormErrors(["Uložení se nepodařilo. Zkuste to znovu."]);
     } finally {
-      setSaving(false);
+      setPending(null);
+    }
+  }
+
+  function dropDraft(id: string) {
+    const nextDrafts = drafts.filter((item) => item.id !== id);
+    setDrafts(nextDrafts);
+    setEdits((current) => {
+      const remaining = { ...current };
+      delete remaining[id];
+      return remaining;
+    });
+    setIndex((current) =>
+      nextDrafts.length === 0 ? 0 : Math.min(current, nextDrafts.length - 1),
+    );
+  }
+
+  async function reject() {
+    if (!draft || saving) return;
+    const confirmed = window.confirm(
+      "Tahle karta se do databáze nezapíše. Draft i výstřižek se smažou. Pokračovat?",
+    );
+    if (!confirmed) return;
+
+    setPending("reject");
+    setFormErrors([]);
+    setNotice(null);
+
+    try {
+      const response = await fetch("/api/pandemic/drafts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: draft.id }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        image_deleted?: boolean;
+        image_warning?: string | null;
+      };
+      if (!response.ok) {
+        setFormErrors([payload.error ?? "Hru se nepodařilo smazat."]);
+        return;
+      }
+
+      dropDraft(draft.id);
+      setNotice(
+        payload.image_warning
+          ? "Hra byla zamítnuta a smazána z přepisu. Výstřižek v úložišti se nepodařilo odstranit."
+          : payload.image_deleted
+            ? "Hra byla zamítnuta a smazána včetně výstřižku."
+            : "Hra byla zamítnuta a smazána z přepisu.",
+      );
+    } catch {
+      setFormErrors(["Hru se nepodařilo smazat. Zkuste to znovu."]);
+    } finally {
+      setPending(null);
     }
   }
 
@@ -224,6 +271,7 @@ export function TranscriptionWorkspace() {
           index={index}
           gameOrder={null}
           saving={saving}
+          pending={pending}
           onPrevious={() => {
             setIndex((current) => Math.max(0, current - 1));
             setFormErrors([]);
@@ -235,6 +283,7 @@ export function TranscriptionWorkspace() {
             setNotice(null);
           }}
           onApprove={() => void approve()}
+          onReject={() => void reject()}
         />
       ) : null}
 
@@ -256,7 +305,7 @@ export function TranscriptionWorkspace() {
 
       {!loading && !loadError && drafts.length === 0 ? (
         <article className="rounded-3xl border border-white/10 bg-white/5 p-8 text-sm leading-6 text-zinc-400 backdrop-blur-xl sm:p-10">
-          Všechny naskenované hry jsou schválené. Nové drafty se tady objeví po
+          Ve frontě už není žádná hra k přepisu. Nové drafty se tady objeví po
           zpracování dalšího A4 skenu.
         </article>
       ) : null}
@@ -560,6 +609,7 @@ export function TranscriptionWorkspace() {
             index={index}
             gameOrder={draft.game_order}
             saving={saving}
+            pending={pending}
             onPrevious={() => {
               setIndex((current) => Math.max(0, current - 1));
               setFormErrors([]);
@@ -571,6 +621,7 @@ export function TranscriptionWorkspace() {
               setNotice(null);
             }}
             onApprove={() => void approve()}
+            onReject={() => void reject()}
           />
         </form>
       ) : null}
@@ -584,18 +635,22 @@ function DraftToolbar({
   index,
   gameOrder,
   saving,
+  pending,
   onPrevious,
   onNext,
   onApprove,
+  onReject,
 }: {
   loading: boolean;
   count: number;
   index: number;
   gameOrder: number | null;
   saving: boolean;
+  pending: null | "approve" | "reject";
   onPrevious: () => void;
   onNext: () => void;
   onApprove: () => void;
+  onReject: () => void;
 }) {
   const hasDraft = gameOrder !== null;
 
@@ -642,7 +697,16 @@ function DraftToolbar({
           tabIndex={skipTab}
           className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {saving ? "Ukládám…" : "Schválit a uložit do databáze"}
+          {pending === "approve" ? "Ukládám…" : "Schválit a uložit do databáze"}
+        </button>
+        <button
+          type="button"
+          onClick={onReject}
+          disabled={!hasDraft || saving}
+          tabIndex={skipTab}
+          className="inline-flex h-9 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 px-5 text-sm font-semibold text-red-200 transition hover:border-red-300/50 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {pending === "reject" ? "Mažu…" : "Zamítnout a smazat"}
         </button>
       </div>
     </section>
