@@ -83,6 +83,41 @@ const cardBoxes = {
   diseases: { x: 32, y: 50, w: 68, h: 50 },
 } as const satisfies Record<string, CropBox>;
 
+const CROP_OFFSET_KEY = "prepis-crop-offset";
+const CROP_OFFSET_LIMIT = 50;
+
+function clampCropOffset(value: number) {
+  return Math.max(-CROP_OFFSET_LIMIT, Math.min(CROP_OFFSET_LIMIT, Math.round(value)));
+}
+
+function readStoredCropOffset() {
+  try {
+    const raw = sessionStorage.getItem(CROP_OFFSET_KEY);
+    if (!raw) return { x: 0, y: 0 };
+    const parsed = JSON.parse(raw) as { x?: unknown; y?: unknown };
+    const x = typeof parsed.x === "number" ? parsed.x : Number(parsed.x);
+    const y = typeof parsed.y === "number" ? parsed.y : Number(parsed.y);
+    return {
+      x: Number.isFinite(x) ? clampCropOffset(x) : 0,
+      y: Number.isFinite(y) ? clampCropOffset(y) : 0,
+    };
+  } catch {
+    return { x: 0, y: 0 };
+  }
+}
+
+function storeCropOffset(offset: { x: number; y: number }) {
+  try {
+    sessionStorage.setItem(CROP_OFFSET_KEY, JSON.stringify(offset));
+  } catch {
+    // Posun zůstane v otevřeném formuláři i bez uložení do prohlížeče.
+  }
+}
+
+function shiftCrop(box: CropBox, offset: { x: number; y: number }): CropBox {
+  return { ...box, x: box.x + offset.x, y: box.y + offset.y };
+}
+
 export function TranscriptionWorkspace() {
   const [draft, setDraft] = useState<DraftGame | null>(null);
   const [catalogs, setCatalogs] = useState<PandemicCatalogs>(emptyCatalogs);
@@ -97,6 +132,10 @@ export function TranscriptionWorkspace() {
   const saving = pending !== null;
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
+  const [offsetX, setOffsetX] = useState("0");
+  const [offsetY, setOffsetY] = useState("0");
+  const [offsetError, setOffsetError] = useState<string | null>(null);
   const draftIdRef = useRef<string | null>(null);
   draftIdRef.current = draft?.id ?? null;
 
@@ -117,6 +156,13 @@ export function TranscriptionWorkspace() {
     }
     applyQueue(payload);
   }
+
+  useEffect(() => {
+    const stored = readStoredCropOffset();
+    setCropOffset(stored);
+    setOffsetX(String(stored.x));
+    setOffsetY(String(stored.y));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -185,6 +231,40 @@ export function TranscriptionWorkspace() {
   const form = draft
     ? (edits[draft.id] ?? presentDraft(draft.draft_data, catalogs))
     : emptyDraftData();
+  const cropBoxes = {
+    date: shiftCrop(cardBoxes.date, cropOffset),
+    outcome: shiftCrop(cardBoxes.outcome, cropOffset),
+    players: shiftCrop(cardBoxes.players, cropOffset),
+    diseases: shiftCrop(cardBoxes.diseases, cropOffset),
+  };
+
+  function applyCropOffset() {
+    const x = Number(offsetX.trim().replace(",", "."));
+    const y = Number(offsetY.trim().replace(",", "."));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      setOffsetError("X a Y zadejte jako číslo, třeba -15 nebo 10.");
+      return;
+    }
+    if (Math.abs(x) > CROP_OFFSET_LIMIT || Math.abs(y) > CROP_OFFSET_LIMIT) {
+      setOffsetError(`Posun může být od -${CROP_OFFSET_LIMIT} do ${CROP_OFFSET_LIMIT}.`);
+      return;
+    }
+    const next = { x: clampCropOffset(x), y: clampCropOffset(y) };
+    setCropOffset(next);
+    setOffsetX(String(next.x));
+    setOffsetY(String(next.y));
+    setOffsetError(null);
+    storeCropOffset(next);
+  }
+
+  function resetCropOffset() {
+    const next = { x: 0, y: 0 };
+    setCropOffset(next);
+    setOffsetX("0");
+    setOffsetY("0");
+    setOffsetError(null);
+    storeCropOffset(next);
+  }
 
   function patchForm(recipe: (current: DraftData) => DraftData) {
     if (!draft) return;
@@ -373,6 +453,16 @@ export function TranscriptionWorkspace() {
         Zpět na Pandemic
       </Link>
 
+      <CropOffsetBar
+        offsetX={offsetX}
+        offsetY={offsetY}
+        error={offsetError}
+        onOffsetX={setOffsetX}
+        onOffsetY={setOffsetY}
+        onApply={applyCropOffset}
+        onReset={resetCropOffset}
+      />
+
       {!draft ? (
         <DraftToolbar
           loading={loading}
@@ -425,7 +515,7 @@ export function TranscriptionWorkspace() {
           <SectionBlock
             title="Datum"
             src={form.card_image_url}
-            box={cardBoxes.date}
+            box={cropBoxes.date}
             alt={`Datum na kartě hry ${draft.game_order}`}
           >
             <Field label="Datum">
@@ -443,7 +533,7 @@ export function TranscriptionWorkspace() {
           <SectionBlock
             title="Výsledek, obtížnost a režim"
             src={form.card_image_url}
-            box={cardBoxes.outcome}
+            box={cropBoxes.outcome}
             alt={`Výsledek a obtížnost na kartě hry ${draft.game_order}`}
           >
             <CodeSelect
@@ -478,7 +568,7 @@ export function TranscriptionWorkspace() {
           <SectionBlock
             title="Hráči a role"
             src={form.card_image_url}
-            box={cardBoxes.players}
+            box={cropBoxes.players}
             alt={`Hráči a role na kartě hry ${draft.game_order}`}
           >
             {catalogs.players.length === 0 ? (
@@ -633,7 +723,7 @@ export function TranscriptionWorkspace() {
           <SectionBlock
             title="Stavy nemocí a kmen"
             src={form.card_image_url}
-            box={cardBoxes.diseases}
+            box={cropBoxes.diseases}
             alt={`Stavy nemocí na kartě hry ${draft.game_order}`}
           >
             <div className="grid gap-4 sm:grid-cols-2">
@@ -724,6 +814,78 @@ export function TranscriptionWorkspace() {
         </form>
       ) : null}
     </main>
+  );
+}
+
+function CropOffsetBar({
+  offsetX,
+  offsetY,
+  error,
+  onOffsetX,
+  onOffsetY,
+  onApply,
+  onReset,
+}: {
+  offsetX: string;
+  offsetY: string;
+  error: string | null;
+  onOffsetX: (value: string) => void;
+  onOffsetY: (value: string) => void;
+  onApply: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <section className="mb-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <p className="pb-2 text-xs font-medium uppercase tracking-[0.18em] text-emerald-400/85">
+          Posun výřezů
+        </p>
+        <label className="flex items-center gap-2 text-sm text-zinc-300">
+          X
+          <input
+            type="number"
+            inputMode="numeric"
+            value={offsetX}
+            onChange={(event) => onOffsetX(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") onApply();
+            }}
+            className="h-9 w-20 rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-zinc-300">
+          Y
+          <input
+            type="number"
+            inputMode="numeric"
+            value={offsetY}
+            onChange={(event) => onOffsetY(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") onApply();
+            }}
+            className="h-9 w-20 rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={onApply}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-emerald-500 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
+        >
+          Zobrazit
+        </button>
+        <button
+          type="button"
+          onClick={onReset}
+          className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white"
+        >
+          Reset
+        </button>
+      </div>
+      <p className="mt-2 text-xs text-zinc-500">
+        Kladné X posune výřez doprava, kladné Y dolů. Posun zůstane i na další kartě.
+        {error ? <span className="mt-1 block text-red-300">{error}</span> : null}
+      </p>
+    </section>
   );
 }
 

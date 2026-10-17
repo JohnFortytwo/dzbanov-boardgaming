@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BrandLogo } from "@/app/components/brand-logo";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
 import { ResetAchievementsButton } from "@/app/components/ResetAchievementsButton";
 import { SignedInUser } from "@/app/components/SignedInUser";
@@ -67,8 +68,8 @@ async function BoardgamingHome() {
         <p className="mb-5 text-xs font-medium uppercase tracking-[0.28em] text-emerald-400/85">
           Herní ekosystém
         </p>
-        <h1 className="text-center text-4xl font-semibold tracking-tight text-white sm:text-6xl md:text-7xl">
-          Džbánov Boardgaming
+        <h1 className="w-full max-w-2xl">
+          <BrandLogo variant="hero" priority />
         </h1>
         <p className="mt-6 max-w-2xl text-center text-lg leading-8 text-zinc-400 sm:text-xl">
           Ekosystém pro evidenci, analýzu a digitalizaci herních výsledků

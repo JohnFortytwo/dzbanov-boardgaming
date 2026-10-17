@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
+import { BrandLogo } from "@/app/components/brand-logo";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { logout } from "@/app/login/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -44,11 +45,8 @@ async function PandemicChrome({ children }: { children: ReactNode }) {
       </div>
 
       <header className="relative z-10 flex flex-wrap items-start justify-between gap-4 px-6 pt-6">
-        <Link
-          href="/"
-          className="text-sm font-medium text-zinc-400 transition hover:text-white"
-        >
-          Džbánov Boardgaming
+        <Link href="/" className="inline-flex shrink-0 rounded-md transition hover:opacity-80">
+          <BrandLogo variant="header" />
         </Link>
         <div className="flex flex-col items-end gap-2">
           <SignedInUser email={email} />

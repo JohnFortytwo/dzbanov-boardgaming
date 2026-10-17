@@ -73,9 +73,9 @@ export function SignedInUser({ email }: { email: string }) {
             src={badge.src}
             alt={badge.label}
             title={badge.label}
-            width={20}
-            height={20}
-            className="h-5 w-5 rounded-full object-cover"
+            width={30}
+            height={30}
+            className="size-[30px] rounded-full object-cover"
           />
           <span
             role="tooltip"
