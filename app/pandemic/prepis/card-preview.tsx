@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { resolveScanImageUrl } from "@/lib/pandemic/scan-image";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -28,8 +29,16 @@ export function CardPreview({
   const scaleRef = useRef(1);
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const url = resolveScanImageUrl(src);
   const [open, setOpen] = useState(false);
-  const [broken, setBroken] = useState(false);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const broken = Boolean(url) && failedUrl === url;
+
+  function markBroken() {
+    console.error("Výstřižek se nepodařilo načíst:", url);
+    if (url) setFailedUrl(url);
+    setOpen(false);
+  }
 
   function setZoom(next: number) {
     const clamped = clamp(Number(next.toFixed(2)), MIN_SCALE, MAX_SCALE);
@@ -50,7 +59,7 @@ export function CardPreview({
 
     node.addEventListener("wheel", onWheel, { passive: false });
     return () => node.removeEventListener("wheel", onWheel);
-  }, [src, broken]);
+  }, [url, broken]);
 
   useEffect(() => {
     if (!open) return;
@@ -89,7 +98,7 @@ export function CardPreview({
               type="button"
               tabIndex={-1}
               onClick={() => zoomBy(-0.25)}
-              disabled={!src || broken || scale <= MIN_SCALE}
+              disabled={!url || broken || scale <= MIN_SCALE}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               Zmenšit
@@ -101,7 +110,7 @@ export function CardPreview({
               type="button"
               tabIndex={-1}
               onClick={() => zoomBy(0.25)}
-              disabled={!src || broken || scale >= MAX_SCALE}
+              disabled={!url || broken || scale >= MAX_SCALE}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               Zvětšit
@@ -110,7 +119,7 @@ export function CardPreview({
               type="button"
               tabIndex={-1}
               onClick={resetZoom}
-              disabled={!src || broken || (scale === 1 && pan.x === 0 && pan.y === 0)}
+              disabled={!url || broken || (scale === 1 && pan.x === 0 && pan.y === 0)}
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               100 %
@@ -122,7 +131,7 @@ export function CardPreview({
           ref={frameRef}
           className="relative flex flex-1 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/70"
           onPointerDown={(event) => {
-            if (!src || broken || event.button !== 0) return;
+            if (!url || broken || event.button !== 0) return;
             dragRef.current = {
               pointerId: event.pointerId,
               startX: event.clientX,
@@ -144,18 +153,18 @@ export function CardPreview({
           onPointerUp={() => {
             const drag = dragRef.current;
             dragRef.current = null;
-            if (!drag || drag.moved || !src || broken) return;
+            if (!drag || drag.moved || !url || broken) return;
             setOpen(true);
           }}
         >
-          {src && !broken ? (
+          {url && !broken ? (
             // Full-resolution scan: CSS zoom needs the original bitmap, not a resized optimizer output.
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={src}
+              src={url}
               alt={alt}
               draggable={false}
-              onError={() => setBroken(true)}
+              onError={markBroken}
               style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})` }}
               className={`max-h-full max-w-full select-none object-contain ${
                 scale > 1 ? "cursor-grab" : "cursor-zoom-in"
@@ -172,7 +181,7 @@ export function CardPreview({
         </p>
       </div>
 
-      {open && src && !broken ? (
+      {open && url && !broken ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/90 p-4 backdrop-blur-sm"
           role="dialog"
@@ -190,10 +199,11 @@ export function CardPreview({
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={src}
+            src={url}
             alt={alt}
             className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)]"
             onClick={(event) => event.stopPropagation()}
+            onError={markBroken}
           />
         </div>
       ) : null}

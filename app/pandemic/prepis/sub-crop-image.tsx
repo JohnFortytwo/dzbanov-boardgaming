@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { resolveScanImageUrl } from "@/lib/pandemic/scan-image";
 
 export type CropBox = {
   x: number;
@@ -18,12 +19,15 @@ export function SubCropImage({
   box: CropBox;
   alt: string;
 }) {
-  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
-  const [broken, setBroken] = useState(false);
+  const url = resolveScanImageUrl(src);
+  const [natural, setNatural] = useState<{ url: string; width: number; height: number } | null>(null);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const broken = Boolean(url) && failedUrl === url;
+  const size = natural?.url === url ? natural : null;
   const width = box.w > 0 ? box.w : 1;
   const height = box.h > 0 ? box.h : 1;
-  const aspectRatio = natural
-    ? (natural.width * width) / (natural.height * height)
+  const aspectRatio = size
+    ? (size.width * width) / (size.height * height)
     : width / height;
 
   return (
@@ -31,18 +35,21 @@ export function SubCropImage({
       className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/70"
       style={{ aspectRatio }}
     >
-      {src && !broken ? (
+      {url && !broken ? (
         // The crop is a CSS transform of the original scan, so the bitmap must stay unresized.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={src}
+          src={url}
           alt={alt}
           draggable={false}
           onLoad={(event) => {
             const image = event.currentTarget;
-            setNatural({ width: image.naturalWidth, height: image.naturalHeight });
+            setNatural({ url, width: image.naturalWidth, height: image.naturalHeight });
           }}
-          onError={() => setBroken(true)}
+          onError={() => {
+            console.error("Výstřižek se nepodařilo načíst:", url);
+            setFailedUrl(url);
+          }}
           className="absolute top-0 left-0 h-full w-full max-w-none origin-top-left"
           style={{
             transform: `scale(${100 / width}, ${100 / height}) translate(${-box.x}%, ${-box.y}%)`,
