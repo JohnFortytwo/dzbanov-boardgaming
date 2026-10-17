@@ -137,47 +137,54 @@ def extract_card_ocr(img: Image.Image) -> dict:
             break
     return {}
 
+def upload_card_to_storage(card_filename: str, card_bytes: bytes) -> str:
+    """Nahraje výstřižek do veřejného bucketu scans a vrátí jeho HTTPS URL."""
+    bucket = "scans"
+    try:
+        supabase.storage.from_(bucket).upload(
+            path=card_filename,
+            file=card_bytes,
+            file_options={"content-type": "image/png", "upsert": "true"},
+        )
+        public_url = str(supabase.storage.from_(bucket).get_public_url(card_filename)).strip().rstrip("?")
+    except Exception as error:
+        print(
+            f"  [Chyba] Nahrání výstřižku '{card_filename}' do Supabase Storage bucketu '{bucket}' selhalo: {error}"
+        )
+        raise
+
+    if not public_url.startswith("https://"):
+        print(
+            f"  [Chyba] Veřejná URL výstřižku '{card_filename}' není platná HTTPS adresa: {public_url!r}"
+        )
+        raise RuntimeError(f"Neplatná veřejná URL pro '{card_filename}': {public_url!r}")
+
+    return public_url
+
 def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: int = 1):
     """
     1. Vytvoří záznam v a4_scans
     2. Rozřeže A4 na 10 karet v mřížce 2x5
-    3. Uloží ořezané obrázky do public/scans/
+    3. Nahraje výstřižky do Supabase Storage bucketu scans
     4. Projde každou kartu přes Gemini OCR
-    5. Vytvoří předvyplněné drafty v a4_draft_games
+    5. Vytvoří předvyplněné drafty v a4_draft_games s plnou HTTPS URL
     """
-    output_dir = os.path.join("public", "scans")
-    os.makedirs(output_dir, exist_ok=True)
-
     scan_record = supabase.table("a4_scans").insert({
         "file_path": file_path,
         "page_number": page_number,
         "status": "PENDING"
     }).execute().data[0]
-    
+
     scan_id = scan_record["id"]
     cards = crop_a4_into_10_game_cards(file_bytes)
-    
+
     draft_records = []
-    
+
     for index, card_bytes in enumerate(cards, start=1):
         card_filename = f"{scan_id}_{index}.png"
-        
-        # 1. Volitelně uložení zálohy lokálně (můžeš nechat nebo zakomentovat)
-        card_path = os.path.join(output_dir, card_filename)
         img = Image.open(io.BytesIO(card_bytes))
-        img.save(card_path, "PNG")
-
-        # 2. Nahrání do Supabase Storage bucketu 'scans'
-        try:
-            supabase.storage.from_("scans").upload(
-                path=card_filename,
-                file=card_bytes,
-                file_options={"content-type": "image/png", "x-upsert": "true"}
-            )
-            card_image_url = supabase.storage.from_("scans").get_public_url(card_filename)
-        except Exception as e:
-            print(f"  [Varování] Nepodařilo se nahradit obrázek v Storage: {e}")
-            card_image_url = f"/scans/{card_filename}" # fallback na lokální cestu
+        img.load()
+        card_image_url = upload_card_to_storage(card_filename, card_bytes)
         
         print(f"  -> Zpracovávám kartu {index}/10 přes Gemini OCR...")
         ocr_data = extract_card_ocr(img)

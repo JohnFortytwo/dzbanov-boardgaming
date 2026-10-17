@@ -2,7 +2,6 @@ import sys
 import os
 import shutil
 import pypdf
-from PIL import Image
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -10,6 +9,7 @@ from services.scan_processor import process_and_store_a4_scan
 
 UPLOAD_DIR = "scan_upload"
 USED_DIR = "scan_used"
+BATCH_LIMIT = 5
 
 def process_single_pdf(pdf_path: str):
     """Zpracuje jeden PDF soubor stránku po stránce."""
@@ -21,22 +21,28 @@ def process_single_pdf(pdf_path: str):
     total_pages = len(reader.pages)
     print(f"\n--- Načítám PDF: {os.path.basename(pdf_path)} ({total_pages} stránek) ---")
 
+    stored_pages = 0
     for page_idx, page in enumerate(reader.pages, start=1):
         print(f"Zpracovávám stránku {page_idx}/{total_pages}...")
-        for image_file_object in page.images:
+        page_images = list(page.images)
+        if not page_images:
+            print(f"  [Chyba] Stránka {page_idx} neobsahuje žádný obrázek skenu.")
+            return False
+        for image_file_object in page_images:
             image_bytes = image_file_object.data
-            
+
             scan_id = process_and_store_a4_scan(
                 file_bytes=image_bytes,
                 file_path=f"{os.path.basename(pdf_path)}#page={page_idx}",
                 page_number=page_idx
             )
+            stored_pages += 1
             print(f"  -> Stránka {page_idx} úspěšně uložena s scan_id: {scan_id}")
-    
-    return True
 
-def process_batch(limit: int = 5):
-    """Projde složku scan_upload, zpracuje max 'limit' PDF souborů a přesune je do scan_used."""
+    return stored_pages > 0
+
+def process_batch(limit: int = BATCH_LIMIT):
+    """Projde složku scan_upload, zpracuje nejvýš 5 PDF a hotové přesune do scan_used."""
     if not os.path.exists(UPLOAD_DIR):
         print(f"Složka '{UPLOAD_DIR}' neexistuje!")
         return
@@ -58,12 +64,23 @@ def process_batch(limit: int = 5):
         dst_path = os.path.join(USED_DIR, filename)
 
         print(f"\n[{index}/{len(batch_to_process)}] Dávkový zpracovatel: {filename}")
-        
-        success = process_single_pdf(src_path)
-        
-        if success:
-            shutil.move(src_path, dst_path)
-            print(f"  -> Přesunuto do '{USED_DIR}/{filename}'")
+
+        try:
+            success = process_single_pdf(src_path)
+        except Exception as error:
+            print(
+                f"  [Chyba] PDF '{filename}' se nepodařilo zpracovat a zůstává ve složce '{UPLOAD_DIR}': {error}"
+            )
+            continue
+
+        if not success:
+            print(
+                f"  [Chyba] PDF '{filename}' nebylo dokončeno a zůstává ve složce '{UPLOAD_DIR}'."
+            )
+            continue
+
+        shutil.move(src_path, dst_path)
+        print(f"  -> Přesunuto do '{USED_DIR}/{filename}'")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -73,4 +90,4 @@ if __name__ == "__main__":
         else:
             print(f"Předaný argument '{target}' není platný soubor.")
     else:
-        process_batch(limit=5)
+        process_batch(limit=BATCH_LIMIT)
