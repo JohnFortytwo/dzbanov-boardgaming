@@ -9,7 +9,7 @@ from services.scan_processor import process_and_store_a4_scan
 
 UPLOAD_DIR = "scan_upload"
 USED_DIR = "scan_used"
-BATCH_LIMIT = 5
+BATCH_LIMIT = 3
 
 def process_single_pdf(pdf_path: str):
     """Zpracuje jeden PDF soubor stránku po stránce."""
@@ -42,7 +42,7 @@ def process_single_pdf(pdf_path: str):
     return stored_pages > 0
 
 def process_batch(limit: int = BATCH_LIMIT):
-    """Projde složku scan_upload, zpracuje nejvýš 5 PDF a hotové přesune do scan_used."""
+    """Projde složku scan_upload, zpracuje nejvýš 3 PDF a hotové přesune do scan_used."""
     if not os.path.exists(UPLOAD_DIR):
         print(f"Složka '{UPLOAD_DIR}' neexistuje!")
         return
