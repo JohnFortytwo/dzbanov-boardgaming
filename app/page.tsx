@@ -5,6 +5,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
 import { ResetAchievementsButton } from "@/app/components/ResetAchievementsButton";
 import { SignedInUser } from "@/app/components/SignedInUser";
+import { UserManual } from "@/app/components/UserManual";
 import { logout } from "@/app/login/actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,6 +48,7 @@ async function BoardgamingHome() {
         <SignedInUser email={email} />
         <div className="flex flex-wrap items-center justify-end gap-2">
           <ResetAchievementsButton />
+          <UserManual />
           <Link
             href="/password"
             className="inline-flex items-center rounded-full border border-emerald-400/30 bg-transparent px-4 py-2 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10 hover:text-emerald-200"
