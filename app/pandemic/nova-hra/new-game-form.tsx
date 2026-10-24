@@ -15,6 +15,7 @@ import {
 import {
   emptyDraftData,
   emptyPlayer,
+  foldCode,
   modeAllowsPurple,
   modeAllowsVirulentStrain,
   prepareDraft,
@@ -24,6 +25,21 @@ import {
   type PandemicCatalogs,
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
+
+const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
+
+const addRowClassName =
+  "inline-flex h-10 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.95)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-zinc-500 disabled:shadow-none";
+
+function sortPlayers(players: PlayerOption[]) {
+  const rank = new Map(PLAYER_PRIORITY.map((name, index) => [foldCode(name), index]));
+  return [...players].sort((left, right) => {
+    const leftRank = rank.get(foldCode(left.name)) ?? PLAYER_PRIORITY.length;
+    const rightRank = rank.get(foldCode(right.name)) ?? PLAYER_PRIORITY.length;
+    if (leftRank !== rightRank) return leftRank - rightRank;
+    return left.name.localeCompare(right.name, "cs");
+  });
+}
 
 function pragueToday() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -72,7 +88,10 @@ function playersInGame(form: DraftData, players: PlayerOption[]) {
 }
 
 export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicCatalogs }) {
-  const [catalogs, setCatalogs] = useState(initialCatalogs);
+  const [catalogs, setCatalogs] = useState(() => ({
+    ...initialCatalogs,
+    players: sortPlayers(initialCatalogs.players),
+  }));
   const [form, setForm] = useState<DraftData>(freshForm);
   const [errors, setErrors] = useState<string[]>([]);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -101,9 +120,8 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
     }
     setCatalogs((current) => ({
       ...current,
-      players: sortByName(
+      players: sortPlayers(
         [...current.players.filter((item) => item.id !== player.id), player],
-        (item) => item.name,
       ),
     }));
   }
@@ -270,7 +288,7 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
                   players: [...form.players, emptyPlayer(form.players.length + 1)],
                 })
               }
-              className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className={addRowClassName}
             >
               Přidat hráče
             </button>
@@ -356,7 +374,7 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
                     ],
                   })
                 }
-                className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+                className={addRowClassName}
               >
                 Přidat změnu role
               </button>

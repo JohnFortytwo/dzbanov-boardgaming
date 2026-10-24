@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createClient } from "@supabase/supabase-js";
 import type { CodeLabel, PandemicCatalogs, PlayerOption } from "@/lib/pandemic/drafts";
 
 const CODE_TABLES = [
@@ -10,13 +10,34 @@ const CODE_TABLES = [
   ["virulent_strain_colors", "virulentStrainColors"],
 ] as const;
 
-async function loadCodes(table: (typeof CODE_TABLES)[number][0]): Promise<CodeLabel[]> {
-  const { data, error } = await supabaseAdmin
+function catalogClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Chybí přístup k číselníkům.");
+  }
+
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
+  });
+}
+
+async function loadCodes(
+  supabase: ReturnType<typeof catalogClient>,
+  table: (typeof CODE_TABLES)[number][0],
+): Promise<CodeLabel[]> {
+  const { data, error } = await supabase
     .from(table)
     .select("code, name_cs")
     .order("name_cs", { ascending: true });
 
-  if (error || !data) return [];
+  if (error) {
+    throw new Error(`Číselník ${table} se nepodařilo načíst. ${error.message}`);
+  }
+  if (!data) return [];
 
   return data.flatMap((row) => {
     const code = typeof row.code === "string" ? row.code.trim() : "";
@@ -28,10 +49,15 @@ async function loadCodes(table: (typeof CODE_TABLES)[number][0]): Promise<CodeLa
 }
 
 export async function loadPandemicCatalogs(): Promise<PandemicCatalogs> {
-  const { data: playerRows } = await supabaseAdmin
+  const supabase = catalogClient();
+  const { data: playerRows, error: playerError } = await supabase
     .from("players")
     .select("id, name")
     .order("name", { ascending: true });
+
+  if (playerError) {
+    throw new Error(`Seznam hráčů se nepodařilo načíst. ${playerError.message}`);
+  }
 
   const players: PlayerOption[] = (playerRows ?? []).flatMap((row) => {
     const id = typeof row.id === "string" ? row.id : "";
@@ -41,7 +67,7 @@ export async function loadPandemicCatalogs(): Promise<PandemicCatalogs> {
   });
 
   const codeLists = await Promise.all(
-    CODE_TABLES.map(async ([table, key]) => [key, await loadCodes(table)] as const),
+    CODE_TABLES.map(async ([table, key]) => [key, await loadCodes(supabase, table)] as const),
   );
 
   const catalogs: PandemicCatalogs = {
