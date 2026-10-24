@@ -27,9 +27,24 @@ import {
 } from "@/lib/pandemic/drafts";
 
 const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
+const ROLE_SINK = ["bio", "lokál", "pilot", "rejža", "vir"];
 
 const addRowClassName =
   "inline-flex h-10 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.95)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-zinc-500 disabled:shadow-none";
+
+function sortRoles(roles: CodeLabel[]) {
+  const rank = new Map(ROLE_SINK.map((code, index) => [foldCode(code), index]));
+  return [...roles].sort((left, right) => {
+    const leftRank = rank.get(foldCode(left.code));
+    const rightRank = rank.get(foldCode(right.code));
+    if (leftRank === undefined && rightRank === undefined) {
+      return left.name_cs.localeCompare(right.name_cs, "cs");
+    }
+    if (leftRank === undefined) return -1;
+    if (rightRank === undefined) return 1;
+    return leftRank - rightRank;
+  });
+}
 
 function sortPlayers(players: PlayerOption[]) {
   const rank = new Map(PLAYER_PRIORITY.map((name, index) => [foldCode(name), index]));
@@ -56,10 +71,6 @@ function freshForm(): DraftData {
     played_at: pragueToday(),
     players: [emptyPlayer(1), emptyPlayer(2)],
   };
-}
-
-function sortByName<T>(items: T[], label: (item: T) => string) {
-  return [...items].sort((left, right) => label(left).localeCompare(label(right), "cs"));
 }
 
 async function postCatalog(url: string, body: { name: string }) {
@@ -91,6 +102,7 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
   const [catalogs, setCatalogs] = useState(() => ({
     ...initialCatalogs,
     players: sortPlayers(initialCatalogs.players),
+    roles: sortRoles(initialCatalogs.roles),
   }));
   const [form, setForm] = useState<DraftData>(freshForm);
   const [errors, setErrors] = useState<string[]>([]);
@@ -134,10 +146,7 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
     }
     setCatalogs((current) => ({
       ...current,
-      roles: sortByName(
-        [...current.roles.filter((item) => item.code !== role.code), role],
-        (item) => item.name_cs,
-      ),
+      roles: sortRoles([...current.roles.filter((item) => item.code !== role.code), role]),
     }));
   }
 

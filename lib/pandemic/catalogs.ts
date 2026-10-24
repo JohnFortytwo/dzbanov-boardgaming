@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient as createAdminClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import type { CodeLabel, PandemicCatalogs, PlayerOption } from "@/lib/pandemic/drafts";
 
 const CODE_TABLES = [
@@ -10,14 +11,12 @@ const CODE_TABLES = [
   ["virulent_strain_colors", "virulentStrainColors"],
 ] as const;
 
-function catalogClient() {
+function serviceRoleClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("Chybí přístup k číselníkům.");
-  }
+  if (!url || !key) return null;
 
-  return createClient(url, key, {
+  return createAdminClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
@@ -26,7 +25,7 @@ function catalogClient() {
 }
 
 async function loadCodes(
-  supabase: ReturnType<typeof catalogClient>,
+  supabase: SupabaseClient,
   table: (typeof CODE_TABLES)[number][0],
 ): Promise<CodeLabel[]> {
   const { data, error } = await supabase
@@ -48,8 +47,7 @@ async function loadCodes(
   });
 }
 
-export async function loadPandemicCatalogs(): Promise<PandemicCatalogs> {
-  const supabase = catalogClient();
+async function readCatalogs(supabase: SupabaseClient): Promise<PandemicCatalogs> {
   const { data: playerRows, error: playerError } = await supabase
     .from("players")
     .select("id, name")
@@ -85,4 +83,23 @@ export async function loadPandemicCatalogs(): Promise<PandemicCatalogs> {
   }
 
   return catalogs;
+}
+
+function codesMissing(catalogs: PandemicCatalogs) {
+  return (
+    catalogs.difficulties.length === 0 ||
+    catalogs.gameResults.length === 0 ||
+    catalogs.diseaseStates.length === 0 ||
+    catalogs.gameModes.length === 0 ||
+    catalogs.virulentStrainColors.length === 0
+  );
+}
+
+export async function loadPandemicCatalogs(): Promise<PandemicCatalogs> {
+  const catalogs = await readCatalogs(await createClient());
+  if (!codesMissing(catalogs)) return catalogs;
+
+  const admin = serviceRoleClient();
+  if (!admin) return catalogs;
+  return readCatalogs(admin);
 }
