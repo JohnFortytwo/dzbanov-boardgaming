@@ -1,28 +1,15 @@
 // app/api/pandemic/drafts/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { loadPandemicCatalogs } from "@/lib/pandemic/catalogs";
 import {
   assertOwnLock,
   claimDraftAfter,
   DraftQueueError,
   openDraftQueue,
 } from "@/lib/pandemic/draft-queue";
-import {
-  normalizeDraftData,
-  prepareDraft,
-  type CodeLabel,
-  type PandemicCatalogs,
-  type PlayerOption,
-} from "@/lib/pandemic/drafts";
-
-const CODE_TABLES = [
-  ["roles", "roles"],
-  ["difficulties", "difficulties"],
-  ["game_results", "gameResults"],
-  ["disease_states", "diseaseStates"],
-  ["game_modes", "gameModes"],
-  ["virulent_strain_colors", "virulentStrainColors"],
-] as const;
+import { normalizeDraftData, prepareDraft } from "@/lib/pandemic/drafts";
+import { savePandemicGame, SCAN_GAME_SOURCE } from "@/lib/pandemic/save-game";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -62,84 +49,17 @@ async function nextQueue(userId: string, createdAt: string, gameOrder: number) {
   }
 }
 
-async function loadCodes(
-  supabase: typeof supabaseAdmin,
-  table: (typeof CODE_TABLES)[number][0],
-): Promise<CodeLabel[]> {
-  const { data, error } = await supabase
-    .from(table)
-    .select("code, name_cs")
-    .order("name_cs", { ascending: true });
-
-  if (error || !data) return [];
-
-  return data.flatMap((row) => {
-    const code = typeof row.code === "string" ? row.code.trim() : "";
-    if (!code) return [];
-    const name =
-      typeof row.name_cs === "string" && row.name_cs.trim()
-        ? row.name_cs.trim()
-        : code;
-    return [{ code, name_cs: name }];
-  });
-}
-
-async function loadCatalogs(
-  supabase: typeof supabaseAdmin,
-): Promise<PandemicCatalogs> {
-  const { data: playerRows } = await supabase
-    .from("players")
-    .select("id, name")
-    .order("name", { ascending: true });
-
-  const players: PlayerOption[] = (playerRows ?? []).flatMap((row) => {
-    const id = typeof row.id === "string" ? row.id : "";
-    const name = typeof row.name === "string" ? row.name.trim() : "";
-    if (!id || !name) return [];
-    return [{ id, name }];
-  });
-
-  const codeLists = await Promise.all(
-    CODE_TABLES.map(async ([table, key]) => [key, await loadCodes(supabase, table)] as const),
-  );
-
-  const catalogs: PandemicCatalogs = {
-    players,
-    roles: [],
-    difficulties: [],
-    gameResults: [],
-    diseaseStates: [],
-    gameModes: [],
-    virulentStrainColors: [],
-  };
-
-  for (const [key, values] of codeLists) {
-    catalogs[key] = values;
-  }
-
-  return catalogs;
-}
-
 export async function GET() {
-  const { supabase, userId, response } = await requireUser();
+  const { userId, response } = await requireUser();
   if (response) return response;
 
   try {
     const queue = await openDraftQueue(userId);
-    const catalogs = await loadCatalogs(supabase as unknown as typeof supabaseAdmin);
+    const catalogs = await loadPandemicCatalogs();
     return Response.json({ ...queue, catalogs });
   } catch (error) {
     return queueError(error);
   }
-}
-
-async function rollbackGame(
-  supabase: typeof supabaseAdmin,
-  gameId: string,
-) {
-  await supabase.from("pandemic_game_role_changes").delete().eq("game_id", gameId);
-  await supabase.from("pandemic_game_players").delete().eq("game_id", gameId);
-  await supabase.from("pandemic_games").delete().eq("id", gameId);
 }
 
 export async function POST(request: Request) {
@@ -199,75 +119,15 @@ export async function POST(request: Request) {
     return Response.json({ error: errors[0], errors }, { status: 400 });
   }
 
-  // Zápis schválené hry do ostré tabulky pandemic_games
-  const { data: game, error: gameError } = await supabaseAdmin
-    .from("pandemic_games")
-    .insert({
-      played_at: draft.played_at,
-      result_code: draft.result_code,
-      difficulty_code: draft.difficulty_code,
-      game_mode_code: draft.game_mode_code,
-      yellow_disease: draft.yellow_disease,
-      red_disease: draft.red_disease,
-      blue_disease: draft.blue_disease,
-      black_disease: draft.black_disease,
-      purple_disease: draft.purple_disease,
-      virulent_strain_color: draft.virulent_strain_color,
-      note: draft.note ?? null,
-      source: "PDF_scan_confirmed",
-    })
-    .select("id")
-    .single();
-
-  if (gameError || !game?.id) {
-    return Response.json(
-      {
-        error: `Hru se nepodařilo uložit. ${gameError?.message ?? "Neznámá chyba."}`,
-      },
-      { status: 400 },
-    );
+  const saved = await savePandemicGame(draft, {
+    source: SCAN_GAME_SOURCE,
+    createdBy: userId,
+  });
+  if ("error" in saved) {
+    return Response.json({ error: saved.error }, { status: 400 });
   }
 
-  const gameId = String(game.id);
-
-  const { error: playersError } = await supabaseAdmin.from("pandemic_game_players").insert(
-    draft.players.map((player) => ({
-      game_id: gameId,
-      player_id: player.matched_player_id,
-      role_code: player.role_code,
-      player_order: player.player_order,
-    })),
-  );
-
-  if (playersError) {
-    await rollbackGame(supabaseAdmin, gameId);
-    return Response.json(
-      { error: `Hráče se nepodařilo uložit. ${playersError.message}` },
-      { status: 400 },
-    );
-  }
-
-  if (draft.role_changes.length > 0) {
-    const { error: changesError } = await supabaseAdmin
-      .from("pandemic_game_role_changes")
-      .insert(
-        draft.role_changes.map((change) => ({
-          game_id: gameId,
-          player_id: change.matched_player_id,
-          from_role_code: change.from_role_code,
-          to_role_code: change.to_role_code,
-          change_order: change.change_order,
-        })),
-      );
-
-    if (changesError) {
-      await rollbackGame(supabaseAdmin, gameId);
-      return Response.json(
-        { error: `Změny rolí se nepodařilo uložit. ${changesError.message}` },
-        { status: 400 },
-      );
-    }
-  }
+  const gameId = saved.id;
 
   const { data: verified, error: verifyError } = await supabaseAdmin
     .from("a4_draft_games")
@@ -281,7 +141,9 @@ export async function POST(request: Request) {
     .select("id");
 
   if (verifyError || !verified?.length) {
-    await rollbackGame(supabaseAdmin, gameId);
+    await supabaseAdmin.from("pandemic_game_role_changes").delete().eq("game_id", gameId);
+    await supabaseAdmin.from("pandemic_game_players").delete().eq("game_id", gameId);
+    await supabaseAdmin.from("pandemic_games").delete().eq("id", gameId);
     return Response.json(
       {
         error: verifyError

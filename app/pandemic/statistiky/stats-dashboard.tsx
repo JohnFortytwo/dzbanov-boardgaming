@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { CountRow, DiseaseRow, PandemicStats, RoleRow } from "@/lib/pandemic/stats";
 import { BackupDownload } from "./backup-download";
+import { VoidLatestGame } from "./void-latest-game";
 
 const numberFormat = new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 1 });
 const integerFormat = new Intl.NumberFormat("cs-CZ");
@@ -61,18 +62,22 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
               ? `${formatDay(stats.firstPlayedAt)} – ${formatDay(stats.lastPlayedAt)}`
               : "Zatím bez dat"}
           </p>
-          <BackupDownload />
+          <div className="flex flex-wrap items-start justify-end gap-2">
+            <VoidLatestGame enabled={stats.games > 0} />
+            <BackupDownload />
+          </div>
         </div>
       </div>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-        Přehled schválených partií z databáze. Čísla se načítají při každém otevření,
-        takže sem hned spadne i naposledy uložená hra. Tlačítko Stáhnout zálohu uloží
-        tyhle partie mimo aplikaci.
+        Přehled platných partií z databáze. Čísla se načítají při každém otevření,
+        takže sem hned spadne i naposledy uložená hra. Stáhnout zálohu uloží všechny
+        partie, včetně neplatných. Smazat poslední partii vyřadí naposledy uloženou
+        hru ze statistik.
       </p>
 
       {stats.games === 0 ? (
         <article className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-8 text-sm leading-6 text-zinc-400">
-          V databázi zatím není žádná schválená partie.
+          V databázi zatím není žádná platná partie.
         </article>
       ) : (
         <div className="mt-8 flex flex-col gap-6">
@@ -110,10 +115,10 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
 
           <Section
             title="Naposledy uložené partie"
-            note="Seřazeno podle času zápisu do databáze, ne podle data na kartě."
+            note="Posledních deset platných partií podle času zápisu, ne podle data na kartě."
           >
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[44rem] text-left text-sm">
+              <table className="w-full min-w-[64rem] text-left text-sm">
                 <thead className="text-xs uppercase tracking-wider text-zinc-500">
                   <tr>
                     <Th>Uloženo</Th>
@@ -122,6 +127,7 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
                     <Th>Mód</Th>
                     <Th>Obtížnost</Th>
                     <Th>Sestava</Th>
+                    <Th>Zapsal</Th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
@@ -141,6 +147,20 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
                               .join("; ")}
                           </p>
                         ) : null}
+                        {game.diseases.length > 0 ? (
+                          <p className="mt-1 text-xs text-zinc-500">
+                            {game.diseases.map((disease) => `${disease.label} ${disease.state}`).join(" · ")}
+                            {game.strain ? ` · Kmen ${game.strain}` : ""}
+                          </p>
+                        ) : game.strain ? (
+                          <p className="mt-1 text-xs text-zinc-500">Kmen {game.strain}</p>
+                        ) : null}
+                        {game.note ? (
+                          <p className="mt-1 max-w-md whitespace-pre-wrap text-xs text-zinc-400">{game.note}</p>
+                        ) : null}
+                      </Td>
+                      <Td>
+                        <span className="break-all">{game.recordedBy ?? "–"}</span>
                       </Td>
                     </tr>
                   ))}

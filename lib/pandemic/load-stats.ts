@@ -1,5 +1,6 @@
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { connection } from "next/server";
+import { loadAccountLabels } from "@/lib/pandemic/accounts";
 import {
   buildPandemicStats,
   type CodeName,
@@ -54,11 +55,11 @@ function asString(value: unknown): string | null {
 export async function loadPandemicStats() {
   await connection();
 
-  const [gameRows, seatRows, changeRows, playerRows, roles, modes, difficulties, results, diseaseStates, strainColors] =
+  const [gameRows, seatRows, changeRows, playerRows, roles, modes, difficulties, results, diseaseStates, strainColors, accounts] =
     await Promise.all([
       fetchAll<Record<string, unknown>>(
         "pandemic_games",
-        "id, played_at, created_at, result_code, difficulty_code, game_mode_code, yellow_disease, red_disease, blue_disease, black_disease, purple_disease, virulent_strain_color",
+        "id, played_at, created_at, result_code, difficulty_code, game_mode_code, yellow_disease, red_disease, blue_disease, black_disease, purple_disease, virulent_strain_color, note, created_by, voided_at",
       ),
       fetchAll<Record<string, unknown>>(
         "pandemic_game_players",
@@ -75,11 +76,12 @@ export async function loadPandemicStats() {
       fetchCodes("game_results"),
       fetchCodes("disease_states"),
       fetchCodes("virulent_strain_colors"),
+      loadAccountLabels(),
     ]);
 
   const games: StatsGame[] = gameRows.flatMap((row) => {
     const id = asString(row.id);
-    if (!id) return [];
+    if (!id || asString(row.voided_at)) return [];
     return [
       {
         id,
@@ -94,13 +96,16 @@ export async function loadPandemicStats() {
         black_disease: asString(row.black_disease),
         purple_disease: asString(row.purple_disease),
         virulent_strain_color: asString(row.virulent_strain_color),
+        note: asString(row.note),
+        created_by: asString(row.created_by),
       },
     ];
   });
+  const validGameIds = new Set(games.map((game) => game.id));
 
   const seats: StatsSeat[] = seatRows.flatMap((row) => {
     const gameId = asString(row.game_id);
-    if (!gameId) return [];
+    if (!gameId || !validGameIds.has(gameId)) return [];
     const order = typeof row.player_order === "number" ? row.player_order : Number(row.player_order);
     return [
       {
@@ -114,7 +119,7 @@ export async function loadPandemicStats() {
 
   const roleChanges: StatsRoleChange[] = changeRows.flatMap((row) => {
     const gameId = asString(row.game_id);
-    if (!gameId) return [];
+    if (!gameId || !validGameIds.has(gameId)) return [];
     const order = typeof row.change_order === "number" ? row.change_order : Number(row.change_order);
     return [
       {
@@ -145,6 +150,7 @@ export async function loadPandemicStats() {
     results,
     diseaseStates,
     strainColors,
+    accounts: [...accounts.entries()].map(([code, name_cs]) => ({ code, name_cs })),
   };
 
   return buildPandemicStats(source);

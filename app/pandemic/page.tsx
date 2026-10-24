@@ -8,10 +8,10 @@ const tiles = [
   {
     href: "/pandemic/nova-hra",
     title: "Nová hra",
-    description: "Formulář pro živé zadání odehrané hry.",
-    status: "Rozpracováno",
+    description: "Formulář pro zápis právě odehrané hry.",
+    status: "K zápisu",
     action: "Otevřít formulář",
-    ready: false,
+    ready: true,
   },
   {
     href: "/pandemic/statistiky",

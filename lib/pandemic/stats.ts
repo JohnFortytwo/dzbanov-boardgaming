@@ -1,4 +1,4 @@
-import { foldCode } from "@/lib/pandemic/drafts";
+import { foldCode, modeAllowsVirulentStrain } from "@/lib/pandemic/drafts";
 
 export type CodeName = {
   code: string;
@@ -18,6 +18,8 @@ export type StatsGame = {
   black_disease: string | null;
   purple_disease: string | null;
   virulent_strain_color: string | null;
+  note: string | null;
+  created_by: string | null;
 };
 
 export type StatsSeat = {
@@ -46,6 +48,7 @@ export type StatsSource = {
   results: CodeName[];
   diseaseStates: CodeName[];
   strainColors: CodeName[];
+  accounts: CodeName[];
 };
 
 export type CountRow = {
@@ -96,6 +99,11 @@ export type RecentChange = {
   to: string;
 };
 
+export type RecentDisease = {
+  label: string;
+  state: string;
+};
+
 export type RecentGame = {
   id: string;
   playedAt: string | null;
@@ -105,6 +113,10 @@ export type RecentGame = {
   difficulty: string;
   players: RecentPlayer[];
   changes: RecentChange[];
+  diseases: RecentDisease[];
+  strain: string | null;
+  note: string | null;
+  recordedBy: string | null;
 };
 
 export type PandemicStats = {
@@ -239,6 +251,55 @@ function countRows(
   });
 }
 
+export function describeRecentGame(
+  game: StatsGame,
+  seats: StatsSeat[],
+  changes: StatsRoleChange[],
+  names: {
+    player: (playerId: string | null) => string;
+    role: (code: string | null) => string;
+    result: (code: string | null) => string;
+    mode: (code: string | null) => string;
+    difficulty: (code: string | null) => string;
+    disease: (code: string | null) => string;
+    strain: (code: string | null) => string;
+    account: (userId: string | null) => string | null;
+  },
+): RecentGame {
+  const orderedSeats = [...seats].sort((left, right) => left.player_order - right.player_order);
+  const orderedChanges = [...changes].sort((left, right) => left.change_order - right.change_order);
+
+  return {
+    id: game.id,
+    playedAt: game.played_at,
+    savedAt: game.created_at,
+    result: names.result(game.result_code),
+    mode: names.mode(game.game_mode_code),
+    difficulty: names.difficulty(game.difficulty_code),
+    players: orderedSeats.map((seat) => ({
+      name: names.player(seat.player_id),
+      role: names.role(seat.role_code),
+    })),
+    changes: orderedChanges.map((change) => ({
+      name: names.player(change.player_id),
+      from: names.role(change.from_role_code),
+      to: names.role(change.to_role_code),
+    })),
+    diseases: DISEASES.flatMap((disease) => {
+      const code = game[disease.key];
+      if (!code) return [];
+      return [{ label: disease.label, state: names.disease(code) }];
+    }),
+    strain: modeAllowsVirulentStrain(game.game_mode_code)
+      ? game.virulent_strain_color
+        ? names.strain(game.virulent_strain_color)
+        : "neuvedeno"
+      : null,
+    note: game.note,
+    recordedBy: names.account(game.created_by),
+  };
+}
+
 export function buildPandemicStats(source: StatsSource): PandemicStats {
   const games = source.games;
   const gameCount = games.length;
@@ -250,6 +311,7 @@ export function buildPandemicStats(source: StatsSource): PandemicStats {
   const diseaseLabel = labelMap(source.diseaseStates);
   const strainLabel = labelMap(source.strainColors);
   const playerNames = new Map(source.players.map((player) => [player.code, player.name_cs]));
+  const accountNames = new Map(source.accounts.map((account) => [account.code, account.name_cs]));
 
   const seatsByGame = new Map<string, StatsSeat[]>();
   for (const seat of source.seats) {
@@ -468,36 +530,32 @@ export function buildPandemicStats(source: StatsSource): PandemicStats {
     .filter((value): value is string => Boolean(value))
     .sort();
 
+  const nameFor = (playerId: string | null) =>
+    (playerId && playerNames.get(playerId)) || "Neznámý hráč";
+  const accountFor = (userId: string | null) => {
+    if (!userId) return null;
+    return accountNames.get(userId) ?? "Neznámý účet";
+  };
+
   const recentGames: RecentGame[] = [...games]
-    .sort((left, right) => (right.created_at ?? "").localeCompare(left.created_at ?? ""))
-    .slice(0, 8)
-    .map((game) => {
-      const seats = [...(seatsByGame.get(game.id) ?? [])].sort(
-        (left, right) => left.player_order - right.player_order,
-      );
-      const changes = [...(changesByGame.get(game.id) ?? [])].sort(
-        (left, right) => left.change_order - right.change_order,
-      );
-      const nameFor = (playerId: string | null) =>
-        (playerId && playerNames.get(playerId)) || "Neznámý hráč";
-      return {
-        id: game.id,
-        playedAt: game.played_at,
-        savedAt: game.created_at,
-        result: resultLabel(game.result_code),
-        mode: modeLabel(game.game_mode_code),
-        difficulty: difficultyLabel(game.difficulty_code),
-        players: seats.map((seat) => ({
-          name: nameFor(seat.player_id),
-          role: roleLabel(seat.role_code),
-        })),
-        changes: changes.map((change) => ({
-          name: nameFor(change.player_id),
-          from: roleLabel(change.from_role_code),
-          to: roleLabel(change.to_role_code),
-        })),
-      };
-    });
+    .sort((left, right) => {
+      const byTime = (right.created_at ?? "").localeCompare(left.created_at ?? "");
+      if (byTime !== 0) return byTime;
+      return right.id.localeCompare(left.id);
+    })
+    .slice(0, 10)
+    .map((game) =>
+      describeRecentGame(game, seatsByGame.get(game.id) ?? [], changesByGame.get(game.id) ?? [], {
+        player: nameFor,
+        role: roleLabel,
+        result: resultLabel,
+        mode: modeLabel,
+        difficulty: difficultyLabel,
+        disease: diseaseLabel,
+        strain: strainLabel,
+        account: accountFor,
+      }),
+    );
 
   const gamesWithSeats = new Set(source.seats.map((seat) => seat.game_id));
 

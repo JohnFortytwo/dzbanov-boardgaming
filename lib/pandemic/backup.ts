@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { loadAccountLabels } from "@/lib/pandemic/accounts";
 import { foldCode } from "@/lib/pandemic/drafts";
 
 type CodeName = {
@@ -26,6 +27,9 @@ type BackupGameRow = {
   black_disease: string | null;
   purple_disease: string | null;
   virulent_strain_color: string | null;
+  created_by: string | null;
+  voided_at: string | null;
+  voided_by: string | null;
 };
 
 type BackupSeat = {
@@ -54,6 +58,7 @@ export type BackupSource = {
   modes: CodeName[];
   diseaseStates: CodeName[];
   strainColors: CodeName[];
+  accounts: { id: string; label: string }[];
 };
 
 const PLAYER_COLUMNS = 5;
@@ -114,12 +119,12 @@ async function fetchCodes(supabase: SupabaseClient, table: string): Promise<Code
 
 export async function loadPandemicBackup(): Promise<BackupSource> {
   const { supabaseAdmin } = await import("@/lib/supabase/admin");
-  const [gameRows, seatRows, changeRows, playerRows, roles, results, difficulties, modes, diseaseStates, strainColors] =
+  const [gameRows, seatRows, changeRows, playerRows, roles, results, difficulties, modes, diseaseStates, strainColors, accounts] =
     await Promise.all([
       fetchAll(
         supabaseAdmin,
         "pandemic_games",
-        "id, played_at, created_at, source, note, result_code, difficulty_code, game_mode_code, yellow_disease, red_disease, blue_disease, black_disease, purple_disease, virulent_strain_color",
+        "id, played_at, created_at, source, note, result_code, difficulty_code, game_mode_code, yellow_disease, red_disease, blue_disease, black_disease, purple_disease, virulent_strain_color, created_by, voided_at, voided_by",
         ["id"],
       ),
       fetchAll(
@@ -141,6 +146,7 @@ export async function loadPandemicBackup(): Promise<BackupSource> {
       fetchCodes(supabaseAdmin, "game_modes"),
       fetchCodes(supabaseAdmin, "disease_states"),
       fetchCodes(supabaseAdmin, "virulent_strain_colors"),
+      loadAccountLabels(),
     ]);
 
   return {
@@ -163,6 +169,9 @@ export async function loadPandemicBackup(): Promise<BackupSource> {
           black_disease: asString(row.black_disease),
           purple_disease: asString(row.purple_disease),
           virulent_strain_color: asString(row.virulent_strain_color),
+          created_by: asString(row.created_by),
+          voided_at: asString(row.voided_at),
+          voided_by: asString(row.voided_by),
         },
       ];
     }),
@@ -208,6 +217,7 @@ export async function loadPandemicBackup(): Promise<BackupSource> {
     modes,
     diseaseStates,
     strainColors,
+    accounts: [...accounts.entries()].map(([id, label]) => ({ id, label })),
   };
 }
 
@@ -277,6 +287,7 @@ export function renderPandemicBackup(source: BackupSource, now = new Date()) {
   const roleLabel = labelLookup(source.roles);
   const diseaseLabel = labelLookup(source.diseaseStates);
   const strainLabel = labelLookup(source.strainColors);
+  const accountLabel = new Map(source.accounts.map((account) => [account.id, account.label]));
   const playerNames = new Map(source.players.map((player) => [player.id, player.name]));
 
   const seatsByGame = new Map<string, BackupSeat[]>();
@@ -351,6 +362,10 @@ export function renderPandemicBackup(source: BackupSource, now = new Date()) {
     "Poznámka",
     "Id",
     "Uloženo",
+    "Zapsal",
+    "Platnost",
+    "Zneplatnil",
+    "Zneplatněno",
   ];
 
   const lines = rendered.map(({ game, players, roleChanges }) => {
@@ -379,6 +394,10 @@ export function renderPandemicBackup(source: BackupSource, now = new Date()) {
       game.note ?? "",
       game.id,
       formatSavedAt(game.created_at),
+      game.created_by ? (accountLabel.get(game.created_by) ?? "Neznámý účet") : "",
+      game.voided_at ? "Neplatná" : "Platná",
+      game.voided_by ? (accountLabel.get(game.voided_by) ?? "Neznámý účet") : "",
+      formatSavedAt(game.voided_at),
     );
     return cells.map(csvField).join(";");
   });
@@ -417,6 +436,12 @@ export function renderPandemicBackup(source: BackupSource, now = new Date()) {
         virulent_strain_color_label: game.virulent_strain_color
           ? strainLabel(game.virulent_strain_color)
           : null,
+        created_by: game.created_by,
+        recorded_by: game.created_by ? (accountLabel.get(game.created_by) ?? "Neznámý účet") : null,
+        voided_at: game.voided_at,
+        voided_by: game.voided_by,
+        voided_by_label: game.voided_by ? (accountLabel.get(game.voided_by) ?? "Neznámý účet") : null,
+        valid: !game.voided_at,
         players,
         role_changes: roleChanges,
       })),
