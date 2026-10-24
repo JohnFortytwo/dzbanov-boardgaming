@@ -1,6 +1,5 @@
 import { connection } from "next/server";
 import { BADGE_IDS, isDungeonMaster } from "@/lib/badges";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
@@ -18,15 +17,32 @@ export async function POST() {
   }
 
   const badges = [...BADGE_IDS];
-  const { error } = await supabaseAdmin.from("profiles").upsert({
-    id: userId,
+  const patch = {
     badges,
     has_achievement_42: true,
     has_achievement_ano: true,
-  });
+  };
+
+  const { data: updated, error } = await supabase
+    .from("profiles")
+    .update(patch)
+    .eq("id", userId)
+    .select("id");
 
   if (error) {
+    console.error("Přidání všech odznaků selhalo.", error.message);
     return Response.json({ error: "Odznaky se nepodařilo přidat." }, { status: 500 });
+  }
+
+  if (!updated?.length) {
+    const { error: insertError } = await supabase.from("profiles").insert({
+      id: userId,
+      ...patch,
+    });
+    if (insertError) {
+      console.error("Vložení všech odznaků selhalo.", insertError.message);
+      return Response.json({ error: "Odznaky se nepodařilo přidat." }, { status: 500 });
+    }
   }
 
   return Response.json({ ok: true, badges });
