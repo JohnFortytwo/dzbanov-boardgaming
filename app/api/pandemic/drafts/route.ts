@@ -192,6 +192,7 @@ export async function POST(request: Request) {
   const stored = normalizeDraftData(existing.draft_data);
   const incoming = normalizeDraftData(payload.draft_data);
   incoming.card_image_url = stored.card_image_url;
+  incoming.card_content = stored.card_content;
 
   const { draft, errors } = prepareDraft(incoming);
   if (errors.length > 0) {

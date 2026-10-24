@@ -12,8 +12,16 @@ export type DraftRoleChange = {
   change_order: number;
 };
 
+export type CardContent = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
 export type DraftData = {
   card_image_url: string | null;
+  card_content: CardContent | null;
   played_at: string | null;
   result_code: string | null;
   difficulty_code: string | null;
@@ -414,9 +422,30 @@ function readRoleChange(value: unknown, index: number): DraftRoleChange {
   };
 }
 
+function finiteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) {
+    return Number(value);
+  }
+  return null;
+}
+
+function readCardContent(value: unknown): CardContent | null {
+  const row = asRecord(value);
+  const x = finiteNumber(row.x);
+  const y = finiteNumber(row.y);
+  const w = finiteNumber(row.w);
+  const h = finiteNumber(row.h);
+  if (x === null || y === null || w === null || h === null) return null;
+  if (x < 0 || y < 0 || w <= 0 || h <= 0) return null;
+  if (x + w > 100.01 || y + h > 100.01) return null;
+  return { x, y, w, h };
+}
+
 export function emptyDraftData(): DraftData {
   return {
     card_image_url: null,
+    card_content: null,
     played_at: null,
     result_code: null,
     difficulty_code: null,
@@ -440,6 +469,7 @@ export function normalizeDraftData(value: unknown): DraftData {
 
   return {
     card_image_url: asString(row.card_image_url),
+    card_content: readCardContent(row.card_content),
     played_at: toIsoDate(asString(row.played_at)),
     result_code: asString(row.result_code),
     difficulty_code: asString(row.difficulty_code),

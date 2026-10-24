@@ -13,6 +13,7 @@ import {
   presentDraft,
   prepareDraft,
   type CodeLabel,
+  type CardContent,
   type DraftData,
   type DraftGame,
   type DraftPlayer,
@@ -116,6 +117,16 @@ function storeCropOffset(offset: { x: number; y: number }) {
 
 function shiftCrop(box: CropBox, offset: { x: number; y: number }): CropBox {
   return { ...box, x: box.x + offset.x, y: box.y + offset.y };
+}
+
+function placeOnCard(box: CropBox, content: CardContent | null): CropBox {
+  if (!content) return box;
+  return {
+    x: content.x + (box.x / 100) * content.w,
+    y: content.y + (box.y / 100) * content.h,
+    w: (box.w / 100) * content.w,
+    h: (box.h / 100) * content.h,
+  };
 }
 
 export function TranscriptionWorkspace() {
@@ -231,11 +242,12 @@ export function TranscriptionWorkspace() {
   const form = draft
     ? (edits[draft.id] ?? presentDraft(draft.draft_data, catalogs))
     : emptyDraftData();
+  const content = form.card_content;
   const cropBoxes = {
-    date: shiftCrop(cardBoxes.date, cropOffset),
-    outcome: shiftCrop(cardBoxes.outcome, cropOffset),
-    players: shiftCrop(cardBoxes.players, cropOffset),
-    diseases: shiftCrop(cardBoxes.diseases, cropOffset),
+    date: placeOnCard(shiftCrop(cardBoxes.date, cropOffset), content),
+    outcome: placeOnCard(shiftCrop(cardBoxes.outcome, cropOffset), content),
+    players: placeOnCard(shiftCrop(cardBoxes.players, cropOffset), content),
+    diseases: placeOnCard(shiftCrop(cardBoxes.diseases, cropOffset), content),
   };
 
   function applyCropOffset() {

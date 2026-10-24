@@ -1,5 +1,4 @@
 import os
-import io
 import json
 import time
 from datetime import datetime
@@ -180,14 +179,13 @@ def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: in
 
     draft_records = []
 
-    for index, card_bytes in enumerate(cards, start=1):
+    for index, card in enumerate(cards, start=1):
         card_filename = f"{scan_id}_{index}.png"
-        img = Image.open(io.BytesIO(card_bytes))
-        img.load()
-        card_image_url = upload_card_to_storage(card_filename, card_bytes)
-        
+        card.ocr_image.load()
+        card_image_url = upload_card_to_storage(card_filename, card.image)
+
         print(f"  -> Zpracovávám kartu {index}/10 přes Gemini OCR...")
-        ocr_data = extract_card_ocr(img)
+        ocr_data = extract_card_ocr(card.ocr_image)
         
         raw_played_at = ocr_data.get("played_at")
         valid_played_at = validate_iso_date(raw_played_at)
@@ -195,6 +193,12 @@ def process_and_store_a4_scan(file_bytes: bytes, file_path: str, page_number: in
         # Kompletní draft_data JSON pro frontend s veřejnou cloudovou URL
         draft_json = {
             "card_image_url": card_image_url,
+            "card_content": {
+                "x": card.content_x,
+                "y": card.content_y,
+                "w": card.content_w,
+                "h": card.content_h,
+            },
             "played_at": valid_played_at,
             "result_code": ocr_data.get("result_code") or "Výhra",
             "difficulty_code": ocr_data.get("difficulty_code") or "Středně náročná",
