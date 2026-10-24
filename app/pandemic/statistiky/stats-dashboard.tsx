@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { CountRow, DiseaseRow, PandemicStats, RoleRow } from "@/lib/pandemic/stats";
+import { BackupDownload } from "./backup-download";
 
 const numberFormat = new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 1 });
 const integerFormat = new Intl.NumberFormat("cs-CZ");
@@ -54,15 +55,19 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
       </p>
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <h1 className="text-4xl font-semibold tracking-tight text-white">Statistiky</h1>
-        <p className="text-sm text-zinc-500">
-          {stats.firstPlayedAt && stats.lastPlayedAt
-            ? `${formatDay(stats.firstPlayedAt)} – ${formatDay(stats.lastPlayedAt)}`
-            : "Zatím bez dat"}
-        </p>
+        <div className="flex flex-col gap-2 sm:items-end">
+          <p className="text-sm text-zinc-500">
+            {stats.firstPlayedAt && stats.lastPlayedAt
+              ? `${formatDay(stats.firstPlayedAt)} – ${formatDay(stats.lastPlayedAt)}`
+              : "Zatím bez dat"}
+          </p>
+          <BackupDownload />
+        </div>
       </div>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
         Přehled schválených partií z databáze. Čísla se načítají při každém otevření,
-        takže sem hned spadne i naposledy uložená hra.
+        takže sem hned spadne i naposledy uložená hra. Tlačítko Stáhnout zálohu uloží
+        tyhle partie mimo aplikaci.
       </p>
 
       {stats.games === 0 ? (
