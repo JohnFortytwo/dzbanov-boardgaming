@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { grantBadge } from "@/lib/badges-server";
 import { requirePandemicUser } from "@/lib/pandemic/auth";
 import { voidLatestGame } from "@/lib/pandemic/latest-game";
 
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
     if (!result.ok) {
       return Response.json({ error: result.error }, { status: result.status });
     }
-    return Response.json({ ok: true });
+    const badge = await grantBadge(userId, "pandemic_delete");
+    return Response.json({ ok: true, badge });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Partii se nepodařilo smazat.";
     return Response.json({ error: message }, { status: 500 });

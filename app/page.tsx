@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { DonateModal } from "@/app/components/DonateModal";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
-import { ResetAchievementsButton } from "@/app/components/ResetAchievementsButton";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { UserManual } from "@/app/components/UserManual";
 import { logout } from "@/app/login/actions";
@@ -47,7 +47,6 @@ async function BoardgamingHome() {
       <div className="absolute right-6 top-6 z-10 flex flex-col items-end gap-2">
         <SignedInUser email={email} />
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <ResetAchievementsButton />
           <UserManual />
           <Link
             href="/password"
@@ -66,7 +65,7 @@ async function BoardgamingHome() {
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 py-20">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-6 py-20">
         <p className="mb-5 text-xs font-medium uppercase tracking-[0.28em] text-emerald-400/85">
           Herní ekosystém
         </p>
@@ -77,7 +76,7 @@ async function BoardgamingHome() {
           Ekosystém pro evidenci, analýzu a digitalizaci herních výsledků
         </p>
 
-        <section className="mt-16 grid w-full items-stretch gap-6 md:grid-cols-2">
+        <section className="mt-16 grid w-full items-stretch gap-6 sm:grid-cols-2">
           <article className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-10">
             <div className="mb-6 flex items-center justify-between gap-4">
               <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-emerald-300">
@@ -103,6 +102,32 @@ async function BoardgamingHome() {
           </article>
 
           <DraciDoupeModal />
+
+          <article className="flex h-full flex-col rounded-3xl border border-amber-400/25 bg-white/5 p-8 shadow-[0_24px_80px_-32px_rgba(251,191,36,0.45)] backdrop-blur-xl sm:p-10">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-amber-200">
+                Modul
+              </span>
+              <span className="text-xs text-zinc-500">Sbírka</span>
+            </div>
+
+            <h2 className="text-3xl font-semibold tracking-tight text-white">
+              Odznaky
+            </h2>
+            <p className="mt-3 flex-1 text-base leading-7 text-zinc-400">
+              Přehled získaných odznaků. Úspěch i selhání, z Pandemicu i z
+              Dračího doupěte.
+            </p>
+
+            <Link
+              href="/odznaky"
+              className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-full bg-amber-400 px-6 text-sm font-semibold text-zinc-950 transition hover:bg-amber-300"
+            >
+              Otevřít odznaky
+            </Link>
+          </article>
+
+          <DonateModal />
         </section>
       </main>
     </div>

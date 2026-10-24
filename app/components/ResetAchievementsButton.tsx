@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { resetUserAchievements } from "@/lib/achievements";
+import { resetUserBadges } from "@/lib/badges-client";
 
 export function ResetAchievementsButton() {
   const [open, setOpen] = useState(false);
@@ -23,7 +23,7 @@ export function ResetAchievementsButton() {
     setPending(true);
     setError(null);
 
-    const result = await resetUserAchievements();
+    const result = await resetUserBadges();
     setPending(false);
 
     if (!result.ok) {
@@ -36,7 +36,7 @@ export function ResetAchievementsButton() {
 
   return (
     <>
-      <div className="relative">
+      <div className="flex flex-col items-start gap-2">
         <button
           type="button"
           onClick={() => {
@@ -45,17 +45,16 @@ export function ResetAchievementsButton() {
           }}
           className="inline-flex items-center rounded-full border border-red-400/30 bg-transparent px-4 py-2 text-xs font-medium text-red-300 transition hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-200"
         >
-          Očistit hříchy (Resetovat achievementy)
+          Zahodit odznaky
         </button>
-        {error && !open ? (
-          <p className="absolute right-0 top-full mt-1 w-max max-w-64 text-xs text-red-300">
-            {error}
-          </p>
-        ) : null}
+        <p className="max-w-md text-xs leading-5 text-zinc-500">
+          Smaže všechny odznaky na účtu, včetně těch, které se získávají těžko.
+        </p>
+        {error && !open ? <p className="text-xs text-red-300">{error}</p> : null}
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             onClick={() => {
@@ -72,14 +71,14 @@ export function ResetAchievementsButton() {
               id="reset-achievements-title"
               className="text-lg font-semibold text-white"
             >
-              Očistit hříchy
+              Zahodit odznaky?
             </h2>
             <p className="mt-3 text-sm leading-6 text-zinc-300">
-              Opravdu chceš smazat své dosavadní odznaky?
+              Opravdu je chceš všechny zahodit? Zmizí i odznaky, které se
+              získávají těžko — z Pandemicu i z Dračího doupěte. Zpátky je
+              dostaneš jen tím, že si je znovu zasloužíš.
             </p>
-            {error ? (
-              <p className="mt-3 text-sm text-red-300">{error}</p>
-            ) : null}
+            {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
@@ -87,7 +86,7 @@ export function ResetAchievementsButton() {
                 disabled={pending}
                 className="rounded-full border border-white/10 px-4 py-2 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white disabled:opacity-60"
               >
-                Zrušit
+                Nechat si je
               </button>
               <button
                 type="button"
@@ -95,7 +94,7 @@ export function ResetAchievementsButton() {
                 disabled={pending}
                 className="rounded-full border border-red-400/40 bg-red-500/10 px-4 py-2 text-xs font-medium text-red-200 transition hover:bg-red-500/20 disabled:opacity-60"
               >
-                {pending ? "Mažu…" : "Smazat odznaky"}
+                {pending ? "Zahazuji…" : "Zahodit odznaky"}
               </button>
             </div>
           </div>

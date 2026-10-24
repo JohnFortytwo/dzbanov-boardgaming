@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { isBadgeId } from "@/lib/badges";
+import { announceBadge } from "@/lib/badges-client";
 import type { RecentGame } from "@/lib/pandemic/stats";
 
 const savedFormat = new Intl.DateTimeFormat("cs-CZ", {
@@ -80,10 +82,11 @@ export function VoidLatestGame({ enabled }: { enabled: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: game.id }),
       });
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json()) as { error?: string; badge?: unknown };
       if (!response.ok) {
         throw new Error(payload.error ?? "Partii se nepodařilo smazat.");
       }
+      if (isBadgeId(payload.badge)) announceBadge(payload.badge);
       setOpen(false);
       setNotice("Poslední partie je smazaná a ze statistik zmizela.");
       router.refresh();

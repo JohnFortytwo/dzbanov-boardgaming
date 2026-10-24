@@ -1,26 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type ReactNode } from "react";
-import {
-  setUserAchievement,
-  type AchievementFlag,
-} from "@/lib/achievements";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { badgeById, type BadgeId } from "@/lib/badges";
+import { grantOwnBadge } from "@/lib/badges-client";
 
 type Step = "1" | "2a" | "finale-a" | "finale-b";
 
-const FINALE_FLAGS: Partial<Record<Step, AchievementFlag>> = {
-  "finale-a": "has_achievement_42",
-  "finale-b": "has_achievement_ano",
+const FINALE_FLAGS: Partial<Record<Step, BadgeId>> = {
+  "finale-a": "dd_resist",
+  "finale-b": "dd_ano",
 };
 
 export function DraciDoupeModal() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("1");
   const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
+    "idle" | "saving" | "saved" | "owned" | "error"
   >("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const grantToken = useRef(0);
 
   useEffect(() => {
     if (!open) return;
@@ -39,30 +38,29 @@ export function DraciDoupeModal() {
     };
   }, [open]);
 
-  useEffect(() => {
-    const flag = FINALE_FLAGS[step];
-    if (!open || !flag) return;
+  function choose(next: Step) {
+    setStep(next);
+    const flag = FINALE_FLAGS[next];
+    if (!flag) return;
 
-    let cancelled = false;
+    const token = grantToken.current + 1;
+    grantToken.current = token;
     setSaveStatus("saving");
     setSaveError(null);
 
-    void setUserAchievement(flag).then((result) => {
-      if (cancelled) return;
-      if (result.ok) {
-        setSaveStatus("saved");
+    void grantOwnBadge(flag).then((result) => {
+      if (token !== grantToken.current) return;
+      if (!result.ok) {
+        setSaveStatus("error");
+        setSaveError(result.error);
         return;
       }
-      setSaveStatus("error");
-      setSaveError(result.error);
+      setSaveStatus(result.granted ? "saved" : "owned");
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open, step]);
+  }
 
   function enterDungeon() {
+    grantToken.current += 1;
     setStep("1");
     setSaveStatus("idle");
     setSaveError(null);
@@ -101,7 +99,7 @@ export function DraciDoupeModal() {
           step={step}
           saveStatus={saveStatus}
           saveError={saveError}
-          onStep={setStep}
+          onStep={choose}
           onClose={() => setOpen(false)}
         />
       ) : null}
@@ -117,7 +115,7 @@ function DungeonDialog({
   onClose,
 }: {
   step: Step;
-  saveStatus: "idle" | "saving" | "saved" | "error";
+  saveStatus: "idle" | "saving" | "saved" | "owned" | "error";
   saveError: string | null;
   onStep: (step: Step) => void;
   onClose: () => void;
@@ -193,16 +191,16 @@ function DungeonDialog({
 
         {step === "finale-a" ? (
           <Finale
-            text="Ukázal jsi pravé srdce poctivého deskovkáře! Získáváš tajný achievement Poslušný ovčan jeskyně."
+            text="Ukázal jsi pravé srdce poctivého deskovkáře! Získáváš odznak Poslušný ovčan."
             saveStatus={saveStatus}
             saveError={saveError}
           >
             <Image
-              src="/Images/42_black.png"
-              alt="Achievement Poslušný ovčan jeskyně"
+              src={badgeById("dd_resist").src}
+              alt={badgeById("dd_resist").title}
               width={1024}
               height={1024}
-              className="mx-auto h-auto w-full max-w-sm rounded-2xl"
+              className="mx-auto size-64 rounded-full object-cover"
             />
           </Finale>
         ) : null}
@@ -214,11 +212,11 @@ function DungeonDialog({
             saveError={saveError}
           >
             <Image
-              src="/Images/ano-bude-lip.png"
-              alt="Banner: bude líp"
-              width={422}
-              height={536}
-              className="mx-auto h-auto w-full max-w-md rounded-2xl"
+              src={badgeById("dd_ano").src}
+              alt={badgeById("dd_ano").title}
+              width={1024}
+              height={1024}
+              className="mx-auto size-64 rounded-full object-cover"
             />
           </Finale>
         ) : null}
@@ -265,7 +263,7 @@ function Finale({
   children,
 }: {
   text: string;
-  saveStatus: "idle" | "saving" | "saved" | "error";
+  saveStatus: "idle" | "saving" | "saved" | "owned" | "error";
   saveError: string | null;
   children: ReactNode;
 }) {
@@ -274,8 +272,9 @@ function Finale({
       <p className="text-base leading-7 text-zinc-100">{text}</p>
       <div className="mt-6">{children}</div>
       <p className="mt-4 text-sm text-zinc-500" aria-live="polite">
-        {saveStatus === "saving" ? "Zapisuji achievement…" : null}
-        {saveStatus === "saved" ? "Achievement je uložený na tvém účtu." : null}
+        {saveStatus === "saving" ? "Zapisuji odznak…" : null}
+        {saveStatus === "saved" ? "Odznak je uložený na tvém účtu." : null}
+        {saveStatus === "owned" ? "Tenhle odznak už máš." : null}
         {saveStatus === "error" ? saveError : null}
       </p>
     </div>

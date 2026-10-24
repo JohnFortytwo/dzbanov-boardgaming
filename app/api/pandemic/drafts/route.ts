@@ -9,6 +9,7 @@ import {
   openDraftQueue,
 } from "@/lib/pandemic/draft-queue";
 import { normalizeDraftData, prepareDraft } from "@/lib/pandemic/drafts";
+import { grantBadge } from "@/lib/badges-server";
 import { savePandemicGame, SCAN_GAME_SOURCE } from "@/lib/pandemic/save-game";
 
 async function requireUser() {
@@ -157,7 +158,8 @@ export async function POST(request: Request) {
   const createdAt = typeof existing.created_at === "string" ? existing.created_at : "";
   const gameOrder = typeof existing.game_order === "number" ? existing.game_order : 0;
   const queue = await nextQueue(userId, createdAt, gameOrder);
-  return Response.json({ ok: true, game_id: gameId, ...queue });
+  const badge = await grantBadge(userId, "pandemic_history");
+  return Response.json({ ok: true, game_id: gameId, badge, ...queue });
 }
 
 const PUBLIC_SCAN_OBJECT = /\/storage\/v1\/object\/public\/scans\/([^?#]+)/i;

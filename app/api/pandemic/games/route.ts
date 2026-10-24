@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { requirePandemicUser } from "@/lib/pandemic/auth";
 import { normalizeDraftData, prepareDraft } from "@/lib/pandemic/drafts";
+import { grantBadge } from "@/lib/badges-server";
 import { LIVE_GAME_SOURCE, savePandemicGame } from "@/lib/pandemic/save-game";
 
 export async function POST(request: Request) {
@@ -33,5 +34,6 @@ export async function POST(request: Request) {
     return Response.json({ error: saved.error }, { status: 400 });
   }
 
-  return Response.json({ ok: true, game_id: saved.id });
+  const badge = await grantBadge(userId, "pandemic_new");
+  return Response.json({ ok: true, game_id: saved.id, badge });
 }
