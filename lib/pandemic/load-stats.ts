@@ -2,7 +2,7 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { connection } from "next/server";
 import { loadAccountLabels } from "@/lib/pandemic/accounts";
 import {
-  buildPandemicStats,
+  buildPandemicStatsBundle,
   type CodeName,
   type StatsGame,
   type StatsRoleChange,
@@ -153,5 +153,5 @@ export async function loadPandemicStats() {
     accounts: [...accounts.entries()].map(([code, name_cs]) => ({ code, name_cs })),
   };
 
-  return buildPandemicStats(source);
+  return buildPandemicStatsBundle(source);
 }

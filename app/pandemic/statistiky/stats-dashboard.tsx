@@ -1,6 +1,20 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import type { CountRow, DiseaseRow, PandemicStats, RoleRow } from "@/lib/pandemic/stats";
+import {
+  DEFAULT_RECENT_GAME_LIMIT,
+  DEFAULT_STATS_RANGE,
+  RECENT_GAME_OPTIONS,
+  STATS_RANGE_OPTIONS,
+  type CountRow,
+  type DiseaseRow,
+  type PandemicStats,
+  type PandemicStatsBundle,
+  type RecentGameLimit,
+  type RoleRow,
+  type StatsRangeId,
+} from "@/lib/pandemic/stats";
 import { BackupDownload } from "./backup-download";
 import { VoidLatestGame } from "./void-latest-game";
 
@@ -34,13 +48,29 @@ function formatSaved(value: string | null) {
   return savedFormat.format(date);
 }
 
-export function StatsDashboard({ stats }: { stats: PandemicStats }) {
-  const latest = stats.recentGames[0] ?? null;
+function rangeDescription(rangeId: StatsRangeId, inRange: number, total: number) {
+  if (rangeId === "all") {
+    return `Ostatní tabulky počítají celou historii, ${integerFormat.format(total)} platných partií. Úvodní karty se nemění.`;
+  }
+  const limit = Number(rangeId);
+  if (total < limit) {
+    return `Ostatní tabulky berou posledních ${integerFormat.format(limit)} uložených her. V databázi je jich ${integerFormat.format(total)}, takže jde o celou historii.`;
+  }
+  return `Ostatní tabulky počítají posledních ${integerFormat.format(inRange)} uložených her podle času zápisu. Úvodní karty zůstávají za celou historii.`;
+}
+
+export function StatsDashboard({ bundle }: { bundle: PandemicStatsBundle }) {
+  const [recentLimit, setRecentLimit] = useState<RecentGameLimit>(DEFAULT_RECENT_GAME_LIMIT);
+  const [rangeId, setRangeId] = useState<StatsRangeId>(DEFAULT_STATS_RANGE);
+  const headline = bundle.ranges.all;
+  const stats = bundle.ranges[rangeId];
+  const latest = bundle.recentGames[0] ?? null;
+  const visibleRecent = bundle.recentGames.slice(0, recentLimit);
   const gaps = [
-    stats.missing.result > 0 ? `${stats.missing.result} bez výsledku` : null,
-    stats.missing.mode > 0 ? `${stats.missing.mode} bez módu` : null,
-    stats.missing.difficulty > 0 ? `${stats.missing.difficulty} bez obtížnosti` : null,
-    stats.missing.players > 0 ? `${stats.missing.players} bez hráčů` : null,
+    headline.missing.result > 0 ? `${headline.missing.result} bez výsledku` : null,
+    headline.missing.mode > 0 ? `${headline.missing.mode} bez módu` : null,
+    headline.missing.difficulty > 0 ? `${headline.missing.difficulty} bez obtížnosti` : null,
+    headline.missing.players > 0 ? `${headline.missing.players} bez hráčů` : null,
   ].filter((item): item is string => Boolean(item));
 
   return (
@@ -58,47 +88,48 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
         <h1 className="text-4xl font-semibold tracking-tight text-white">Statistiky</h1>
         <div className="flex flex-col gap-2 sm:items-end">
           <p className="text-sm text-zinc-500">
-            {stats.firstPlayedAt && stats.lastPlayedAt
-              ? `${formatDay(stats.firstPlayedAt)} – ${formatDay(stats.lastPlayedAt)}`
+            {headline.firstPlayedAt && headline.lastPlayedAt
+              ? `${formatDay(headline.firstPlayedAt)} – ${formatDay(headline.lastPlayedAt)}`
               : "Zatím bez dat"}
           </p>
           <div className="flex flex-wrap items-start justify-end gap-2">
-            <VoidLatestGame enabled={stats.games > 0} />
+            <VoidLatestGame enabled={headline.games > 0} />
             <BackupDownload />
           </div>
         </div>
       </div>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">
-        Přehled platných partií z databáze. Čísla se načítají při každém otevření,
-        takže sem hned spadne i naposledy uložená hra. Stáhnout zálohu uloží všechny
-        partie, včetně neplatných. Smazat poslední partii vyřadí naposledy uloženou
-        hru ze statistik.
+        Přehled platných partií z databáze. Čísla nahoře jsou za celou historii a
+        načítají se při každém otevření, takže sem hned spadne i naposledy uložená
+        hra. Tabulky pod posledními partiemi mají vlastní rozsah. Stáhnout zálohu
+        uloží všechny partie, včetně neplatných. Smazat poslední partii vyřadí
+        naposledy uloženou hru ze statistik.
       </p>
 
-      {stats.games === 0 ? (
+      {headline.games === 0 ? (
         <article className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-8 text-sm leading-6 text-zinc-400">
           V databázi zatím není žádná platná partie.
         </article>
       ) : (
         <div className="mt-8 flex flex-col gap-6">
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <SummaryCard label="Odehraných her" value={integerFormat.format(stats.games)} />
+            <SummaryCard label="Odehraných her" value={integerFormat.format(headline.games)} />
             <SummaryCard
               label="Výhry"
-              value={formatPercent(stats.winRate)}
-              detail={`${integerFormat.format(stats.wins)} z ${integerFormat.format(stats.games)}`}
+              value={formatPercent(headline.winRate)}
+              detail={`${integerFormat.format(headline.wins)} z ${integerFormat.format(headline.games)}`}
             />
             <SummaryCard
               label="Hráčů na partii"
               value={
-                stats.averagePlayers === null
+                headline.averagePlayers === null
                   ? "–"
                   : new Intl.NumberFormat("cs-CZ", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(stats.averagePlayers)
+                    }).format(headline.averagePlayers)
               }
-              detail={`${integerFormat.format(stats.seats)} obsazení`}
+              detail={`${integerFormat.format(headline.seats)} obsazení`}
             />
             <SummaryCard
               label="Naposledy uloženo"
@@ -115,7 +146,23 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
 
           <Section
             title="Naposledy uložené partie"
-            note="Posledních deset platných partií podle času zápisu, ne podle data na kartě."
+            note={
+              visibleRecent.length < recentLimit
+                ? `Uložených partií je ${integerFormat.format(visibleRecent.length)}, takže jsou tu všechny. Řazeno podle času zápisu, ne podle data na kartě.`
+                : `Posledních ${integerFormat.format(recentLimit)} platných partií podle času zápisu, ne podle data na kartě.`
+            }
+            toolbar={
+              <ChoicePills
+                name="recent-games"
+                legend="Zobrazit"
+                value={recentLimit}
+                options={RECENT_GAME_OPTIONS.map((limit) => ({
+                  value: limit,
+                  label: `${limit} her`,
+                }))}
+                onChange={setRecentLimit}
+              />
+            }
           >
             <div className="overflow-x-auto">
               <table className="w-full min-w-[64rem] text-left text-sm">
@@ -131,7 +178,7 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
-                  {stats.recentGames.map((game) => (
+                  {visibleRecent.map((game) => (
                     <tr key={game.id}>
                       <Td>{formatSaved(game.savedAt)}</Td>
                       <Td>{formatDay(game.playedAt)}</Td>
@@ -169,9 +216,26 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
             </div>
           </Section>
 
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] sm:p-6">
+            <ChoicePills
+              name="stats-range"
+              legend="Rozsah ostatních tabulek"
+              tone="heading"
+              value={rangeId}
+              options={STATS_RANGE_OPTIONS.map((option) => ({
+                value: option.id,
+                label: option.label,
+              }))}
+              onChange={setRangeId}
+            />
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-500">
+              {rangeDescription(rangeId, stats.games, headline.games)}
+            </p>
+          </section>
+
           <Section
             title="Módy a obtížnosti"
-            note="Počet partií v každé kombinaci. Nula znamená, že tahle dvojice v datech zatím není."
+            note="Počet partií v každé kombinaci ve zvoleném rozsahu. Nula znamená, že tahle dvojice v tomto výběru není."
           >
             <Matrix stats={stats} />
           </Section>
@@ -191,14 +255,14 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
 
           <Section
             title="Role"
-            note="Podíl her, ve kterých se role objevila na startu nebo v některé změně. Medik ve 30 % her znamená, že medika někdo hrál ve třech partiích z deseti."
+            note="Podíl her ve zvoleném rozsahu, ve kterých se role objevila na startu nebo v některé změně. Medik ve 30 % her znamená, že medika někdo hrál ve třech partiích z deseti."
           >
             <RoleTable rows={stats.roles} />
           </Section>
 
           <Section
             title="Hráči"
-            note="Úspěšnost je podíl výher v partiích, kterých se hráč zúčastnil."
+            note="Úspěšnost je podíl výher v partiích zvoleného rozsahu, kterých se hráč zúčastnil."
           >
             <div className="overflow-x-auto">
               <table className="w-full min-w-[36rem] text-left text-sm">
@@ -228,14 +292,15 @@ export function StatsDashboard({ stats }: { stats: PandemicStats }) {
 
           <Section
             title="Stavy nemocí"
-            note="Fialová se počítá jen z her, kde je její stav vyplněný. Ostatní barvy ze všech partií, které mají záznam."
+            note="Fialová se počítá jen z her, kde je její stav vyplněný. Ostatní barvy z partií ve zvoleném rozsahu, které mají záznam."
           >
             <DiseaseTable rows={stats.diseases} />
             {stats.strainColors.length > 0 ? (
               <div className="mt-6">
                 <h3 className="text-sm font-medium text-zinc-300">Barva zhoubného kmene</h3>
                 <p className="mt-1 text-xs leading-5 text-zinc-500">
-                  Vyplněno u {integerFormat.format(stats.strainGames)} her.
+                  Vyplněno u {integerFormat.format(stats.strainGames)}{" "}
+                  {stats.strainGames === 1 ? "hry" : "her"}.
                 </p>
                 <div className="mt-3">
                   <BreakdownTable rows={stats.strainColors} label="Barva" />
@@ -274,19 +339,83 @@ function SummaryCard({
   );
 }
 
+function ChoicePills<T extends string | number>({
+  name,
+  legend,
+  value,
+  options,
+  onChange,
+  tone = "label",
+}: {
+  name: string;
+  legend: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+  tone?: "label" | "heading";
+}) {
+  return (
+    <form onSubmit={(event) => event.preventDefault()}>
+      <fieldset>
+        <legend
+          className={
+            tone === "heading"
+              ? "text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85"
+              : "text-xs font-medium uppercase tracking-[0.18em] text-zinc-500"
+          }
+        >
+          {legend}
+        </legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {options.map((option) => {
+            const checked = option.value === value;
+            return (
+              <label
+                key={String(option.value)}
+                className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-400/70 ${
+                  checked
+                    ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-100"
+                    : "border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={name}
+                  value={String(option.value)}
+                  checked={checked}
+                  onChange={() => onChange(option.value)}
+                  className="sr-only"
+                />
+                {option.label}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+    </form>
+  );
+}
+
 function Section({
   title,
   note,
+  toolbar,
   children,
 }: {
   title: string;
   note?: string;
+  toolbar?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] sm:p-6">
-      <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">{title}</h2>
-      {note ? <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">{note}</p> : null}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">{title}</h2>
+          {note ? <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500">{note}</p> : null}
+        </div>
+        {toolbar ? <div className="shrink-0">{toolbar}</div> : null}
+      </div>
       <div className="mt-4">{children}</div>
     </section>
   );

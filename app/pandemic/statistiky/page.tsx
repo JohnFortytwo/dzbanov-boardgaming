@@ -17,7 +17,7 @@ export default async function StatistikyPage() {
 
   try {
     const stats = await loadPandemicStats();
-    return <StatsDashboard stats={stats} />;
+    return <StatsDashboard bundle={stats} />;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Statistiky se nepodařilo načíst.";
     return (

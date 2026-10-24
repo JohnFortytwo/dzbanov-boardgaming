@@ -119,6 +119,28 @@ export type RecentGame = {
   recordedBy: string | null;
 };
 
+export const RECENT_GAME_OPTIONS = [5, 10, 20] as const;
+export type RecentGameLimit = (typeof RECENT_GAME_OPTIONS)[number];
+export const DEFAULT_RECENT_GAME_LIMIT: RecentGameLimit = 5;
+export const MAX_RECENT_GAMES = 20;
+
+export const STATS_RANGE_OPTIONS = [
+  { id: "all", limit: null, label: "Celá historie" },
+  { id: "1000", limit: 1000, label: "1000 her" },
+  { id: "500", limit: 500, label: "500 her" },
+  { id: "100", limit: 100, label: "100 her" },
+  { id: "50", limit: 50, label: "50 her" },
+  { id: "10", limit: 10, label: "10 her" },
+] as const;
+
+export type StatsRangeId = (typeof STATS_RANGE_OPTIONS)[number]["id"];
+export const DEFAULT_STATS_RANGE: StatsRangeId = "1000";
+
+export type PandemicStatsBundle = {
+  ranges: Record<StatsRangeId, PandemicStats>;
+  recentGames: RecentGame[];
+};
+
 export type PandemicStats = {
   games: number;
   wins: number;
@@ -220,6 +242,24 @@ function byPreferred(order: string[]) {
   };
 }
 
+function bySavedAtDesc(left: StatsGame, right: StatsGame) {
+  const byTime = (right.created_at ?? "").localeCompare(left.created_at ?? "");
+  if (byTime !== 0) return byTime;
+  return right.id.localeCompare(left.id);
+}
+
+function windowSource(source: StatsSource, limit: number | null): StatsSource {
+  if (limit === null || source.games.length <= limit) return source;
+  const games = [...source.games].sort(bySavedAtDesc).slice(0, limit);
+  const ids = new Set(games.map((game) => game.id));
+  return {
+    ...source,
+    games,
+    seats: source.seats.filter((seat) => ids.has(seat.game_id)),
+    roleChanges: source.roleChanges.filter((change) => ids.has(change.game_id)),
+  };
+}
+
 function collectKeys(values: (string | null)[], catalog: CodeName[], order: string[]) {
   const keys = new Set<string>();
   for (const value of values) {
@@ -300,7 +340,11 @@ export function describeRecentGame(
   };
 }
 
-export function buildPandemicStats(source: StatsSource): PandemicStats {
+export function buildPandemicStats(
+  source: StatsSource,
+  options?: { recentLimit?: number },
+): PandemicStats {
+  const recentLimit = options?.recentLimit ?? MAX_RECENT_GAMES;
   const games = source.games;
   const gameCount = games.length;
   const wins = games.filter((game) => isWin(game.result_code)).length;
@@ -537,25 +581,29 @@ export function buildPandemicStats(source: StatsSource): PandemicStats {
     return accountNames.get(userId) ?? "Neznámý účet";
   };
 
-  const recentGames: RecentGame[] = [...games]
-    .sort((left, right) => {
-      const byTime = (right.created_at ?? "").localeCompare(left.created_at ?? "");
-      if (byTime !== 0) return byTime;
-      return right.id.localeCompare(left.id);
-    })
-    .slice(0, 10)
-    .map((game) =>
-      describeRecentGame(game, seatsByGame.get(game.id) ?? [], changesByGame.get(game.id) ?? [], {
-        player: nameFor,
-        role: roleLabel,
-        result: resultLabel,
-        mode: modeLabel,
-        difficulty: difficultyLabel,
-        disease: diseaseLabel,
-        strain: strainLabel,
-        account: accountFor,
-      }),
-    );
+  const recentGames: RecentGame[] =
+    recentLimit <= 0
+      ? []
+      : [...games]
+          .sort(bySavedAtDesc)
+          .slice(0, recentLimit)
+          .map((game) =>
+            describeRecentGame(
+              game,
+              seatsByGame.get(game.id) ?? [],
+              changesByGame.get(game.id) ?? [],
+              {
+                player: nameFor,
+                role: roleLabel,
+                result: resultLabel,
+                mode: modeLabel,
+                difficulty: difficultyLabel,
+                disease: diseaseLabel,
+                strain: strainLabel,
+                account: accountFor,
+              },
+            ),
+          );
 
   const gamesWithSeats = new Set(source.seats.map((seat) => seat.game_id));
 
@@ -587,5 +635,18 @@ export function buildPandemicStats(source: StatsSource): PandemicStats {
     roleChangePairs,
     roleChangeDepth: { none, one, twoOrMore },
     recentGames,
+  };
+}
+
+export function buildPandemicStatsBundle(source: StatsSource): PandemicStatsBundle {
+  const ranges = {} as Record<StatsRangeId, PandemicStats>;
+  for (const option of STATS_RANGE_OPTIONS) {
+    ranges[option.id] = buildPandemicStats(windowSource(source, option.limit), {
+      recentLimit: option.limit === null ? MAX_RECENT_GAMES : 0,
+    });
+  }
+  return {
+    ranges,
+    recentGames: ranges.all.recentGames,
   };
 }
