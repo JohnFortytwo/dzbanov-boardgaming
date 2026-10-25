@@ -16,8 +16,8 @@ export default async function StatistikyPage() {
   if (!data?.claims) redirect("/login");
 
   try {
-    const stats = await loadPandemicStats();
-    return <StatsDashboard bundle={stats} />;
+    const source = await loadPandemicStats();
+    return <StatsDashboard source={source} />;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Statistiky se nepodařilo načíst.";
     return (

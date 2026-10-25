@@ -1,21 +1,38 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { foldCode } from "@/lib/pandemic/drafts";
 import {
   DEFAULT_RECENT_GAME_LIMIT,
   DEFAULT_STATS_RANGE,
   RECENT_GAME_OPTIONS,
   STATS_RANGE_OPTIONS,
+  buildHighlights,
+  buildPandemicStats,
+  buildTimeline,
+  filterStatsSource,
+  statsRangeLimit,
+  summarizeCrews,
+  summarizePlayers,
+  summarizeRoles,
+  windowSource,
+  type ChangeRow,
+  type ChangeSideRow,
   type CountRow,
   type DiseaseRow,
   type PandemicStats,
-  type PandemicStatsBundle,
+  type PlayerRow,
   type RecentGameLimit,
+  type RoleLens,
   type RoleRow,
+  type StatsGameFilter,
   type StatsRangeId,
+  type StatsSource,
+  type TimelineBucket,
 } from "@/lib/pandemic/stats";
 import { BackupDownload } from "./backup-download";
+import { StatsTimelineChart } from "./stats-chart";
 import { VoidLatestGame } from "./void-latest-game";
 
 const numberFormat = new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 1 });
@@ -31,7 +48,7 @@ const savedFormat = new Intl.DateTimeFormat("cs-CZ", {
 
 function formatPercent(value: number | null) {
   if (value === null || Number.isNaN(value)) return "–";
-  return `${numberFormat.format(value)} %`;
+  return `${numberFormat.format(value)}\u00a0%`;
 }
 
 function formatDay(value: string | null) {
@@ -54,18 +71,63 @@ function rangeDescription(rangeId: StatsRangeId, inRange: number, total: number)
   }
   const limit = Number(rangeId);
   if (total < limit) {
-    return `Ostatní tabulky berou posledních ${integerFormat.format(limit)} uložených her. V databázi je jich ${integerFormat.format(total)}, takže jde o celou historii.`;
+    return `Ostatní tabulky berou posledních ${integerFormat.format(limit)} odehraných her. V databázi je jich ${integerFormat.format(total)}, takže jde o celou historii.`;
   }
-  return `Ostatní tabulky počítají posledních ${integerFormat.format(inRange)} uložených her podle času zápisu. Úvodní karty zůstávají za celou historii.`;
+  return `Ostatní tabulky počítají posledních ${integerFormat.format(inRange)} odehraných her podle data partie. Když se datum shoduje, rozhoduje čas uložení. Úvodní karty zůstávají za celou historii.`;
 }
 
-export function StatsDashboard({ bundle }: { bundle: PandemicStatsBundle }) {
+const EMPTY_FILTER: StatsGameFilter = { mode: null, difficulty: null, playerCount: null };
+
+const ROLE_LENS_NOTE: Record<RoleLens, string> = {
+  any: "Role se počítá, když se ve hře objevila na startu nebo v jakékoli změně.",
+  entire: "Jen hry, kde role byla ve startovní sestavě a nikdo z ní neodešel ani na ni nepřišel.",
+  from: "Jen hry, ve kterých někdo z téhle role odešel. Úspěšnost je výsledek těch partií.",
+  to: "Jen hry, ve kterých někdo na tuhle roli přišel. Úspěšnost je výsledek těch partií.",
+};
+
+export function StatsDashboard({ source }: { source: StatsSource }) {
   const [recentLimit, setRecentLimit] = useState<RecentGameLimit>(DEFAULT_RECENT_GAME_LIMIT);
   const [rangeId, setRangeId] = useState<StatsRangeId>(DEFAULT_STATS_RANGE);
-  const headline = bundle.ranges.all;
-  const stats = bundle.ranges[rangeId];
-  const latest = bundle.recentGames[0] ?? null;
-  const visibleRecent = bundle.recentGames.slice(0, recentLimit);
+  const [roleLens, setRoleLens] = useState<RoleLens>("any");
+  const [roleFilter, setRoleFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
+  const [playerFilter, setPlayerFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
+  const [crewFilter, setCrewFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
+  const [timelineFilter, setTimelineFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
+  const [roleSort, setRoleSort] = useState<SortState>({ key: "winRate", direction: "desc" });
+  const [playerSort, setPlayerSort] = useState<SortState>({ key: "games", direction: "desc" });
+  const [changeView, setChangeView] = useState<"pairs" | "from" | "to">("pairs");
+  const [changeSort, setChangeSort] = useState<SortState>({ key: "count", direction: "desc" });
+  const [showAllChanges, setShowAllChanges] = useState(false);
+  const [crewSize, setCrewSize] = useState<2 | 3 | 4>(2);
+  const [showAllCrews, setShowAllCrews] = useState(false);
+  const [timelineBucket, setTimelineBucket] = useState<TimelineBucket>("month");
+  const [timelineMetric, setTimelineMetric] = useState<"games" | "rate">("games");
+
+  const headline = useMemo(() => buildPandemicStats(source), [source]);
+  const windowed = useMemo(() => windowSource(source, statsRangeLimit(rangeId)), [source, rangeId]);
+  const stats = useMemo(() => buildPandemicStats(windowed, { recentLimit: 0 }), [windowed]);
+  const playerCountChoices = useMemo(() => seatCounts(windowed), [windowed]);
+  const roleRows = useMemo(
+    () => orderRoles(summarizeRoles(filterStatsSource(windowed, roleFilter), roleLens), roleSort),
+    [windowed, roleFilter, roleLens, roleSort],
+  );
+  const playerRows = useMemo(
+    () => orderPlayers(summarizePlayers(filterStatsSource(windowed, playerFilter)), playerSort),
+    [windowed, playerFilter, playerSort],
+  );
+  const crews = useMemo(
+    () => summarizeCrews(filterStatsSource(windowed, crewFilter), crewSize),
+    [windowed, crewFilter, crewSize],
+  );
+  const timeline = useMemo(
+    () => buildTimeline(filterStatsSource(windowed, timelineFilter), timelineBucket),
+    [windowed, timelineFilter, timelineBucket],
+  );
+  const highlights = useMemo(() => buildHighlights(windowed), [windowed]);
+  const latest = headline.recentGames[0] ?? null;
+  const visibleRecent = headline.recentGames.slice(0, recentLimit);
+  const frequentCrews = crews.filter((crew) => crew.games >= 2);
+  const visibleCrews = showAllCrews ? crews : frequentCrews.slice(0, 12);
   const gaps = [
     headline.missing.result > 0 ? `${headline.missing.result} bez výsledku` : null,
     headline.missing.mode > 0 ? `${headline.missing.mode} bez módu` : null,
@@ -235,7 +297,7 @@ export function StatsDashboard({ bundle }: { bundle: PandemicStatsBundle }) {
 
           <Section
             title="Módy a obtížnosti"
-            note="Počet partií v každé kombinaci ve zvoleném rozsahu. Nula znamená, že tahle dvojice v tomto výběru není."
+            note="V buňce je počet her a jeho podíl na řádku. U součtu řádku je podíl ze všech her v tabulce. Nula znamená, že tahle dvojice ve zvoleném rozsahu není."
           >
             <Matrix stats={stats} />
           </Section>
@@ -244,49 +306,116 @@ export function StatsDashboard({ bundle }: { bundle: PandemicStatsBundle }) {
             <Section title="Úspěšnost podle módu">
               <BreakdownTable rows={stats.modes} label="Mód" />
             </Section>
-            <Section title="Úspěšnost podle obtížnosti">
-              <BreakdownTable rows={stats.difficulties} label="Obtížnost" />
+            <Section title="Jak partie končí">
+              <BreakdownTable
+                rows={stats.results}
+                label="Výsledek"
+                showWins={false}
+                showWinRate={false}
+              />
             </Section>
           </div>
 
-          <Section title="Jak partie končí">
-            <BreakdownTable rows={stats.results} label="Výsledek" />
+          <Section
+            title="Oblíbené kombinace"
+            note="Jen legendární klasika, velmi náročný zhoubný kmen a velmi náročná mutace. Podíl je ze všech her ve zvoleném rozsahu."
+          >
+            <BreakdownTable rows={stats.favorites} label="Kombinace" keepEmpty />
           </Section>
 
           <Section
             title="Role"
-            note="Podíl her ve zvoleném rozsahu, ve kterých se role objevila na startu nebo v některé změně. Medik ve 30 % her znamená, že medika někdo hrál ve třech partiích z deseti."
+            note={`${ROLE_LENS_NOTE[roleLens]} Aktivní role zůstávají nad těmi, které už se nehrají, a řazení platí v každé skupině zvlášť.`}
           >
-            <RoleTable rows={stats.roles} />
+            <div className="flex flex-col gap-4">
+              <ChoicePills
+                name="role-lens"
+                legend="Které hry počítat"
+                value={roleLens}
+                options={[
+                  { value: "entire", label: "Celá hra" },
+                  { value: "any", label: "Včetně změn" },
+                  { value: "from", label: "Jen z role" },
+                  { value: "to", label: "Jen na roli" },
+                ]}
+                onChange={setRoleLens}
+              />
+              <GameFilters
+                source={windowed}
+                playerCounts={playerCountChoices}
+                value={roleFilter}
+                onChange={setRoleFilter}
+              />
+              <RoleTable rows={roleRows} sort={roleSort} onSort={setRoleSort} />
+            </div>
           </Section>
 
           <Section
             title="Hráči"
-            note="Úspěšnost je podíl výher v partiích zvoleného rozsahu, kterých se hráč zúčastnil."
+            note="Úspěšnost je podíl výher v partiích zvoleného rozsahu a filtrů, kterých se hráč zúčastnil. Nejčastější start je role, se kterou do těch her nejčastěji nastupoval."
           >
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[36rem] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wider text-zinc-500">
-                  <tr>
-                    <Th>Hráč</Th>
-                    <Th align="right">Her</Th>
-                    <Th align="right">Výher</Th>
-                    <Th align="right">Úspěšnost</Th>
-                    <Th>Nejčastější start</Th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {stats.players.map((player) => (
-                    <tr key={player.key}>
-                      <Td>{player.label}</Td>
-                      <Td align="right">{integerFormat.format(player.games)}</Td>
-                      <Td align="right">{integerFormat.format(player.wins)}</Td>
-                      <Td align="right">{formatPercent(player.winRate)}</Td>
-                      <Td>{player.topRole ?? "–"}</Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex flex-col gap-4">
+              <GameFilters
+                source={windowed}
+                playerCounts={playerCountChoices}
+                value={playerFilter}
+                onChange={setPlayerFilter}
+              />
+              <PlayerTable rows={playerRows} sort={playerSort} onSort={setPlayerSort} />
+            </div>
+          </Section>
+
+          <Section
+            title="Podle počtu hráčů"
+            note="Úspěšnost partií podle toho, kolik hráčů u stolu sedělo."
+          >
+            <BreakdownTable rows={stats.playerCounts} label="Počet hráčů" />
+          </Section>
+
+          <Section
+            title="Nejčastější sestavy"
+            note="Sestava je sada jmen. Pořadí u stolu nerozhoduje. Výchozí pohled ukazuje sestavy, které spolu hrály aspoň dvakrát."
+          >
+            <div className="flex flex-col gap-4">
+              <ChoicePills
+                name="crew-size"
+                legend="Velikost stolu"
+                value={crewSize}
+                options={[
+                  { value: 2, label: "Dvojice" },
+                  { value: 3, label: "Trojice" },
+                  { value: 4, label: "Čtveřice" },
+                ]}
+                onChange={(size) => {
+                  setCrewSize(size);
+                  setShowAllCrews(false);
+                }}
+              />
+              <GameFilters
+                source={windowed}
+                playerCounts={[]}
+                value={crewFilter}
+                onChange={setCrewFilter}
+                hidePlayerCount
+              />
+              <CrewTable rows={visibleCrews} />
+              {crews.length > visibleCrews.length ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCrews(true)}
+                  className="self-start rounded-full border border-white/10 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-white/20 hover:text-white"
+                >
+                  Zobrazit všech {integerFormat.format(crews.length)} sestav
+                </button>
+              ) : showAllCrews && frequentCrews.length < crews.length ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCrews(false)}
+                  className="self-start rounded-full border border-white/10 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-white/20 hover:text-white"
+                >
+                  Jen sestavy s aspoň dvěma hrami
+                </button>
+              ) : null}
             </div>
           </Section>
 
@@ -311,9 +440,111 @@ export function StatsDashboard({ bundle }: { bundle: PandemicStatsBundle }) {
 
           <Section
             title="Změny rolí"
-            note={`${integerFormat.format(stats.gamesWithRoleChange)} her má aspoň jednu změnu, celkem ${integerFormat.format(stats.roleChanges)} přechodů. Beze změny ${integerFormat.format(stats.roleChangeDepth.none)}, jedna změna ${integerFormat.format(stats.roleChangeDepth.one)}, dvě a víc ${integerFormat.format(stats.roleChangeDepth.twoOrMore)}.`}
+            note={`${integerFormat.format(stats.gamesWithRoleChange)} her má aspoň jednu změnu, celkem ${integerFormat.format(stats.roleChanges)} přechodů. Beze změny ${integerFormat.format(stats.roleChangeDepth.none)}, jedna změna ${integerFormat.format(stats.roleChangeDepth.one)}, dvě a víc ${integerFormat.format(stats.roleChangeDepth.twoOrMore)}. Úspěšnost je podíl výher v partiích, kde k dané změně došlo.`}
           >
-            <ChangeTable stats={stats} />
+            <div className="flex flex-col gap-4">
+              <ChoicePills
+                name="change-view"
+                legend="Pohled"
+                value={changeView}
+                options={[
+                  { value: "pairs", label: "Přechody" },
+                  { value: "from", label: "Z role" },
+                  { value: "to", label: "Na roli" },
+                ]}
+                onChange={(view) => {
+                  setChangeView(view);
+                  setChangeSort({ key: "count", direction: "desc" });
+                  setShowAllChanges(false);
+                }}
+              />
+              <p className="text-sm leading-6 text-zinc-500">
+                {changeView === "from"
+                  ? "Součet odchodů z role, bez ohledu na to, kam hráč přešel."
+                  : changeView === "to"
+                    ? "Součet příchodů na roli, bez ohledu na to, odkud hráč přišel."
+                    : "Každý řádek je jeden konkrétní přechod z role na roli."}
+              </p>
+              <ChangeTable
+                stats={stats}
+                view={changeView}
+                sort={changeSort}
+                showAll={showAllChanges}
+                onSort={setChangeSort}
+              />
+              {changeView === "pairs" && stats.roleChangePairs.length > 15 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllChanges((current) => !current)}
+                  className="self-start rounded-full border border-white/10 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-white/20 hover:text-white"
+                >
+                  {showAllChanges
+                    ? "Jen 15 přechodů"
+                    : `Zobrazit všech ${integerFormat.format(stats.roleChangePairs.length)} přechodů`}
+                </button>
+              ) : null}
+            </div>
+          </Section>
+
+          <Section
+            title="Historie partií"
+            note="Sloupce jsou počty her podle data partie. Prázdné měsíce mezi první a poslední hrou v grafu zůstávají, ať je vidět, kdy se nehrálo."
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <ChoicePills
+                  name="timeline-bucket"
+                  legend="Krok"
+                  value={timelineBucket}
+                  options={[
+                    { value: "month", label: "Měsíce" },
+                    { value: "year", label: "Roky" },
+                  ]}
+                  onChange={setTimelineBucket}
+                />
+                <ChoicePills
+                  name="timeline-metric"
+                  legend="Výška sloupce"
+                  value={timelineMetric}
+                  options={[
+                    { value: "games", label: "Počet her" },
+                    { value: "rate", label: "Úspěšnost" },
+                  ]}
+                  onChange={setTimelineMetric}
+                />
+              </div>
+              <GameFilters
+                source={windowed}
+                playerCounts={playerCountChoices}
+                value={timelineFilter}
+                onChange={setTimelineFilter}
+              />
+              <StatsTimelineChart
+                points={timeline.points}
+                undated={timeline.undated}
+                metric={timelineMetric}
+              />
+            </div>
+          </Section>
+
+          <Section
+            title="Zajímavosti"
+            note="Vybrané rekordy ze stejného rozsahu jako tabulky nad nimi."
+          >
+            {highlights.length === 0 ? (
+              <p className="text-sm text-zinc-500">V tomhle rozsahu ještě není z čeho skládat rekordy.</p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {highlights.map((highlight) => (
+                  <SummaryCard
+                    key={highlight.id}
+                    label={highlight.label}
+                    value={highlight.value}
+                    detail={highlight.detail}
+                  />
+                ))}
+              </div>
+            )}
           </Section>
         </div>
       )}
@@ -426,6 +657,7 @@ function Matrix({ stats }: { stats: PandemicStats }) {
   const columnTotals = difficulties.map((_, index) =>
     counts.reduce((sum, row) => sum + (row[index] ?? 0), 0),
   );
+  const grand = columnTotals.reduce((sum, value) => sum + value, 0);
 
   if (modes.length === 0 || difficulties.length === 0) {
     return <p className="text-sm text-zinc-500">Módy nebo obtížnosti v datech chybí.</p>;
@@ -454,10 +686,12 @@ function Matrix({ stats }: { stats: PandemicStats }) {
                 <Td>{mode.label}</Td>
                 {row.map((value, columnIndex) => (
                   <Td key={difficulties[columnIndex]?.key ?? columnIndex} align="right" muted={value === 0}>
-                    {integerFormat.format(value)}
+                    <CountShare count={value} whole={total} />
                   </Td>
                 ))}
-                <Td align="right">{integerFormat.format(total)}</Td>
+                <Td align="right">
+                  <CountShare count={total} whole={grand} />
+                </Td>
               </tr>
             );
           })}
@@ -465,10 +699,12 @@ function Matrix({ stats }: { stats: PandemicStats }) {
             <Td>Celkem</Td>
             {columnTotals.map((value, index) => (
               <Td key={difficulties[index]?.key ?? index} align="right">
-                {integerFormat.format(value)}
+                <CountShare count={value} whole={grand} />
               </Td>
             ))}
-            <Td align="right">{integerFormat.format(columnTotals.reduce((sum, value) => sum + value, 0))}</Td>
+            <Td align="right">
+              <CountShare count={grand} whole={grand} />
+            </Td>
           </tr>
         </tbody>
       </table>
@@ -476,8 +712,20 @@ function Matrix({ stats }: { stats: PandemicStats }) {
   );
 }
 
-function BreakdownTable({ rows, label }: { rows: CountRow[]; label: string }) {
-  const visible = rows.filter((row) => row.games > 0);
+function BreakdownTable({
+  rows,
+  label,
+  showWins = true,
+  showWinRate = true,
+  keepEmpty = false,
+}: {
+  rows: CountRow[];
+  label: string;
+  showWins?: boolean;
+  showWinRate?: boolean;
+  keepEmpty?: boolean;
+}) {
+  const visible = keepEmpty ? rows : rows.filter((row) => row.games > 0);
   if (visible.length === 0) {
     return <p className="text-sm text-zinc-500">Zatím nic k zobrazení.</p>;
   }
@@ -489,8 +737,8 @@ function BreakdownTable({ rows, label }: { rows: CountRow[]; label: string }) {
             <Th>{label}</Th>
             <Th align="right">Her</Th>
             <Th align="right">Podíl</Th>
-            <Th align="right">Výher</Th>
-            <Th align="right">Úspěšnost</Th>
+            {showWins ? <Th align="right">Výher</Th> : null}
+            {showWinRate ? <Th align="right">Úspěšnost</Th> : null}
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10">
@@ -499,8 +747,8 @@ function BreakdownTable({ rows, label }: { rows: CountRow[]; label: string }) {
               <Td>{row.label}</Td>
               <Td align="right">{integerFormat.format(row.games)}</Td>
               <Td align="right">{formatPercent(row.share)}</Td>
-              <Td align="right">{integerFormat.format(row.wins)}</Td>
-              <Td align="right">{formatPercent(row.winRate)}</Td>
+              {showWins ? <Td align="right">{integerFormat.format(row.wins)}</Td> : null}
+              {showWinRate ? <Td align="right">{formatPercent(row.winRate)}</Td> : null}
             </tr>
           ))}
         </tbody>
@@ -509,34 +757,153 @@ function BreakdownTable({ rows, label }: { rows: CountRow[]; label: string }) {
   );
 }
 
-function RoleTable({ rows }: { rows: RoleRow[] }) {
-  const visible = rows.filter((row) => row.games > 0 || row.starts > 0 || row.arrivals > 0);
+function RoleTable({
+  rows,
+  sort,
+  onSort,
+}: {
+  rows: RoleRow[];
+  sort: SortState;
+  onSort: (sort: SortState) => void;
+}) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-zinc-500">V tomhle filtru zatím žádná role.</p>;
+  }
+  const splitAt = rows.findIndex((row) => row.retired);
+  const active = splitAt === -1 ? rows : rows.slice(0, splitAt);
+  const retired = splitAt === -1 ? [] : rows.slice(splitAt);
+  const columns: { key: string; label: string; align?: "left" | "right"; numeric?: boolean }[] = [
+    { key: "label", label: "Role", numeric: false },
+    { key: "games", label: "Her", align: "right" },
+    { key: "share", label: "Podíl her", align: "right" },
+    { key: "starts", label: "Startů", align: "right" },
+    { key: "arrivals", label: "Příchodů", align: "right" },
+    { key: "departures", label: "Odchodů", align: "right" },
+    { key: "winRate", label: "Úspěšnost", align: "right" },
+  ];
+
+  function renderRow(row: RoleRow) {
+    return (
+      <tr key={row.key}>
+        <Td>{row.label}</Td>
+        <Td align="right">{integerFormat.format(row.games)}</Td>
+        <Td align="right">{formatPercent(row.share)}</Td>
+        <Td align="right">{integerFormat.format(row.starts)}</Td>
+        <Td align="right">{integerFormat.format(row.arrivals)}</Td>
+        <Td align="right">{integerFormat.format(row.departures)}</Td>
+        <Td align="right">{formatPercent(row.winRate)}</Td>
+      </tr>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[44rem] text-left text-sm">
+      <table className="w-full min-w-[52rem] text-left text-sm">
         <thead className="text-xs uppercase tracking-wider text-zinc-500">
           <tr>
-            <Th>Role</Th>
+            {columns.map((column) => (
+              <SortHeader
+                key={column.key}
+                label={column.label}
+                sortKey={column.key}
+                sort={sort}
+                onSort={onSort}
+                align={column.align}
+                numeric={column.numeric}
+              />
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/10">
+          {active.map(renderRow)}
+          {retired.length > 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="px-3 py-3 text-xs uppercase tracking-[0.18em] text-zinc-500">
+                Už se nehraje
+              </td>
+            </tr>
+          ) : null}
+          {retired.map(renderRow)}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PlayerTable({
+  rows,
+  sort,
+  onSort,
+}: {
+  rows: PlayerRow[];
+  sort: SortState;
+  onSort: (sort: SortState) => void;
+}) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-zinc-500">V tomhle filtru zatím žádný hráč.</p>;
+  }
+  const columns: { key: string; label: string; align?: "left" | "right"; numeric?: boolean }[] = [
+    { key: "label", label: "Hráč", numeric: false },
+    { key: "games", label: "Her", align: "right" },
+    { key: "wins", label: "Výher", align: "right" },
+    { key: "winRate", label: "Úspěšnost", align: "right" },
+    { key: "topRole", label: "Nejčastější start", numeric: false },
+  ];
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[36rem] text-left text-sm">
+        <thead className="text-xs uppercase tracking-wider text-zinc-500">
+          <tr>
+            {columns.map((column) => (
+              <SortHeader
+                key={column.key}
+                label={column.label}
+                sortKey={column.key}
+                sort={sort}
+                onSort={onSort}
+                align={column.align}
+                numeric={column.numeric}
+              />
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/10">
+          {rows.map((player) => (
+            <tr key={player.key}>
+              <Td>{player.label}</Td>
+              <Td align="right">{integerFormat.format(player.games)}</Td>
+              <Td align="right">{integerFormat.format(player.wins)}</Td>
+              <Td align="right">{formatPercent(player.winRate)}</Td>
+              <Td>{player.topRole ?? "–"}</Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function CrewTable({ rows }: { rows: { key: string; label: string; games: number; wins: number; winRate: number | null }[] }) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-zinc-500">V tomhle filtru zatím žádná sestava s aspoň dvěma hrami.</p>;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[32rem] text-left text-sm">
+        <thead className="text-xs uppercase tracking-wider text-zinc-500">
+          <tr>
+            <Th>Sestava</Th>
             <Th align="right">Her</Th>
-            <Th align="right">Podíl her</Th>
-            <Th align="right">Startů</Th>
-            <Th align="right">Příchodů změnou</Th>
+            <Th align="right">Výher</Th>
             <Th align="right">Úspěšnost</Th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10">
-          {visible.map((row) => (
+          {rows.map((row) => (
             <tr key={row.key}>
-              <Td>
-                {row.label}
-                {row.label !== row.key ? (
-                  <span className="ml-2 text-xs text-zinc-500">{row.key.toUpperCase()}</span>
-                ) : null}
-              </Td>
+              <Td>{row.label}</Td>
               <Td align="right">{integerFormat.format(row.games)}</Td>
-              <Td align="right">{formatPercent(row.share)}</Td>
-              <Td align="right">{integerFormat.format(row.starts)}</Td>
-              <Td align="right">{integerFormat.format(row.arrivals)}</Td>
+              <Td align="right">{integerFormat.format(row.wins)}</Td>
               <Td align="right">{formatPercent(row.winRate)}</Td>
             </tr>
           ))}
@@ -581,38 +948,114 @@ function DiseaseTable({ rows }: { rows: DiseaseRow[] }) {
   );
 }
 
-function ChangeTable({ stats }: { stats: PandemicStats }) {
-  const rows = stats.roleChangePairs.slice(0, 15);
-  if (rows.length === 0) {
-    return <p className="text-sm text-zinc-500">Zatím žádná změna role.</p>;
+function ChangeTable({
+  stats,
+  view,
+  sort,
+  showAll,
+  onSort,
+}: {
+  stats: PandemicStats;
+  view: "pairs" | "from" | "to";
+  sort: SortState;
+  showAll: boolean;
+  onSort: (sort: SortState) => void;
+}) {
+  if (view === "pairs") {
+    const rows = orderChanges(stats.roleChangePairs, sort);
+    const visible = showAll ? rows : rows.slice(0, 15);
+    if (visible.length === 0) return <p className="text-sm text-zinc-500">Zatím žádná změna role.</p>;
+    return (
+      <ChangeGrid
+        rows={visible}
+        sort={sort}
+        onSort={onSort}
+        columns={[
+          { key: "from", label: "Z role", numeric: false },
+          { key: "to", label: "Na roli", numeric: false },
+          { key: "count", label: "Počet", align: "right" },
+          { key: "share", label: "Podíl změn", align: "right" },
+          { key: "games", label: "Her", align: "right" },
+          { key: "winRate", label: "Úspěšnost", align: "right" },
+        ]}
+        render={(row: ChangeRow) => (
+          <>
+            <Td>{row.from}</Td>
+            <Td>{row.to}</Td>
+            <Td align="right">{integerFormat.format(row.count)}</Td>
+            <Td align="right">{formatPercent(row.share)}</Td>
+            <Td align="right">{integerFormat.format(row.games)}</Td>
+            <Td align="right">{formatPercent(row.winRate)}</Td>
+          </>
+        )}
+      />
+    );
   }
+
+  const sideRows = orderChanges(view === "from" ? stats.roleChangeFrom : stats.roleChangeTo, sort);
+  if (sideRows.length === 0) return <p className="text-sm text-zinc-500">Zatím žádná změna role.</p>;
+  return (
+    <ChangeGrid
+      rows={sideRows}
+      sort={sort}
+      onSort={onSort}
+      columns={[
+        { key: "label", label: view === "from" ? "Z role" : "Na roli", numeric: false },
+        { key: "count", label: view === "from" ? "Odchodů" : "Příchodů", align: "right" },
+        { key: "share", label: "Podíl změn", align: "right" },
+        { key: "games", label: "Her", align: "right" },
+        { key: "winRate", label: "Úspěšnost", align: "right" },
+      ]}
+      render={(row: ChangeSideRow) => (
+        <>
+          <Td>{row.label}</Td>
+          <Td align="right">{integerFormat.format(row.count)}</Td>
+          <Td align="right">{formatPercent(row.share)}</Td>
+          <Td align="right">{integerFormat.format(row.games)}</Td>
+          <Td align="right">{formatPercent(row.winRate)}</Td>
+        </>
+      )}
+    />
+  );
+}
+
+function ChangeGrid<T extends { key: string }>({
+  rows,
+  columns,
+  sort,
+  onSort,
+  render,
+}: {
+  rows: T[];
+  columns: { key: string; label: string; align?: "left" | "right"; numeric?: boolean }[];
+  sort: SortState;
+  onSort: (sort: SortState) => void;
+  render: (row: T) => ReactNode;
+}) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[32rem] text-left text-sm">
+      <table className="w-full min-w-[40rem] text-left text-sm">
         <thead className="text-xs uppercase tracking-wider text-zinc-500">
           <tr>
-            <Th>Z role</Th>
-            <Th>Na roli</Th>
-            <Th align="right">Počet</Th>
-            <Th align="right">Podíl změn</Th>
+            {columns.map((column) => (
+              <SortHeader
+                key={column.key}
+                label={column.label}
+                sortKey={column.key}
+                sort={sort}
+                onSort={onSort}
+                align={column.align}
+                numeric={column.numeric}
+              />
+            ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-white/10">
           {rows.map((row) => (
-            <tr key={`${row.from}-${row.to}`}>
-              <Td>{row.from}</Td>
-              <Td>{row.to}</Td>
-              <Td align="right">{integerFormat.format(row.count)}</Td>
-              <Td align="right">{formatPercent(row.share)}</Td>
-            </tr>
+            <tr key={row.key}>{render(row)}</tr>
           ))}
         </tbody>
       </table>
-      {stats.roleChangePairs.length > rows.length ? (
-        <p className="mt-3 text-xs text-zinc-500">
-          Zobrazeno 15 nejčastějších přechodů z {integerFormat.format(stats.roleChangePairs.length)}.
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -645,11 +1088,264 @@ function Td({
 }) {
   return (
     <td
-      className={`px-3 py-2.5 align-top ${align === "right" ? "text-right tabular-nums" : "text-left"} ${
+      className={`px-3 py-2.5 align-top ${align === "right" ? "text-right tabular-nums whitespace-nowrap" : "text-left"} ${
         muted ? "text-zinc-600" : "text-zinc-200"
       }`}
     >
       {children}
     </td>
+  );
+}
+
+type SortState = { key: string; direction: "asc" | "desc" };
+
+const DIFFICULTY_RANK = ["jednoducha", "stredne narocna", "velmi narocna", "legendarni"];
+const MODE_RANK = ["klasika", "zhoubny kmen", "mutace", "worldwide m.", "laborator", "bioterorista", "combo"];
+
+function seatCounts(source: StatsSource) {
+  const counts = new Map<string, number>();
+  for (const seat of source.seats) counts.set(seat.game_id, (counts.get(seat.game_id) ?? 0) + 1);
+  return [...new Set(counts.values())].filter((count) => count > 0).sort((left, right) => left - right);
+}
+
+function playerCountOption(count: number) {
+  if (count === 1) return "1 hráč";
+  if (count >= 2 && count <= 4) return `${count} hráči`;
+  return `${count} hráčů`;
+}
+
+function toggleSort(current: SortState, key: string, numeric: boolean): SortState {
+  if (current.key === key) {
+    return { key, direction: current.direction === "asc" ? "desc" : "asc" };
+  }
+  return { key, direction: numeric ? "desc" : "asc" };
+}
+
+function compareValues(
+  left: string | number | null,
+  right: string | number | null,
+  direction: SortState["direction"],
+) {
+  const leftMissing = left === null || left === "";
+  const rightMissing = right === null || right === "";
+  if (leftMissing && rightMissing) return 0;
+  if (leftMissing) return 1;
+  if (rightMissing) return -1;
+  const result =
+    typeof left === "number" && typeof right === "number"
+      ? left - right
+      : String(left).localeCompare(String(right), "cs");
+  return direction === "asc" ? result : -result;
+}
+
+function roleValue(row: RoleRow, key: string): string | number | null {
+  if (key === "label") return row.label;
+  if (key === "games") return row.games;
+  if (key === "share") return row.share;
+  if (key === "starts") return row.starts;
+  if (key === "arrivals") return row.arrivals;
+  if (key === "departures") return row.departures;
+  if (key === "winRate") return row.winRate;
+  return null;
+}
+
+function orderRoles(rows: RoleRow[], sort: SortState) {
+  const visible = rows.filter(
+    (row) => row.games > 0 || row.starts > 0 || row.arrivals > 0 || row.departures > 0,
+  );
+  const compare = (left: RoleRow, right: RoleRow) =>
+    compareValues(roleValue(left, sort.key), roleValue(right, sort.key), sort.direction) ||
+    left.label.localeCompare(right.label, "cs");
+  return [
+    ...visible.filter((row) => !row.retired).sort(compare),
+    ...visible.filter((row) => row.retired).sort(compare),
+  ];
+}
+
+function orderPlayers(rows: PlayerRow[], sort: SortState) {
+  const compare = (left: PlayerRow, right: PlayerRow) =>
+    compareValues(
+      sort.key === "label"
+        ? left.label
+        : sort.key === "topRole"
+          ? left.topRole
+          : sort.key === "wins"
+            ? left.wins
+            : sort.key === "winRate"
+              ? left.winRate
+              : left.games,
+      sort.key === "label"
+        ? right.label
+        : sort.key === "topRole"
+          ? right.topRole
+          : sort.key === "wins"
+            ? right.wins
+            : sort.key === "winRate"
+              ? right.winRate
+              : right.games,
+      sort.direction,
+    ) || left.label.localeCompare(right.label, "cs");
+  return [...rows].sort(compare);
+}
+
+function orderChanges<T extends ChangeRow | ChangeSideRow>(rows: T[], sort: SortState) {
+  return [...rows].sort((left, right) => {
+    const leftValue = changeValue(left, sort.key);
+    const rightValue = changeValue(right, sort.key);
+    return compareValues(leftValue, rightValue, sort.direction);
+  });
+}
+
+function changeValue(row: ChangeRow | ChangeSideRow, key: string): string | number | null {
+  if (key === "from" && "from" in row) return row.from;
+  if (key === "to" && "to" in row) return row.to;
+  if (key === "label" && "label" in row) return row.label;
+  if (key === "count") return row.count;
+  if (key === "games") return row.games;
+  if (key === "share") return row.share;
+  if (key === "winRate") return row.winRate;
+  return null;
+}
+
+function CountShare({ count, whole }: { count: number; whole: number }) {
+  return (
+    <>
+      {integerFormat.format(count)}
+      {whole > 0 ? (
+        <span className="ml-2 text-xs text-zinc-500">{formatPercent((count / whole) * 100)}</span>
+      ) : null}
+    </>
+  );
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  align = "left",
+  numeric = true,
+}: {
+  label: string;
+  sortKey: string;
+  sort: SortState;
+  onSort: (sort: SortState) => void;
+  align?: "left" | "right";
+  numeric?: boolean;
+}) {
+  const active = sort.key === sortKey;
+  return (
+    <th
+      scope="col"
+      aria-sort={active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}
+      className={`px-3 py-2 font-medium ${align === "right" ? "text-right" : "text-left"}`}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(toggleSort(sort, sortKey, numeric))}
+        className={`inline-flex items-center gap-1 uppercase tracking-wider ${
+          align === "right" ? "w-full justify-end" : ""
+        }`}
+      >
+        {label}
+        <span aria-hidden="true" className={active ? "text-emerald-300" : "text-zinc-600"}>
+          {active ? (sort.direction === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
+function GameFilters({
+  source,
+  playerCounts,
+  value,
+  onChange,
+  hidePlayerCount = false,
+}: {
+  source: StatsSource;
+  playerCounts: number[];
+  value: StatsGameFilter;
+  onChange: (value: StatsGameFilter) => void;
+  hidePlayerCount?: boolean;
+}) {
+  const modes = [...source.modes].sort((left, right) => rankOf(left.code, MODE_RANK) - rankOf(right.code, MODE_RANK));
+  const difficulties = [...source.difficulties].sort(
+    (left, right) => rankOf(left.code, DIFFICULTY_RANK) - rankOf(right.code, DIFFICULTY_RANK),
+  );
+  const active = Boolean(value.mode || value.difficulty || value.playerCount);
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      <FilterSelect
+        label="Mód"
+        value={value.mode ?? ""}
+        onChange={(mode) => onChange({ ...value, mode: mode || null })}
+        options={[{ value: "", label: "Všechny módy" }, ...modes.map((mode) => ({ value: mode.code, label: mode.name_cs }))]}
+      />
+      <FilterSelect
+        label="Obtížnost"
+        value={value.difficulty ?? ""}
+        onChange={(difficulty) => onChange({ ...value, difficulty: difficulty || null })}
+        options={[
+          { value: "", label: "Všechny obtížnosti" },
+          ...difficulties.map((difficulty) => ({ value: difficulty.code, label: difficulty.name_cs })),
+        ]}
+      />
+      {hidePlayerCount ? null : (
+        <FilterSelect
+          label="Počet hráčů"
+          value={value.playerCount == null ? "" : String(value.playerCount)}
+          onChange={(count) => onChange({ ...value, playerCount: count ? Number(count) : null })}
+          options={[
+            { value: "", label: "Libovolně" },
+            ...playerCounts.map((count) => ({ value: String(count), label: playerCountOption(count) })),
+          ]}
+        />
+      )}
+      {active ? (
+        <button
+          type="button"
+          onClick={() => onChange(EMPTY_FILTER)}
+          className="h-9 rounded-full border border-white/10 px-3 text-sm text-zinc-400 transition hover:border-white/20 hover:text-white"
+        >
+          Zrušit filtry
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function rankOf(code: string, order: string[]) {
+  const folded = foldCode(code);
+  const index = order.findIndex((item) => folded === item || folded.startsWith(item));
+  return index === -1 ? order.length : index;
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
+      {label}
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-9 min-w-40 rounded-full border border-white/10 bg-zinc-950 px-3 text-sm font-normal normal-case tracking-normal text-zinc-100 outline-none focus:border-emerald-400/60"
+      >
+        {options.map((option) => (
+          <option key={option.value || "all"} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
