@@ -90,25 +90,65 @@ export function badgeById(id: BadgeId): Badge {
   return badge;
 }
 
-export function parseBadges(
-  value: unknown,
-  legacy?: {
-    has_achievement_42?: boolean | null;
-    has_achievement_ano?: boolean | null;
-  } | null,
-): BadgeId[] {
-  const ids = new Set<BadgeId>();
+export type EarnedBadges = Partial<Record<BadgeId, string>>;
+
+export type BadgeStorageShape = "map" | "list";
+
+function isEarnedAt(value: string) {
+  return !Number.isNaN(Date.parse(value));
+}
+
+export function badgeStorageShape(value: unknown): BadgeStorageShape {
+  return Array.isArray(value) ? "list" : "map";
+}
+
+export function serializeEarnedBadges(earned: EarnedBadges, shape: BadgeStorageShape) {
+  if (shape === "map") return earned;
+  return earnedBadgeIds(earned).map((id) => `${id}|${earned[id]}`);
+}
+
+export function parseEarnedBadges(value: unknown): EarnedBadges {
+  const earned: EarnedBadges = {};
 
   if (Array.isArray(value)) {
     for (const item of value) {
-      if (isBadgeId(item)) ids.add(item);
+      if (typeof item !== "string") continue;
+      const pipe = item.indexOf("|");
+      if (pipe <= 0) continue;
+      const id = item.slice(0, pipe);
+      const at = item.slice(pipe + 1);
+      if (!isBadgeId(id) || !isEarnedAt(at)) continue;
+      earned[id] = new Date(at).toISOString();
     }
+    return earned;
   }
 
-  if (legacy?.has_achievement_42) ids.add("dd_resist");
-  if (legacy?.has_achievement_ano) ids.add("dd_ano");
+  if (!value || typeof value !== "object") return earned;
 
-  return BADGES.map((badge) => badge.id).filter((id) => ids.has(id));
+  const record = value as Record<string, unknown>;
+  for (const id of BADGE_IDS) {
+    const at = record[id];
+    if (typeof at !== "string" || !isEarnedAt(at)) continue;
+    earned[id] = new Date(at).toISOString();
+  }
+  return earned;
+}
+
+export function earnedBadgeIds(earned: EarnedBadges): BadgeId[] {
+  return BADGE_IDS.filter((id) => typeof earned[id] === "string");
+}
+
+export function formatEarnedAt(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("cs-CZ", {
+    timeZone: "Europe/Prague",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function sampleBadges(

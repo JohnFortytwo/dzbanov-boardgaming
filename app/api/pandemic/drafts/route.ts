@@ -64,7 +64,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { userId, response } = await requireUser();
+  const { supabase, userId, response } = await requireUser();
   if (response) return response;
 
   let body: unknown;
@@ -158,8 +158,14 @@ export async function POST(request: Request) {
   const createdAt = typeof existing.created_at === "string" ? existing.created_at : "";
   const gameOrder = typeof existing.game_order === "number" ? existing.game_order : 0;
   const queue = await nextQueue(userId, createdAt, gameOrder);
-  const badge = await grantBadge(userId, "pandemic_history");
-  return Response.json({ ok: true, game_id: gameId, badge, ...queue });
+  const granted = await grantBadge(supabase, userId, "pandemic_history");
+  return Response.json({
+    ok: true,
+    game_id: gameId,
+    badge: granted.ok && granted.granted ? granted.id : null,
+    earned_at: granted.ok && granted.granted ? granted.earnedAt : null,
+    ...queue,
+  });
 }
 
 const PUBLIC_SCAN_OBJECT = /\/storage\/v1\/object\/public\/scans\/([^?#]+)/i;

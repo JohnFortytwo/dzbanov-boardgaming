@@ -1,19 +1,16 @@
--- Odznaky: jeden sloupec pro všechny současné i budoucí odznaky.
--- Spustit jednou v Supabase SQL editoru. Staré sloupce has_achievement_* zůstanou
--- a při prvním čtení se do pole přenesou.
+-- Jednorázově smaže všem dosavadní odznaky a sloupec badges změní
+-- z pole názvů na mapu { "id-odznaku": "čas získání" }.
+-- Spustit jednou v Supabase SQL editoru. Opakované spuštění znovu smaže odznaky.
+
+update public.profiles
+set
+  has_achievement_42 = false,
+  has_achievement_ano = false;
 
 alter table public.profiles
-  add column if not exists badges text[] not null default '{}';
+  drop column if exists badges;
 
-update public.profiles as profile
-set badges = (
-  select coalesce(array_agg(distinct badge), '{}'::text[])
-  from (
-    select unnest(profile.badges) as badge
-    union all
-    select 'dd_resist'::text where profile.has_achievement_42
-    union all
-    select 'dd_ano'::text where profile.has_achievement_ano
-  ) as earned
-  where badge is not null and badge <> ''
-);
+alter table public.profiles
+  add column badges jsonb not null default '{}'::jsonb;
+
+notify pgrst, 'reload schema';

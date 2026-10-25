@@ -25,8 +25,7 @@ import {
   type PandemicCatalogs,
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
-import { isBadgeId } from "@/lib/badges";
-import { announceBadge } from "@/lib/badges-client";
+import { announceBadgeFromPayload } from "@/lib/badges-client";
 
 const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
 const ROLE_SINK = ["bio", "lokál", "pilot", "rejža", "vir"];
@@ -174,12 +173,13 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
         errors?: string[];
         game_id?: string;
         badge?: unknown;
+        earned_at?: unknown;
       };
       if (!response.ok) {
         setErrors(payload.errors?.length ? payload.errors : [payload.error ?? "Uložení se nezdařilo."]);
         return;
       }
-      if (isBadgeId(payload.badge)) announceBadge(payload.badge);
+      announceBadgeFromPayload(payload.badge, payload.earned_at);
       setSavedId(payload.game_id ?? "saved");
       setForm(freshForm());
     } catch {

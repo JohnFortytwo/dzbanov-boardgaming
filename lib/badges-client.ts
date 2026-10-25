@@ -3,24 +3,50 @@
 import { createClient } from "@/lib/supabase/client";
 import {
   BADGE_IDS,
+  badgeStorageShape,
+  earnedBadgeIds,
   isBadgeId,
-  parseBadges,
+  parseEarnedBadges,
+  serializeEarnedBadges,
   type BadgeId,
+  type BadgeStorageShape,
+  type EarnedBadges,
 } from "@/lib/badges";
 
 type BadgeUpdate =
-  | { type: "grant"; id: BadgeId }
+  | { type: "grant"; id: BadgeId; earnedAt: string }
   | { type: "reset" }
-  | { type: "sync"; ids: BadgeId[] };
+  | { type: "sync"; earned: EarnedBadges };
 
 const listeners = new Set<(update: BadgeUpdate) => void>();
-const pendingGrants = new Set<BadgeId>();
+const pendingGrants = new Map<BadgeId, string>();
 
-let known: Set<BadgeId> | null = null;
+let known: EarnedBadges | null = null;
 let resetEpoch = 0;
 
-function remember(ids: readonly BadgeId[]) {
-  known = new Set(ids);
+function remember(earned: EarnedBadges) {
+  known = { ...earned };
+}
+
+async function clearStoredBadges(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  shape: BadgeStorageShape,
+) {
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      badges: serializeEarnedBadges({}, shape),
+      has_achievement_42: false,
+      has_achievement_ano: false,
+    })
+    .eq("id", userId);
+
+  return !error;
+}
+
+function snapshotKnown(): EarnedBadges {
+  return { ...(known ?? {}) };
 }
 
 export function subscribeBadges(listener: (update: BadgeUpdate) => void) {
@@ -30,17 +56,20 @@ export function subscribeBadges(listener: (update: BadgeUpdate) => void) {
   };
 }
 
-export function replaceOwnedBadges(ids: readonly BadgeId[]) {
-  const next = BADGE_IDS.filter((id) => ids.includes(id));
+export function replaceEarnedBadges(earned: EarnedBadges) {
+  const next = parseEarnedBadges(earned);
   resetEpoch += 1;
   pendingGrants.clear();
   remember(next);
-  listeners.forEach((listener) => listener({ type: "sync", ids: next }));
+  listeners.forEach((listener) => listener({ type: "sync", earned: next }));
 }
 
 export async function grantAllBadges() {
   const response = await fetch("/api/badges/grant-all", { method: "POST" });
-  const payload = (await response.json().catch(() => null)) as { error?: string; badges?: unknown } | null;
+  const payload = (await response.json().catch(() => null)) as {
+    error?: string;
+    badges?: unknown;
+  } | null;
 
   if (!response.ok) {
     return {
@@ -49,51 +78,51 @@ export async function grantAllBadges() {
     };
   }
 
-  const ids = Array.isArray(payload?.badges)
-    ? payload.badges.filter((id): id is BadgeId => isBadgeId(id))
-    : [...BADGE_IDS];
-  replaceOwnedBadges(ids);
+  const earned = parseEarnedBadges(payload?.badges);
+  const fallbackAt = new Date().toISOString();
+  if (earnedBadgeIds(earned).length === 0) {
+    for (const id of BADGE_IDS) earned[id] = fallbackAt;
+  }
+  replaceEarnedBadges(earned);
   return { ok: true as const };
 }
 
-export function announceBadge(id: BadgeId) {
-  const already = known?.has(id) ?? false;
-  pendingGrants.add(id);
-  if (known) known.add(id);
-  else known = new Set([id]);
+export function announceBadge(id: BadgeId, earnedAt: string) {
+  const at = Number.isNaN(Date.parse(earnedAt)) ? new Date().toISOString() : new Date(earnedAt).toISOString();
+  const already = Boolean(known?.[id]);
+  pendingGrants.set(id, at);
+  if (!known) known = {};
+  if (!known[id]) known[id] = at;
   if (already) return;
-  listeners.forEach((listener) => listener({ type: "grant", id }));
+  listeners.forEach((listener) => listener({ type: "grant", id, earnedAt: at }));
 }
 
-export async function loadUserBadges(): Promise<BadgeId[]> {
+export function announceBadgeFromPayload(badge: unknown, earnedAt: unknown) {
+  if (!isBadgeId(badge)) return;
+  announceBadge(badge, typeof earnedAt === "string" ? earnedAt : new Date().toISOString());
+}
+
+export async function loadUserBadges(): Promise<EarnedBadges> {
   const epoch = resetEpoch;
   const supabase = createClient();
   const { data, error: userError } = await supabase.auth.getUser();
 
   if (userError || !data.user || epoch !== resetEpoch) {
-    return [...(known ?? [])];
+    return snapshotKnown();
   }
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("badges, has_achievement_42, has_achievement_ano")
+    .select("badges")
     .eq("id", data.user.id)
     .maybeSingle();
 
-  if (epoch !== resetEpoch) return [...(known ?? [])];
+  if (epoch !== resetEpoch) return snapshotKnown();
+  if (error) return snapshotKnown();
 
-  let loaded = profile ? parseBadges(profile.badges, profile) : [];
-  if (error) {
-    const legacy = await supabase
-      .from("profiles")
-      .select("has_achievement_42, has_achievement_ano")
-      .eq("id", data.user.id)
-      .maybeSingle();
-    if (epoch !== resetEpoch) return [...(known ?? [])];
-    loaded = legacy.data ? parseBadges(null, legacy.data) : [...(known ?? [])];
-  }
-  for (const id of pendingGrants) {
-    if (!loaded.includes(id)) loaded.push(id);
+  const loaded = parseEarnedBadges(profile?.badges);
+  for (const [id, earnedAt] of pendingGrants) {
+    if (!loaded[id]) loaded[id] = earnedAt;
   }
   pendingGrants.clear();
   remember(loaded);
@@ -101,51 +130,39 @@ export async function loadUserBadges(): Promise<BadgeId[]> {
 }
 
 export async function grantOwnBadge(id: BadgeId) {
-  if (known?.has(id)) {
+  if (known?.[id]) {
     return { ok: true as const, granted: false };
   }
 
-  const supabase = createClient();
-  const { data, error: userError } = await supabase.auth.getUser();
+  const response = await fetch("/api/badges/grant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id }),
+  });
+  const payload = (await response.json().catch(() => null)) as {
+    error?: string;
+    granted?: boolean;
+    badge?: unknown;
+    earned_at?: unknown;
+    badges?: unknown;
+  } | null;
 
-  if (userError || !data.user) {
+  if (!response.ok) {
     return {
       ok: false as const,
-      error: "Pro uložení odznaku se musíš přihlásit.",
+      error: payload?.error ?? "Odznak se nepodařilo uložit.",
     };
   }
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("badges, has_achievement_42, has_achievement_ano")
-    .eq("id", data.user.id)
-    .maybeSingle();
-
-  if (error) {
-    return { ok: false as const, error: "Odznak se nepodařilo uložit." };
+  if (payload?.granted && isBadgeId(payload.badge)) {
+    const earnedAt = typeof payload.earned_at === "string" ? payload.earned_at : new Date().toISOString();
+    announceBadge(payload.badge, earnedAt);
   }
 
-  const owned = parseBadges(profile?.badges, profile);
-  remember(owned);
-  if (owned.includes(id)) {
-    return { ok: true as const, granted: false };
-  }
+  const earned = parseEarnedBadges(payload?.badges);
+  if (earnedBadgeIds(earned).length > 0) remember(earned);
 
-  const next = [...owned, id];
-  const { error: writeError } = await supabase.from("profiles").upsert({
-    id: data.user.id,
-    badges: next,
-    has_achievement_42: next.includes("dd_resist"),
-    has_achievement_ano: next.includes("dd_ano"),
-  });
-
-  if (writeError) {
-    return { ok: false as const, error: "Odznak se nepodařilo uložit." };
-  }
-
-  announceBadge(id);
-  remember(next);
-  return { ok: true as const, granted: true };
+  return { ok: true as const, granted: Boolean(payload?.granted && isBadgeId(payload.badge)) };
 }
 
 export async function resetUserBadges() {
@@ -159,32 +176,25 @@ export async function resetUserBadges() {
     };
   }
 
-  const { error } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
-    .update({
-      badges: [],
-      has_achievement_42: false,
-      has_achievement_ano: false,
-    })
-    .eq("id", data.user.id);
+    .select("badges")
+    .eq("id", data.user.id)
+    .maybeSingle();
 
-  if (error) {
-    const { error: legacyError } = await supabase
-      .from("profiles")
-      .update({
-        has_achievement_42: false,
-        has_achievement_ano: false,
-      })
-      .eq("id", data.user.id);
-
-    if (legacyError) {
+  const preferred = badgeStorageShape(profile?.badges);
+  const cleared = await clearStoredBadges(supabase, data.user.id, preferred);
+  if (!cleared) {
+    const fallback = preferred === "list" ? "map" : "list";
+    const retried = await clearStoredBadges(supabase, data.user.id, fallback);
+    if (!retried) {
       return { ok: false as const, error: "Odznaky se nepodařilo zahodit." };
     }
   }
 
   resetEpoch += 1;
   pendingGrants.clear();
-  known = new Set();
+  known = {};
   listeners.forEach((listener) => listener({ type: "reset" }));
   return { ok: true as const };
 }

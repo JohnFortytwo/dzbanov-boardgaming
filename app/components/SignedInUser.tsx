@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { HEADER_BADGE_LIMIT, sampleBadges, type BadgeId } from "@/lib/badges";
+import { earnedBadgeIds, HEADER_BADGE_LIMIT, sampleBadges, type BadgeId } from "@/lib/badges";
 import { loadUserBadges, subscribeBadges } from "@/lib/badges-client";
 
 export function SignedInUser({ email }: { email: string }) {
@@ -14,7 +14,7 @@ export function SignedInUser({ email }: { email: string }) {
     let cancelled = false;
 
     void loadUserBadges().then((loaded) => {
-      if (!cancelled) setOwned(loaded);
+      if (!cancelled) setOwned(earnedBadgeIds(loaded));
     });
 
     return () => {
@@ -32,7 +32,7 @@ export function SignedInUser({ email }: { email: string }) {
 
       if (update.type === "sync") {
         setFeatured(null);
-        setOwned(update.ids);
+        setOwned(earnedBadgeIds(update.earned));
         return;
       }
 

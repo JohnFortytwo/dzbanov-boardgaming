@@ -22,8 +22,7 @@ import {
   type PandemicCatalogs,
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
-import { isBadgeId } from "@/lib/badges";
-import { announceBadge } from "@/lib/badges-client";
+import { announceBadgeFromPayload } from "@/lib/badges-client";
 
 const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -367,13 +366,14 @@ export function TranscriptionWorkspace() {
         error?: string;
         errors?: string[];
         badge?: unknown;
+        earned_at?: unknown;
       };
       if (!response.ok) {
         setFormErrors(payload.errors?.length ? payload.errors : [payload.error ?? "Uložení se nezdařilo."]);
         return;
       }
 
-      if (isBadgeId(payload.badge)) announceBadge(payload.badge);
+      announceBadgeFromPayload(payload.badge, payload.earned_at);
       forgetEdit(draft.id);
       applyQueue(payload);
       setNotice("Hra je schválená a uložená v databázi.");

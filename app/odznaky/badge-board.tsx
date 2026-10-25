@@ -3,12 +3,19 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ResetAchievementsButton } from "@/app/components/ResetAchievementsButton";
-import { BADGES, badgeById, isDungeonMaster, type BadgeId } from "@/lib/badges";
+import {
+  BADGES,
+  badgeById,
+  earnedBadgeIds,
+  formatEarnedAt,
+  isDungeonMaster,
+  type EarnedBadges,
+} from "@/lib/badges";
 import { grantAllBadges, loadUserBadges, subscribeBadges } from "@/lib/badges-client";
 import { createClient } from "@/lib/supabase/client";
 
 export function BadgeBoard() {
-  const [owned, setOwned] = useState<BadgeId[] | null>(null);
+  const [owned, setOwned] = useState<EarnedBadges | null>(null);
   const [isMaster, setIsMaster] = useState(false);
 
   useEffect(() => {
@@ -39,23 +46,24 @@ export function BadgeBoard() {
   useEffect(() => {
     return subscribeBadges((update) => {
       if (update.type === "reset") {
-        setOwned([]);
+        setOwned({});
         return;
       }
 
       if (update.type === "sync") {
-        setOwned(update.ids);
+        setOwned(update.earned);
         return;
       }
 
       setOwned((current) => {
-        const ids = current ?? [];
-        return ids.includes(update.id) ? ids : [...ids, update.id];
+        const earned = current ?? {};
+        if (earned[update.id]) return earned;
+        return { ...earned, [update.id]: update.earnedAt };
       });
     });
   }, []);
 
-  const earned = owned ? BADGES.filter((badge) => owned.includes(badge.id)) : [];
+  const earned = owned ? BADGES.filter((badge) => owned[badge.id]) : [];
 
   return (
     <div className="mt-10">
@@ -77,17 +85,17 @@ export function BadgeBoard() {
           <ul className="mt-6 space-y-4">
             {earned.map((badge) => (
               <li key={badge.id}>
-                <EarnedBadge id={badge.id} />
+                <EarnedBadge id={badge.id} earnedAt={owned?.[badge.id] ?? ""} />
               </li>
             ))}
           </ul>
         </>
       )}
 
-      {isMaster || (owned && owned.length > 0) ? (
+      {isMaster || (owned && earnedBadgeIds(owned).length > 0) ? (
         <div className="mt-10 space-y-8 border-t border-white/10 pt-6">
           {isMaster ? <GrantAllBadgesButton /> : null}
-          {owned && owned.length > 0 ? <ResetAchievementsButton /> : null}
+          {owned && earnedBadgeIds(owned).length > 0 ? <ResetAchievementsButton /> : null}
         </div>
       ) : null}
     </div>
@@ -131,8 +139,9 @@ function GrantAllBadgesButton() {
   );
 }
 
-function EarnedBadge({ id }: { id: BadgeId }) {
+function EarnedBadge({ id, earnedAt }: { id: keyof EarnedBadges; earnedAt: string }) {
   const badge = badgeById(id);
+  const when = formatEarnedAt(earnedAt);
 
   return (
     <article className="flex flex-col items-center gap-5 rounded-3xl border border-white/10 bg-white/5 p-5 sm:flex-row sm:items-center sm:p-6">
@@ -146,6 +155,7 @@ function EarnedBadge({ id }: { id: BadgeId }) {
       <div className="text-center sm:text-left">
         <h2 className="text-2xl font-semibold tracking-tight text-white">{badge.title}</h2>
         <p className="mt-2 text-base leading-7 text-zinc-300">{badge.description}</p>
+        {when ? <p className="mt-3 text-sm text-zinc-500">Získáno {when}</p> : null}
       </div>
     </article>
   );

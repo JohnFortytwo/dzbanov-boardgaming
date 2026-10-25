@@ -6,7 +6,7 @@ import { LIVE_GAME_SOURCE, savePandemicGame } from "@/lib/pandemic/save-game";
 
 export async function POST(request: Request) {
   await connection();
-  const { userId, response } = await requirePandemicUser();
+  const { supabase, userId, response } = await requirePandemicUser();
   if (response) return response;
 
   let body: unknown;
@@ -34,6 +34,11 @@ export async function POST(request: Request) {
     return Response.json({ error: saved.error }, { status: 400 });
   }
 
-  const badge = await grantBadge(userId, "pandemic_new");
-  return Response.json({ ok: true, game_id: saved.id, badge });
+  const granted = await grantBadge(supabase, userId, "pandemic_new");
+  return Response.json({
+    ok: true,
+    game_id: saved.id,
+    badge: granted.ok && granted.granted ? granted.id : null,
+    earned_at: granted.ok && granted.granted ? granted.earnedAt : null,
+  });
 }

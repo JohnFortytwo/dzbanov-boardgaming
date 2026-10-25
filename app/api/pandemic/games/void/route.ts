@@ -5,7 +5,7 @@ import { voidLatestGame } from "@/lib/pandemic/latest-game";
 
 export async function POST(request: Request) {
   await connection();
-  const { userId, response } = await requirePandemicUser();
+  const { supabase, userId, response } = await requirePandemicUser();
   if (response) return response;
 
   let body: unknown;
@@ -26,8 +26,12 @@ export async function POST(request: Request) {
     if (!result.ok) {
       return Response.json({ error: result.error }, { status: result.status });
     }
-    const badge = await grantBadge(userId, "pandemic_delete");
-    return Response.json({ ok: true, badge });
+    const granted = await grantBadge(supabase, userId, "pandemic_delete");
+    return Response.json({
+      ok: true,
+      badge: granted.ok && granted.granted ? granted.id : null,
+      earned_at: granted.ok && granted.granted ? granted.earnedAt : null,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Partii se nepodařilo smazat.";
     return Response.json({ error: message }, { status: 500 });
