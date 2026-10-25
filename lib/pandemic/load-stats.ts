@@ -16,7 +16,12 @@ function adminClient() {
   if (!url || !key) {
     throw new Error("Chybí přístup k databázi.");
   }
-  return createAdminClient(url, key);
+  return createAdminClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
+  });
 }
 
 async function fetchAll<T>(table: string, columns: string): Promise<T[]> {

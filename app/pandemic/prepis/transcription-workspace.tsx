@@ -149,7 +149,23 @@ export function TranscriptionWorkspace() {
   const [offsetY, setOffsetY] = useState("0");
   const [offsetError, setOffsetError] = useState<string | null>(null);
   const draftIdRef = useRef<string | null>(null);
+  const scrollToTopAfterSave = useRef(false);
   draftIdRef.current = draft?.id ?? null;
+
+  useEffect(() => {
+    if (!scrollToTopAfterSave.current) return;
+    scrollToTopAfterSave.current = false;
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    scrollToTop();
+    requestAnimationFrame(scrollToTop);
+  }, [draft, notice]);
 
   function applyQueue(payload: DraftsResponse) {
     setDraft(payload.draft);
@@ -375,6 +391,7 @@ export function TranscriptionWorkspace() {
 
       announceBadgeFromPayload(payload.badge, payload.earned_at);
       forgetEdit(draft.id);
+      scrollToTopAfterSave.current = true;
       applyQueue(payload);
       setNotice("Hra je schválená a uložená v databázi.");
     } catch {

@@ -337,8 +337,8 @@ export function filterStatsSource(source: StatsSource, filter: StatsGameFilter):
   }
 
   const games = source.games.filter((game) => {
-    if (mode && game.game_mode_code !== mode) return false;
-    if (difficulty && game.difficulty_code !== difficulty) return false;
+    if (mode && foldCode(game.game_mode_code ?? "") !== foldCode(mode)) return false;
+    if (difficulty && foldCode(game.difficulty_code ?? "") !== foldCode(difficulty)) return false;
     if (playerCount != null && (seatsByGame.get(game.id) ?? 0) !== playerCount) return false;
     return true;
   });
@@ -429,6 +429,99 @@ export function describeRecentGame(
     note: game.note,
     recordedBy: names.account(game.created_by),
   };
+}
+
+export type NotedGame = {
+  id: string;
+  playedAt: string | null;
+  note: string;
+  summary: string;
+};
+
+export function listNotedGames(source: StatsSource): NotedGame[] {
+  const modeLabel = labelMap(source.modes);
+  const difficultyLabel = labelMap(source.difficulties);
+  const resultLabel = labelMap(source.results);
+  const roleLabel = labelMap(source.roles);
+  const diseaseLabel = labelMap(source.diseaseStates);
+  const strainLabel = labelMap(source.strainColors);
+  const playerNames = new Map(source.players.map((player) => [player.code, player.name_cs]));
+  const accountNames = new Map(source.accounts.map((account) => [account.code, account.name_cs]));
+  const names = {
+    player: (playerId: string | null) => (playerId && playerNames.get(playerId)) || "Neznámý hráč",
+    role: roleLabel,
+    result: resultLabel,
+    mode: modeLabel,
+    difficulty: difficultyLabel,
+    disease: diseaseLabel,
+    strain: strainLabel,
+    account: (userId: string | null) => {
+      if (!userId) return null;
+      return accountNames.get(userId) ?? "Neznámý účet";
+    },
+  };
+
+  const seatsByGame = new Map<string, StatsSeat[]>();
+  for (const seat of source.seats) {
+    const list = seatsByGame.get(seat.game_id) ?? [];
+    list.push(seat);
+    seatsByGame.set(seat.game_id, list);
+  }
+  const changesByGame = new Map<string, StatsRoleChange[]>();
+  for (const change of source.roleChanges) {
+    const list = changesByGame.get(change.game_id) ?? [];
+    list.push(change);
+    changesByGame.set(change.game_id, list);
+  }
+
+  const noted: NotedGame[] = [];
+  for (const game of source.games) {
+    const note = game.note?.trim();
+    if (!note) continue;
+    const recent = describeRecentGame(
+      game,
+      seatsByGame.get(game.id) ?? [],
+      changesByGame.get(game.id) ?? [],
+      names,
+    );
+    noted.push({
+      id: game.id,
+      playedAt: game.played_at,
+      note,
+      summary: notedGameSummary(recent),
+    });
+  }
+  return noted;
+}
+
+function notedGameSummary(game: RecentGame) {
+  const stated = (value: string | null | undefined) =>
+    value && value !== "Neuvedeno" ? value : null;
+  const headline = [stated(game.result), stated(game.difficulty), stated(game.mode)]
+    .filter((part): part is string => Boolean(part))
+    .join(", ");
+  const players = game.players
+    .map((player) => {
+      const role = stated(player.role);
+      return role ? `${player.name} (${role})` : player.name;
+    })
+    .join(", ");
+  const changes =
+    game.changes.length > 0
+      ? `Změny rolí: ${game.changes
+          .map((change) => `${change.name} ${change.from} → ${change.to}`)
+          .join("; ")}`
+      : null;
+  const diseases =
+    game.diseases.length > 0
+      ? `Nemocí: ${game.diseases.map((disease) => `${disease.label} ${disease.state}`).join(", ")}`
+      : null;
+  const strain = game.strain && game.strain !== "neuvedeno" ? `Zhoubný kmen: ${game.strain}` : null;
+  const recorded = game.recordedBy ? `Zapsal ${game.recordedBy}` : null;
+  const parts = [headline, players ? `Hráli ${players}` : null, changes, diseases, strain, recorded].filter(
+    (part): part is string => Boolean(part),
+  );
+  return parts.join(". ");
 }
 
 export function buildPandemicStats(

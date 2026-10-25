@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { foldCode } from "@/lib/pandemic/drafts";
 import {
@@ -12,6 +12,7 @@ import {
   buildPandemicStats,
   buildTimeline,
   filterStatsSource,
+  listNotedGames,
   statsRangeLimit,
   summarizeCrews,
   summarizePlayers,
@@ -102,6 +103,8 @@ export function StatsDashboard({ source }: { source: StatsSource }) {
   const [showAllCrews, setShowAllCrews] = useState(false);
   const [timelineBucket, setTimelineBucket] = useState<TimelineBucket>("month");
   const [timelineMetric, setTimelineMetric] = useState<"games" | "rate">("games");
+  const [showAllNotes, setShowAllNotes] = useState(false);
+  const [noteOrder, setNoteOrder] = useState<string[] | null>(null);
 
   const headline = useMemo(() => buildPandemicStats(source), [source]);
   const windowed = useMemo(() => windowSource(source, statsRangeLimit(rangeId)), [source, rangeId]);
@@ -124,6 +127,20 @@ export function StatsDashboard({ source }: { source: StatsSource }) {
     [windowed, timelineFilter, timelineBucket],
   );
   const highlights = useMemo(() => buildHighlights(windowed), [windowed]);
+  const notedGames = useMemo(() => listNotedGames(windowed), [windowed]);
+  useEffect(() => {
+    setNoteOrder(shuffleIds(notedGames.map((game) => game.id)));
+    setShowAllNotes(false);
+  }, [notedGames]);
+  const orderedNotes = useMemo(() => {
+    if (!noteOrder) return [];
+    const byId = new Map(notedGames.map((game) => [game.id, game]));
+    return noteOrder.flatMap((id) => {
+      const game = byId.get(id);
+      return game ? [game] : [];
+    });
+  }, [noteOrder, notedGames]);
+  const visibleNotes = showAllNotes ? orderedNotes : orderedNotes.slice(0, 10);
   const latest = headline.recentGames[0] ?? null;
   const visibleRecent = headline.recentGames.slice(0, recentLimit);
   const frequentCrews = crews.filter((crew) => crew.games >= 2);
@@ -546,10 +563,81 @@ export function StatsDashboard({ source }: { source: StatsSource }) {
               </div>
             )}
           </Section>
+
+          <Section
+            title="Poznámky"
+            note={notesSectionNote(notedGames.length)}
+          >
+            {notedGames.length === 0 ? (
+              <p className="text-sm text-zinc-500">Až u nějaké hry poznámka bude, objeví se tady.</p>
+            ) : noteOrder === null ? (
+              <p className="text-sm text-zinc-500">Vybírám náhodné poznámky…</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {visibleNotes.map((game) => (
+                  <article
+                    key={game.id}
+                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
+                  >
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-emerald-400/80">
+                      {formatDay(game.playedAt)}
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-100">{game.note}</p>
+                    {game.summary ? (
+                      <p className="mt-2 text-sm leading-6 text-zinc-400">{game.summary}</p>
+                    ) : null}
+                  </article>
+                ))}
+                {notedGames.length > 10 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllNotes((current) => !current)}
+                    className="self-start rounded-full border border-white/10 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-white/20 hover:text-white"
+                  >
+                    {showAllNotes
+                      ? "Jen náhodných 10"
+                      : `Zobrazit ${noteCountPhrase(notedGames.length, true)}`}
+                  </button>
+                ) : null}
+              </div>
+            )}
+          </Section>
         </div>
       )}
     </main>
   );
+}
+
+function notesSectionNote(count: number) {
+  if (count === 0) return "Ve zvoleném rozsahu není žádná partie s vyplněnou poznámkou.";
+  if (count === 1) {
+    return "Ve zvoleném rozsahu je jen jedna poznámka. Při načtení stránky se nic nemění, není z čeho losovat.";
+  }
+  if (count <= 10) {
+    return `Ve zvoleném rozsahu je ${noteCountPhrase(count)}, takže jsou tu všechny. Pořadí je náhodné a při načtení stránky se mění.`;
+  }
+  return `Náhodných 10 z ${integerFormat.format(count)} partií ve zvoleném rozsahu, které mají vyplněnou poznámku. Pořadí se při načtení stránky mění.`;
+}
+
+function noteCountPhrase(count: number, all = false) {
+  if (count === 1) return all ? "jedinou poznámku" : "1 poznámka";
+  if (count >= 2 && count <= 4) {
+    return all ? `všechny ${integerFormat.format(count)} poznámky` : `${integerFormat.format(count)} poznámky`;
+  }
+  return all
+    ? `všech ${integerFormat.format(count)} poznámek`
+    : `${integerFormat.format(count)} poznámek`;
+}
+
+function shuffleIds(ids: string[]) {
+  const next = [...ids];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    const current = next[index];
+    next[index] = next[swap] ?? current;
+    next[swap] = current;
+  }
+  return next;
 }
 
 function SummaryCard({
@@ -1269,9 +1357,15 @@ function GameFilters({
   onChange: (value: StatsGameFilter) => void;
   hidePlayerCount?: boolean;
 }) {
-  const modes = [...source.modes].sort((left, right) => rankOf(left.code, MODE_RANK) - rankOf(right.code, MODE_RANK));
-  const difficulties = [...source.difficulties].sort(
-    (left, right) => rankOf(left.code, DIFFICULTY_RANK) - rankOf(right.code, DIFFICULTY_RANK),
+  const modes = catalogOptions(
+    source.modes,
+    source.games.map((game) => game.game_mode_code),
+    MODE_RANK,
+  );
+  const difficulties = catalogOptions(
+    source.difficulties,
+    source.games.map((game) => game.difficulty_code),
+    DIFFICULTY_RANK,
   );
   const active = Boolean(value.mode || value.difficulty || value.playerCount);
   return (
@@ -1280,7 +1374,7 @@ function GameFilters({
         label="Mód"
         value={value.mode ?? ""}
         onChange={(mode) => onChange({ ...value, mode: mode || null })}
-        options={[{ value: "", label: "Všechny módy" }, ...modes.map((mode) => ({ value: mode.code, label: mode.name_cs }))]}
+        options={[{ value: "", label: "Všechny módy" }, ...modes.map((mode) => ({ value: mode.code, label: mode.name }))]}
       />
       <FilterSelect
         label="Obtížnost"
@@ -1288,7 +1382,7 @@ function GameFilters({
         onChange={(difficulty) => onChange({ ...value, difficulty: difficulty || null })}
         options={[
           { value: "", label: "Všechny obtížnosti" },
-          ...difficulties.map((difficulty) => ({ value: difficulty.code, label: difficulty.name_cs })),
+          ...difficulties.map((difficulty) => ({ value: difficulty.code, label: difficulty.name })),
         ]}
       />
       {hidePlayerCount ? null : (
@@ -1315,6 +1409,30 @@ function GameFilters({
   );
 }
 
+function catalogOptions(
+  catalog: { code: string; name_cs: string }[],
+  values: (string | null)[],
+  order: string[],
+) {
+  const byFold = new Map<string, { code: string; name: string }>();
+  for (const row of catalog) {
+    const code = row.code.trim();
+    if (!code) continue;
+    const folded = foldCode(code);
+    if (!byFold.has(folded)) byFold.set(folded, { code, name: row.name_cs.trim() || code });
+  }
+  for (const value of values) {
+    const code = value?.trim();
+    if (!code) continue;
+    const folded = foldCode(code);
+    if (byFold.has(folded)) continue;
+    byFold.set(folded, { code, name: code });
+  }
+  return [...byFold.values()].sort(
+    (left, right) => rankOf(left.code, order) - rankOf(right.code, order) || left.name.localeCompare(right.name, "cs"),
+  );
+}
+
 function rankOf(code: string, order: string[]) {
   const folded = foldCode(code);
   const index = order.findIndex((item) => folded === item || folded.startsWith(item));
@@ -1332,20 +1450,114 @@ function FilterSelect({
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
+  const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(
+    null,
+  );
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const selected = options.find((option) => option.value === value) ?? options[0];
+
+  function placeMenu() {
+    const button = buttonRef.current;
+    if (!button) return;
+    const rect = button.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < 280 && rect.top > spaceBelow;
+    setMenuStyle(
+      openUp
+        ? { bottom: window.innerHeight - rect.top + 4, left: rect.left, width: rect.width }
+        : { top: rect.bottom + 4, left: rect.left, width: rect.width },
+    );
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    function onMove() {
+      placeMenu();
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onMove);
+    window.addEventListener("scroll", onMove, true);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onMove);
+      window.removeEventListener("scroll", onMove, true);
+    };
+  }, [open]);
+
   return (
-    <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
-      {label}
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-9 min-w-40 rounded-full border border-white/10 bg-zinc-950 px-3 text-sm font-normal normal-case tracking-normal text-zinc-100 outline-none focus:border-emerald-400/60"
+    <div
+      ref={rootRef}
+      className="relative flex flex-col gap-1 text-xs font-medium uppercase tracking-[0.14em] text-zinc-500"
+    >
+      <span>{label}</span>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`${label}: ${selected?.label ?? ""}`}
+        ref={buttonRef}
+        onClick={() => {
+          if (open) {
+            setOpen(false);
+            return;
+          }
+          placeMenu();
+          setOpen(true);
+        }}
+        className="flex h-9 min-w-40 items-center justify-between gap-3 rounded-full border border-white/10 bg-zinc-950 px-3 text-left text-sm font-normal normal-case tracking-normal text-zinc-100 outline-none focus:border-emerald-400/60"
       >
-        {options.map((option) => (
-          <option key={option.value || "all"} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        <span className="truncate">{selected?.label}</span>
+        <span aria-hidden="true" className="text-[10px] text-zinc-400">
+          ▾
+        </span>
+      </button>
+      {open && menuStyle ? (
+        <ul
+          role="listbox"
+          aria-label={label}
+          style={{
+            position: "fixed",
+            top: menuStyle.top,
+            bottom: menuStyle.bottom,
+            left: menuStyle.left,
+            width: Math.max(menuStyle.width, 160),
+            zIndex: 50,
+          }}
+          className="max-h-72 overflow-auto rounded-2xl border border-white/10 bg-zinc-950 py-1 shadow-2xl"
+        >
+          {options.map((option) => {
+            const active = option.value === value;
+            return (
+              <li key={option.value || "all"}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`block w-full px-3 py-2 text-left text-sm font-normal normal-case tracking-normal ${
+                    active ? "bg-sky-600 text-white" : "text-zinc-100 hover:bg-white/10"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
   );
 }
