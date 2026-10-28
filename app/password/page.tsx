@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { AccountLinks } from "@/app/components/account-links";
 import { SignedInUser } from "@/app/components/SignedInUser";
-import { UserManual } from "@/app/components/UserManual";
-import { logout } from "@/app/login/actions";
+import { loadOwnNickname } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { PasswordForm } from "./password-form";
 
@@ -22,6 +23,7 @@ export default function PasswordPage() {
 }
 
 async function PasswordContent() {
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
 
@@ -29,7 +31,8 @@ async function PasswordContent() {
     redirect("/login");
   }
 
-  const email = typeof data.claims.email === "string" ? data.claims.email : "";
+  const userId = typeof data.claims.sub === "string" ? data.claims.sub : "";
+  const nickname = await loadOwnNickname(supabase, userId);
 
   return (
     <div className="relative isolate flex min-h-full flex-1 flex-col overflow-hidden bg-zinc-950 text-zinc-100">
@@ -41,24 +44,8 @@ async function PasswordContent() {
 
       <header className="relative z-10 flex flex-wrap items-start justify-end gap-4 px-6 pt-6">
         <div className="flex flex-col items-end gap-2">
-          <SignedInUser email={email} />
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <UserManual />
-            <Link
-              href="/password"
-              className="inline-flex items-center rounded-full border border-emerald-400/30 bg-transparent px-4 py-2 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10 hover:text-emerald-200"
-            >
-              Změnit heslo
-            </Link>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
-              >
-                Odhlásit se
-              </button>
-            </form>
-          </div>
+          <SignedInUser nickname={nickname} />
+          <AccountLinks />
         </div>
       </header>
 

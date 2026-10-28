@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 function remember(labels: Map<string, string>, id: unknown, label: unknown) {
   if (typeof id !== "string" || typeof label !== "string") return;
   const userId = id.trim();
-  const email = label.trim();
-  if (userId && email) labels.set(userId, email);
+  const name = label.trim();
+  if (!userId || !name || name.includes("@")) return;
+  labels.set(userId, name);
 }
 
 function serviceRoleClient() {
@@ -44,19 +45,19 @@ async function loadFromAdmin(labels: Map<string, string>): Promise<string | null
   if (!admin) return "Chybí service role pro čtení účtů.";
 
   try {
-    for (let page = 1; page <= 10; page += 1) {
-      const { data, error } = await admin.auth.admin.listUsers({
-        page,
-        perPage: 200,
-      });
+    for (let from = 0; from < 5000; from += 1000) {
+      const { data, error } = await admin
+        .from("profiles")
+        .select("id, nickname")
+        .range(from, from + 999);
       if (error) return error.message;
-      if (!data?.users) return "Seznam účtů je prázdný.";
+      if (!data) return "Seznam přezdívek je prázdný.";
 
-      for (const user of data.users) {
-        remember(labels, user.id, user.email);
+      for (const row of data) {
+        remember(labels, row.id, row.nickname);
       }
 
-      if (data.users.length < 200) break;
+      if (data.length < 1000) break;
     }
     return null;
   } catch (error) {

@@ -1,6 +1,5 @@
--- Popisky účtů pro statistiky. auth.users nejde číst přes běžné API:
--- anon klíč dostane na auth admin 403 a aplikace pak ukáže „Neznámý účet“.
--- Funkce běží jako vlastník a vrací jen id a e-mail přihlášeným uživatelům.
+-- Popisky účtů pro statistiky a export. Vrací přezdívku, nikdy e-mail.
+-- Vyžaduje sloupec public.profiles.nickname (scripts/profile-nicknames.sql).
 
 create or replace function public.account_labels()
 returns table (id uuid, label text)
@@ -9,17 +8,15 @@ stable
 security definer
 set search_path = ''
 as $$
-  select users.id, users.email::text
-  from auth.users as users
-  where users.email is not null
-    and pg_catalog.btrim(users.email) <> ''
-    and (
-      exists (
-        select 1
-        from public.pandemic_games as games
-        where games.created_by = users.id
-           or games.voided_by = users.id
-      )
+  select profiles.id, profiles.nickname
+  from public.profiles as profiles
+  where profiles.nickname is not null
+    and pg_catalog.btrim(profiles.nickname) <> ''
+    and exists (
+      select 1
+      from public.pandemic_games as games
+      where games.created_by = profiles.id
+         or games.voided_by = profiles.id
     );
 $$;
 
