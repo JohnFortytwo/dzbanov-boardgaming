@@ -1,5 +1,17 @@
 const NICKNAME_PATTERN = /^[0-9A-Za-zÁČĎÉĚÍŇÓŘŠŤÚŮÝŽáčďéěíňóřšťúůýž_ ]+$/;
 
+export const missingNicknameColumnMessage =
+  "V databázi ještě není sloupec pro jméno. V Supabase SQL editoru je potřeba jednou spustit skript scripts/profile-nicknames.sql.";
+
+export function nicknameColumnMissing(error: { code?: string; message?: string }) {
+  const message = error.message?.toLowerCase() ?? "";
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    message.includes("nickname")
+  );
+}
+
 export function normalizeNickname(value: string) {
   return value.trim().replace(/ +/g, " ");
 }

@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { nicknameError, normalizeNickname } from "@/lib/nickname";
+import {
+  missingNicknameColumnMessage,
+  nicknameColumnMissing,
+  nicknameError,
+  normalizeNickname,
+} from "@/lib/nickname";
 
 export type NicknameState = { error: string } | { success: string } | null;
 
@@ -36,7 +41,12 @@ export async function updateNickname(
     return { error: "Jméno může obsahovat jen písmena, číslice, mezeru a podtržítko." };
   }
 
+  if (error && nicknameColumnMissing(error)) {
+    return { error: missingNicknameColumnMessage };
+  }
+
   if (error) {
+    console.error("Jméno se nepodařilo změnit.", error.message);
     return { error: "Jméno se nepodařilo změnit." };
   }
 
