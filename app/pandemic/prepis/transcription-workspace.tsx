@@ -12,6 +12,7 @@ import {
   modeAllowsVirulentStrain,
   presentDraft,
   prepareDraft,
+  roleChangeOrigin,
   type CodeLabel,
   type CardContent,
   type DraftData,
@@ -23,6 +24,7 @@ import {
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
 import { announceBadgeFromPayload } from "@/lib/badges-client";
+import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
 
 const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -692,15 +694,16 @@ export function TranscriptionWorkspace() {
                       updateRoleChange(changeIndex, { matched_player_id })
                     }
                   />
-                  <CodeSelect
-                    label="Z role"
-                    value={change.from_role_code}
-                    options={roleLabels(catalogs.roles || [])}
-                    placeholder="Z role"
-                    onChange={(from_role_code) =>
-                      updateRoleChange(changeIndex, { from_role_code })
-                    }
-                  />
+                  <div title="Načte se podle zvoleného hráče">
+                    <CodeSelect
+                      label="Z role"
+                      value={roleChangeOrigin(form.players, form.role_changes, changeIndex)}
+                      options={roleLabels(catalogs.roles || [])}
+                      placeholder="Podle hráče"
+                      disabled
+                      onChange={() => undefined}
+                    />
+                  </div>
                   <CodeSelect
                     label="Na roli"
                     value={change.to_role_code}
@@ -770,7 +773,7 @@ export function TranscriptionWorkspace() {
                     optional={inactive || disease.optional}
                     disabled={inactive}
                     value={inactive ? null : form[disease.key]}
-                    options={catalogs.diseaseStates || []}
+                    options={sortDiseaseStates(catalogs.diseaseStates || [])}
                     onChange={(value) =>
                       updateForm({ ...form, [disease.key]: value ?? null })
                     }

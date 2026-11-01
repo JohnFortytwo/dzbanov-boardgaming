@@ -1,6 +1,7 @@
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { connection } from "next/server";
 import { loadAccountLabels } from "@/lib/pandemic/accounts";
+import { deriveStoredRoleChanges } from "@/lib/pandemic/role-changes";
 import {
   type CodeName,
   type StatsGame,
@@ -71,7 +72,7 @@ export async function loadPandemicStats() {
       ),
       fetchAll<Record<string, unknown>>(
         "pandemic_game_role_changes",
-        "game_id, player_id, from_role_code, to_role_code, change_order",
+        "game_id, player_id, to_role_code, change_order",
       ),
       fetchAll<Record<string, unknown>>("players", "id, name"),
       fetchCodes("roles"),
@@ -121,20 +122,22 @@ export async function loadPandemicStats() {
     ];
   });
 
-  const roleChanges: StatsRoleChange[] = changeRows.flatMap((row) => {
-    const gameId = asString(row.game_id);
-    if (!gameId || !validGameIds.has(gameId)) return [];
-    const order = typeof row.change_order === "number" ? row.change_order : Number(row.change_order);
-    return [
-      {
-        game_id: gameId,
-        player_id: asString(row.player_id),
-        from_role_code: asString(row.from_role_code),
-        to_role_code: asString(row.to_role_code),
-        change_order: Number.isFinite(order) ? order : 0,
-      },
-    ];
-  });
+  const roleChanges: StatsRoleChange[] = deriveStoredRoleChanges(
+    changeRows.flatMap((row) => {
+      const gameId = asString(row.game_id);
+      if (!gameId || !validGameIds.has(gameId)) return [];
+      const order = typeof row.change_order === "number" ? row.change_order : Number(row.change_order);
+      return [
+        {
+          game_id: gameId,
+          player_id: asString(row.player_id),
+          to_role_code: asString(row.to_role_code),
+          change_order: Number.isFinite(order) ? order : 0,
+        },
+      ];
+    }),
+    seats,
+  );
 
   const players: CodeName[] = playerRows.flatMap((row) => {
     const code = asString(row.id);

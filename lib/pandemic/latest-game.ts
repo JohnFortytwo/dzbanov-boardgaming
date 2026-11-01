@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { loadAccountLabels } from "@/lib/pandemic/accounts";
 import { loadPandemicCatalogs } from "@/lib/pandemic/catalogs";
 import { foldCode } from "@/lib/pandemic/drafts";
+import { deriveStoredRoleChanges } from "@/lib/pandemic/role-changes";
 import {
   describeRecentGame,
   type CodeName,
@@ -98,7 +99,7 @@ export async function loadLatestValidGame(): Promise<RecentGame | null> {
       .eq("game_id", game.id),
     supabaseAdmin
       .from("pandemic_game_role_changes")
-      .select("game_id, player_id, from_role_code, to_role_code, change_order")
+      .select("game_id, player_id, to_role_code, change_order")
       .eq("game_id", game.id),
     loadPandemicCatalogs(),
     loadAccountLabels(),
@@ -113,13 +114,15 @@ export async function loadLatestValidGame(): Promise<RecentGame | null> {
     role_code: asString(row.role_code),
     player_order: asOrder(row.player_order),
   }));
-  const changes: StatsRoleChange[] = (changeResult.data ?? []).map((row) => ({
-    game_id: game.id,
-    player_id: asString(row.player_id),
-    from_role_code: asString(row.from_role_code),
-    to_role_code: asString(row.to_role_code),
-    change_order: asOrder(row.change_order),
-  }));
+  const changes: StatsRoleChange[] = deriveStoredRoleChanges(
+    (changeResult.data ?? []).map((row) => ({
+      game_id: game.id,
+      player_id: asString(row.player_id),
+      to_role_code: asString(row.to_role_code),
+      change_order: asOrder(row.change_order),
+    })),
+    seats,
+  );
 
   const players = new Map(catalogs.players.map((player) => [player.id, player.name]));
   const role = labelMap(catalogs.roles);

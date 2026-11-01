@@ -12,6 +12,7 @@ import {
   roleOptionLabels,
   sortWithPriority,
 } from "../game-fields";
+import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
 import {
   emptyDraftData,
   emptyPlayer,
@@ -19,6 +20,7 @@ import {
   modeAllowsPurple,
   modeAllowsVirulentStrain,
   prepareDraft,
+  roleChangeOrigin,
   type CodeLabel,
   type DraftData,
   type DraftPlayer,
@@ -332,20 +334,16 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
                     })
                   }
                 />
-                <GameCodeSelect
-                  label="Z role"
-                  value={change.from_role_code}
-                  options={roleOptionLabels(catalogs.roles)}
-                  placeholder="Z role"
-                  onChange={(from_role_code) =>
-                    updateForm({
-                      ...form,
-                      role_changes: form.role_changes.map((item, index) =>
-                        index === changeIndex ? { ...item, from_role_code } : item,
-                      ),
-                    })
-                  }
-                />
+                <div title="Načte se podle zvoleného hráče">
+                  <GameCodeSelect
+                    label="Z role"
+                    value={roleChangeOrigin(form.players, form.role_changes, changeIndex)}
+                    options={roleOptionLabels(catalogs.roles)}
+                    placeholder="Podle hráče"
+                    disabled
+                    onChange={() => undefined}
+                  />
+                </div>
                 <GameCodeSelect
                   label="Na roli"
                   value={change.to_role_code}
@@ -414,7 +412,7 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
                   optional={inactive}
                   disabled={inactive}
                   value={inactive ? null : form[disease.key]}
-                  options={catalogs.diseaseStates}
+                  options={sortDiseaseStates(catalogs.diseaseStates)}
                   onChange={(value) => updateForm({ ...form, [disease.key]: value })}
                 />
               );

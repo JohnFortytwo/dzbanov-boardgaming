@@ -1,3 +1,4 @@
+import { DISEASE_STATE_ORDER } from "@/lib/pandemic/disease-states";
 import { foldCode, modeAllowsVirulentStrain } from "@/lib/pandemic/drafts";
 
 export type CodeName = {
@@ -252,8 +253,6 @@ const RESULT_ORDER = [
   "prohra - karty",
   "prohra - pandemie",
 ];
-
-const DISEASE_STATE_ORDER = ["nic", "vynalezeno", "vymyceno"];
 
 const DISEASES = [
   { key: "yellow_disease", label: "Žlutá" },

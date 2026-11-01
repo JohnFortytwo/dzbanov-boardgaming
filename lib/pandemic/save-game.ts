@@ -61,7 +61,6 @@ export async function savePandemicGame(
       draft.role_changes.map((change) => ({
         game_id: gameId,
         player_id: change.matched_player_id,
-        from_role_code: change.from_role_code,
         to_role_code: change.to_role_code,
         change_order: change.change_order,
       })),

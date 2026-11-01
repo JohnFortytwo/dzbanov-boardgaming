@@ -143,7 +143,7 @@ async function runImport() {
     // 2. Uložení změn rolí (1. i 2. změna)
     const roleChangesToInsert = [];
 
-    // Změna 1
+    // Změna 1: hráč, který s touto rolí vstupoval.
     const zmenaZ1 = row.zmena_z_1?.trim();
     const zmenaDo1 = row.zmena_do_1?.trim();
     if (zmenaZ1 && zmenaDo1) {
@@ -152,23 +152,25 @@ async function runImport() {
         roleChangesToInsert.push({
           game_id: game.id,
           player_id: playerWithRole.player_id,
-          from_role_code: zmenaZ1,
           to_role_code: zmenaDo1,
           change_order: 1
         });
       }
     }
 
-    // Změna 2
+    // Změna 2: buď druhý skok téhož hráče, nebo první změna jiného hráče.
     const zmenaZ2 = row.zmena_z_2?.trim();
     const zmenaDo2 = row.zmena_do_2?.trim();
     if (zmenaZ2 && zmenaDo2) {
-      const playerWithRole = gamePlayersToInsert.find(gp => gp.role_code === zmenaZ2);
+      const first = roleChangesToInsert[0];
+      const samePlayerSecond = first && first.to_role_code === zmenaZ2;
+      const playerWithRole = samePlayerSecond
+        ? gamePlayersToInsert.find(gp => gp.player_id === first.player_id)
+        : gamePlayersToInsert.find(gp => gp.role_code === zmenaZ2 && gp.player_id !== first?.player_id);
       if (playerWithRole) {
         roleChangesToInsert.push({
           game_id: game.id,
           player_id: playerWithRole.player_id,
-          from_role_code: zmenaZ2,
           to_role_code: zmenaDo2,
           change_order: 2
         });

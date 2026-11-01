@@ -1,3 +1,5 @@
+import { deriveOrderedFromRoles } from "@/lib/pandemic/role-changes";
+
 export type DraftPlayer = {
   raw_name: string | null;
   matched_player_id: string | null;
@@ -11,6 +13,37 @@ export type DraftRoleChange = {
   to_role_code: string | null;
   change_order: number;
 };
+
+export function deriveDraftRoleChanges(
+  players: DraftPlayer[],
+  changes: DraftRoleChange[],
+): DraftRoleChange[] {
+  const derived = deriveOrderedFromRoles(
+    changes.map((change) => ({
+      ...change,
+      player_id: change.matched_player_id,
+    })),
+    players.map((player) => ({
+      player_id: player.matched_player_id,
+      role_code: player.role_code,
+    })),
+  );
+
+  return derived.map((change) => ({
+    matched_player_id: change.matched_player_id,
+    from_role_code: change.from_role_code,
+    to_role_code: change.to_role_code,
+    change_order: change.change_order,
+  }));
+}
+
+export function roleChangeOrigin(
+  players: DraftPlayer[],
+  changes: DraftRoleChange[],
+  index: number,
+): string | null {
+  return deriveDraftRoleChanges(players, changes)[index]?.from_role_code ?? null;
+}
 
 export type CardContent = {
   x: number;
@@ -345,6 +378,21 @@ export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): Draft
       ? data.players
       : [emptyPlayer(1), emptyPlayer(2), emptyPlayer(3)];
 
+  const players = sourcePlayers.map((player, index) => ({
+    ...player,
+    player_order: index + 1,
+    matched_player_id:
+      player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
+    role_code: presentPlayerRole(player.role_code, catalogs.roles),
+  }));
+  const matchedPlayers = sourcePlayers.map((player) => ({
+    ...player,
+    matched_player_id:
+      player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
+  }));
+  const sourceChanges =
+    data.role_changes.length > 0 ? data.role_changes : inferRoleChanges(matchedPlayers, catalogs.roles);
+
   return {
     ...data,
     played_at: toIsoDate(data.played_at),
@@ -365,30 +413,14 @@ export function presentDraft(data: DraftData, catalogs: PandemicCatalogs): Draft
       catalogs.virulentStrainColors,
       COLOR_ALIASES,
     ),
-    players: sourcePlayers.map((player, index) => ({
-      ...player,
-      player_order: index + 1,
-      matched_player_id:
-        player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
-      role_code: presentPlayerRole(player.role_code, catalogs.roles),
-    })),
-    role_changes: (
-      data.role_changes.length > 0
-        ? data.role_changes
-        : inferRoleChanges(
-            sourcePlayers.map((player) => ({
-              ...player,
-              matched_player_id:
-                player.matched_player_id ?? matchPlayerId(player.raw_name, catalogs.players),
-            })),
-            catalogs.roles,
-          )
-    ).map((change, index) => ({
-      ...change,
-      change_order: index + 1,
-      from_role_code: matchRoleCode(change.from_role_code, catalogs.roles),
-      to_role_code: matchRoleCode(change.to_role_code, catalogs.roles),
-    })),
+    players,
+    role_changes: deriveDraftRoleChanges(
+      players,
+      sourceChanges.map((change) => ({
+        ...change,
+        to_role_code: matchRoleCode(change.to_role_code, catalogs.roles),
+      })),
+    ),
   };
 }
 
@@ -507,23 +539,17 @@ export function prepareDraft(value: DraftData): {
   draft: DraftData;
   errors: string[];
 } {
+  const players = value.players
+    .filter((player) => player.matched_player_id || player.role_code || player.raw_name)
+    .map((player, index) => ({ ...player, player_order: index + 1 }));
   const draft: DraftData = {
     ...value,
     note: value.note?.trim() || null,
-    players: value.players
-      .filter(
-        (player) =>
-          player.matched_player_id || player.role_code || player.raw_name,
-      )
-      .map((player, index) => ({ ...player, player_order: index + 1 })),
-    role_changes: value.role_changes
-      .filter(
-        (change) =>
-          change.matched_player_id ||
-          change.from_role_code ||
-          change.to_role_code,
-      )
-      .map((change, index) => ({ ...change, change_order: index + 1 })),
+    players,
+    role_changes: deriveDraftRoleChanges(
+      players,
+      value.role_changes.filter((change) => change.matched_player_id || change.to_role_code),
+    ),
   };
 
   const errors: string[] = [];
@@ -587,13 +613,36 @@ export function prepareDraft(value: DraftData): {
 
   draft.role_changes.forEach((change, index) => {
     const label = `změny role ${index + 1}`;
+    const earlier = draft.role_changes
+      .slice(0, index)
+      .filter((item) => item.matched_player_id === change.matched_player_id);
+    const seat = draft.players.find(
+      (player) => player.matched_player_id === change.matched_player_id,
+    );
+    let originExplained = false;
+
     if (!change.matched_player_id || !isUuid(change.matched_player_id)) {
       errors.push(`Vyberte hráče u ${label}.`);
+      originExplained = true;
     } else if (!seenPlayers.has(change.matched_player_id)) {
       errors.push(`Hráč u ${label} musí hrát v této partii.`);
+      originExplained = true;
+    } else if (earlier.length > 0 && !earlier[earlier.length - 1]?.to_role_code) {
+      errors.push("Vyberte novou roli u předchozí změny stejného hráče.");
+      originExplained = true;
+    } else if (earlier.length === 0 && !seat?.role_code) {
+      errors.push(`Vyberte roli, se kterou hráč u ${label} vstupuje do hry.`);
+      originExplained = true;
     }
-    if (!change.from_role_code || !change.to_role_code) {
-      errors.push(`Vyplňte výchozí i novou roli u ${label}.`);
+
+    if (!change.to_role_code) {
+      errors.push(`Vyberte novou roli u ${label}.`);
+    } else if (change.from_role_code && change.from_role_code === change.to_role_code) {
+      errors.push(`Nová role u ${label} je stejná jako ta, ze které hráč přechází.`);
+    }
+
+    if (!originExplained && !change.from_role_code) {
+      errors.push(`Výchozí roli u ${label} nejde dopočítat.`);
     }
   });
 

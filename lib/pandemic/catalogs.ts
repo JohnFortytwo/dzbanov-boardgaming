@@ -1,5 +1,6 @@
 import { createClient as createAdminClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
 import type { CodeLabel, PandemicCatalogs, PlayerOption } from "@/lib/pandemic/drafts";
 
 const CODE_TABLES = [
@@ -81,6 +82,7 @@ async function readCatalogs(supabase: SupabaseClient): Promise<PandemicCatalogs>
   for (const [key, values] of codeLists) {
     catalogs[key] = values;
   }
+  catalogs.diseaseStates = sortDiseaseStates(catalogs.diseaseStates);
 
   return catalogs;
 }

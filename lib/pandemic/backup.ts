@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { loadAccountLabels } from "@/lib/pandemic/accounts";
+import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
 import { foldCode } from "@/lib/pandemic/drafts";
+import { deriveStoredRoleChanges } from "@/lib/pandemic/role-changes";
 
 type CodeName = {
   code: string;
@@ -136,7 +138,7 @@ export async function loadPandemicBackup(): Promise<BackupSource> {
       fetchAll(
         supabaseAdmin,
         "pandemic_game_role_changes",
-        "game_id, player_id, from_role_code, to_role_code, change_order",
+        "game_id, player_id, to_role_code, change_order",
         ["game_id", "change_order"],
       ),
       fetchAll(supabaseAdmin, "players", "id, name", ["id"]),
@@ -189,22 +191,33 @@ export async function loadPandemicBackup(): Promise<BackupSource> {
         },
       ];
     }),
-    roleChanges: changeRows.flatMap((row) => {
-      const gameId = asString(row.game_id);
-      const playerId = asString(row.player_id);
-      const fromRole = asString(row.from_role_code);
-      const toRole = asString(row.to_role_code);
-      if (!gameId || (!playerId && !fromRole && !toRole)) return [];
-      return [
-        {
-          game_id: gameId,
-          player_id: playerId,
-          from_role_code: fromRole,
-          to_role_code: toRole,
-          change_order: asOrder(row.change_order),
-        },
-      ];
-    }),
+    roleChanges: deriveStoredRoleChanges(
+      changeRows.flatMap((row) => {
+        const gameId = asString(row.game_id);
+        const playerId = asString(row.player_id);
+        const toRole = asString(row.to_role_code);
+        if (!gameId || (!playerId && !toRole)) return [];
+        return [
+          {
+            game_id: gameId,
+            player_id: playerId,
+            to_role_code: toRole,
+            change_order: asOrder(row.change_order),
+          },
+        ];
+      }),
+      seatRows.flatMap((row) => {
+        const gameId = asString(row.game_id);
+        if (!gameId) return [];
+        return [
+          {
+            game_id: gameId,
+            player_id: asString(row.player_id),
+            role_code: asString(row.role_code),
+          },
+        ];
+      }),
+    ),
     players: playerRows.flatMap((row) => {
       const id = asString(row.id);
       const name = asString(row.name);
@@ -451,7 +464,7 @@ export function renderPandemicBackup(source: BackupSource, now = new Date()) {
         game_results: [...source.results].sort(byName),
         difficulties: [...source.difficulties].sort(byName),
         game_modes: [...source.modes].sort(byName),
-        disease_states: [...source.diseaseStates].sort(byName),
+        disease_states: sortDiseaseStates(source.diseaseStates),
         virulent_strain_colors: [...source.strainColors].sort(byName),
       },
     },
