@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   diseaseFields,
+  DiseaseStateControl,
   fieldClassName,
   GameCodeSelect,
   GameField,
@@ -11,8 +12,9 @@ import {
   QuickCreate,
   roleOptionLabels,
   sortWithPriority,
+  StrainColorControl,
 } from "../game-fields";
-import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
+import { applyDiseaseResultLink, type DiseaseAutoFill } from "@/lib/pandemic/disease-link";
 import {
   emptyDraftData,
   emptyPlayer,
@@ -32,8 +34,30 @@ import { announceBadgeFromPayload } from "@/lib/badges-client";
 const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
 const ROLE_SINK = ["bio", "lokál", "pilot", "rejža", "vir"];
 
+const LAST_LINEUP_KEY = "pandemic-last-lineup";
+
 const addRowClassName =
   "inline-flex h-10 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.95)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-zinc-500 disabled:shadow-none";
+
+function readLastLineup(): string[] {
+  try {
+    const raw = localStorage.getItem(LAST_LINEUP_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { playerIds?: unknown };
+    if (!Array.isArray(parsed.playerIds)) return [];
+    return parsed.playerIds.filter((id): id is string => typeof id === "string" && id.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+function writeLastLineup(playerIds: string[]) {
+  try {
+    localStorage.setItem(LAST_LINEUP_KEY, JSON.stringify({ playerIds }));
+  } catch {
+    // Sestava zůstane v uložené partii, i když ji prohlížeč odmítne zapsat.
+  }
+}
 
 function sortRoles(roles: CodeLabel[]) {
   const rank = new Map(ROLE_SINK.map((code, index) => [foldCode(code), index]));
@@ -108,12 +132,28 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
     roles: sortRoles(initialCatalogs.roles),
   }));
   const [form, setForm] = useState<DraftData>(freshForm);
+  const [diseaseAuto, setDiseaseAuto] = useState<DiseaseAutoFill>({});
+  const [diseaseHint, setDiseaseHint] = useState<string | null>(null);
+  const [lastLineup, setLastLineup] = useState<string[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    setLastLineup(readLastLineup());
+  }, []);
+
   function updateForm(next: DraftData) {
-    setForm(next);
+    const linked = applyDiseaseResultLink({
+      previous: form,
+      next,
+      auto: diseaseAuto,
+      diseaseStates: catalogs.diseaseStates,
+      gameResults: catalogs.gameResults,
+    });
+    setForm(linked.form);
+    setDiseaseAuto(linked.auto);
+    setDiseaseHint(linked.notice);
     setErrors([]);
     setSavedId(null);
   }
@@ -182,8 +222,17 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
         return;
       }
       announceBadgeFromPayload(payload.badge, payload.earned_at);
+      const lineup = prepared.draft.players
+        .map((player) => player.matched_player_id)
+        .filter((id): id is string => Boolean(id));
+      if (lineup.length > 0) {
+        writeLastLineup(lineup);
+        setLastLineup(lineup);
+      }
       setSavedId(payload.game_id ?? "saved");
       setForm(freshForm());
+      setDiseaseAuto({});
+      setDiseaseHint(null);
     } catch {
       setErrors(["Uložení se nepodařilo. Zkuste to znovu."]);
     } finally {
@@ -192,6 +241,22 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
   }
 
   const seatedPlayers = playersInGame(form, catalogs.players);
+  const canLoadLineup =
+    !form.players.some((player) => player.matched_player_id) &&
+    lastLineup.some((id) => catalogs.players.some((player) => player.id === id));
+
+  function loadLastLineup() {
+    const known = new Set(catalogs.players.map((player) => player.id));
+    const ids = lastLineup.filter((id) => known.has(id));
+    if (ids.length === 0) return;
+    updateForm({
+      ...form,
+      players: ids.map((id, index) => ({
+        ...emptyPlayer(index + 1),
+        matched_player_id: id,
+      })),
+    });
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-8 sm:py-10">
@@ -298,6 +363,15 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
             ))}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
+            {canLoadLineup ? (
+              <button
+                type="button"
+                onClick={loadLastLineup}
+                className="inline-flex h-10 items-center rounded-full border border-emerald-400/30 px-4 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10"
+              >
+                Načíst hráče z minulé hry
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={form.players.length >= 5}
@@ -405,27 +479,29 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
             {diseaseFields.map((disease) => {
               const inactive = disease.key === "purple_disease" && !modeAllowsPurple(form.game_mode_code);
               return (
-                <GameCodeSelect
+                <DiseaseStateControl
                   key={disease.key}
                   label={disease.label}
                   swatch={disease.dot}
-                  optional={inactive}
                   disabled={inactive}
                   value={inactive ? null : form[disease.key]}
-                  options={sortDiseaseStates(catalogs.diseaseStates)}
+                  states={catalogs.diseaseStates}
                   onChange={(value) => updateForm({ ...form, [disease.key]: value })}
                 />
               );
             })}
-            <GameCodeSelect
-              label="Barva kmene"
-              optional={!modeAllowsVirulentStrain(form.game_mode_code)}
+            <StrainColorControl
               disabled={!modeAllowsVirulentStrain(form.game_mode_code)}
               value={modeAllowsVirulentStrain(form.game_mode_code) ? form.virulent_strain_color : null}
               options={catalogs.virulentStrainColors}
               onChange={(virulent_strain_color) => updateForm({ ...form, virulent_strain_color })}
             />
           </div>
+          {diseaseHint ? (
+            <p role="status" className="mt-3 text-sm text-emerald-200">
+              {diseaseHint}
+            </p>
+          ) : null}
           <div className="mt-4">
             <GameField label="Poznámka">
               <textarea

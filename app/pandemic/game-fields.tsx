@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { foldCode, type CodeLabel, type PlayerOption } from "@/lib/pandemic/drafts";
+import { diseaseStatePills } from "@/lib/pandemic/disease-link";
 
 export const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -123,6 +124,186 @@ export function GameCodeSelect({
         {label}
       </span>
       {control}
+    </div>
+  );
+}
+
+const pillClassName =
+  "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed";
+
+function moveRadio(current: number, delta: number, length: number) {
+  if (length === 0) return 0;
+  if (current < 0) return delta > 0 ? 0 : length - 1;
+  return (current + delta + length) % length;
+}
+
+export function DiseaseStateControl({
+  label,
+  swatch,
+  value,
+  states,
+  disabled = false,
+  onChange,
+}: {
+  label: string;
+  swatch?: string;
+  value: string | null;
+  states: CodeLabel[];
+  disabled?: boolean;
+  onChange: (value: string) => void;
+}) {
+  const options = diseaseStatePills(states);
+  const selectedIndex = options.findIndex((option) => option.code === value);
+
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (disabled || options.length === 0) return;
+    const delta =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0;
+    if (delta === 0) return;
+    event.preventDefault();
+    const next = options[moveRadio(selectedIndex, delta, options.length)];
+    if (next) onChange(next.code);
+  }
+
+  return (
+    <div className={`space-y-1 ${disabled ? "opacity-50" : ""}`}>
+      <span className="flex items-center gap-2 text-xs font-medium text-zinc-300">
+        {swatch ? <span className={`h-2.5 w-2.5 rounded-full ${swatch}`} /> : null}
+        {label}
+      </span>
+      {options.length === 0 ? (
+        <p className="text-xs text-zinc-500">{disabled ? "Mimo tenhle režim" : "Načítám stavy…"}</p>
+      ) : (
+        <div
+          role="radiogroup"
+          aria-label={label}
+          className="flex flex-wrap gap-1.5"
+          onKeyDown={onKeyDown}
+        >
+          {options.map((option, index) => {
+            const selected = option.code === value;
+            return (
+              <button
+                key={option.code}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={disabled}
+                tabIndex={disabled ? -1 : selected || (selectedIndex < 0 && index === 0) ? 0 : -1}
+                onClick={() => onChange(option.code)}
+                className={`${pillClassName} ${
+                  selected
+                    ? "border-emerald-400 bg-emerald-500 text-zinc-950"
+                    : "border-white/15 bg-zinc-950/40 text-zinc-200 hover:border-white/30 hover:text-white"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const STRAIN_SWATCHES: { match: string[]; swatch: string }[] = [
+  { match: ["zluta", "yellow"], swatch: "bg-yellow-400" },
+  { match: ["cervena", "red"], swatch: "bg-red-500" },
+  { match: ["modra", "blue"], swatch: "bg-sky-500" },
+  { match: ["cerna", "black"], swatch: "bg-zinc-100" },
+];
+
+function strainChoices(options: CodeLabel[]) {
+  const choices: { code: string; label: string; swatch: string; order: number }[] = [];
+  for (const option of options) {
+    const folded = `${foldCode(option.code)} ${foldCode(option.name_cs)}`;
+    if (folded.includes("fial") || folded.includes("purple")) continue;
+    const matchIndex = STRAIN_SWATCHES.findIndex((entry) =>
+      entry.match.some((token) => folded.includes(token)),
+    );
+    choices.push({
+      code: option.code,
+      label: option.name_cs,
+      swatch: matchIndex >= 0 ? STRAIN_SWATCHES[matchIndex].swatch : "bg-zinc-400",
+      order: matchIndex >= 0 ? matchIndex : STRAIN_SWATCHES.length,
+    });
+  }
+  return choices.sort((left, right) => left.order - right.order || left.label.localeCompare(right.label, "cs"));
+}
+
+export function StrainColorControl({
+  value,
+  options,
+  disabled = false,
+  onChange,
+}: {
+  value: string | null;
+  options: CodeLabel[];
+  disabled?: boolean;
+  onChange: (value: string | null) => void;
+}) {
+  const colors = strainChoices(options);
+  const selectedIndex = value ? colors.findIndex((color) => color.code === value) : -1;
+  const slots = [null, ...colors.map((color) => color.code)];
+  const slotIndex = value ? slots.indexOf(value) : 0;
+
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (disabled || slots.length === 0) return;
+    const delta =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0;
+    if (delta === 0) return;
+    event.preventDefault();
+    onChange(slots[moveRadio(slotIndex < 0 ? -1 : slotIndex, delta, slots.length)] ?? null);
+  }
+
+  return (
+    <div className={`space-y-1 ${disabled ? "opacity-50" : ""}`}>
+      <span className="block text-xs font-medium text-zinc-300">Barva kmene</span>
+      <div role="radiogroup" aria-label="Barva kmene" className="flex flex-wrap items-center gap-2" onKeyDown={onKeyDown}>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={value === null}
+          aria-label="Nevybráno"
+          title="Nevybráno"
+          disabled={disabled}
+          tabIndex={disabled ? -1 : value === null || selectedIndex < 0 ? 0 : -1}
+          onClick={() => onChange(null)}
+          className={`h-9 w-9 rounded-full border-2 border-dashed bg-transparent transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed ${
+            value === null ? "border-emerald-300" : "border-white/30 hover:border-white/60"
+          }`}
+        />
+        {colors.map((color) => {
+          const selected = color.code === value;
+          return (
+            <button
+              key={color.code}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={color.label}
+              title={color.label}
+              disabled={disabled}
+              tabIndex={disabled ? -1 : selected ? 0 : -1}
+              onClick={() => onChange(color.code)}
+              className={`h-9 w-9 rounded-full ${color.swatch} transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed ${
+                selected
+                  ? "ring-2 ring-emerald-300 ring-offset-2 ring-offset-zinc-950"
+                  : "ring-1 ring-white/25 hover:ring-white/50"
+              }`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -24,7 +24,8 @@ import {
   type PlayerOption,
 } from "@/lib/pandemic/drafts";
 import { announceBadgeFromPayload } from "@/lib/badges-client";
-import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
+import { applyDiseaseResultLink, type DiseaseAutoFill } from "@/lib/pandemic/disease-link";
+import { DiseaseStateControl, StrainColorControl } from "../game-fields";
 
 const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -73,11 +74,11 @@ const emptyCatalogs: PandemicCatalogs = {
 };
 
 const diseases = [
-  { key: "yellow_disease", label: "Žlutá", dot: "bg-yellow-400", optional: false },
-  { key: "red_disease", label: "Červená", dot: "bg-red-500", optional: false },
-  { key: "blue_disease", label: "Modrá", dot: "bg-sky-500", optional: false },
-  { key: "black_disease", label: "Černá", dot: "bg-zinc-100", optional: false },
-  { key: "purple_disease", label: "Fialová", dot: "bg-purple-500", optional: false },
+  { key: "yellow_disease", label: "Žlutá", dot: "bg-yellow-400" },
+  { key: "red_disease", label: "Červená", dot: "bg-red-500" },
+  { key: "blue_disease", label: "Modrá", dot: "bg-sky-500" },
+  { key: "black_disease", label: "Černá", dot: "bg-zinc-100" },
+  { key: "purple_disease", label: "Fialová", dot: "bg-purple-500" },
 ] as const;
 
 const cardBoxes = {
@@ -146,6 +147,8 @@ export function TranscriptionWorkspace() {
   const saving = pending !== null;
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [diseaseHint, setDiseaseHint] = useState<string | null>(null);
+  const [diseaseAuto, setDiseaseAuto] = useState<Record<string, DiseaseAutoFill>>({});
   const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
   const [offsetX, setOffsetX] = useState("0");
   const [offsetY, setOffsetY] = useState("0");
@@ -153,6 +156,10 @@ export function TranscriptionWorkspace() {
   const draftIdRef = useRef<string | null>(null);
   const scrollToTopAfterSave = useRef(false);
   draftIdRef.current = draft?.id ?? null;
+
+  useEffect(() => {
+    setDiseaseHint(null);
+  }, [draft?.id]);
 
   useEffect(() => {
     if (!scrollToTopAfterSave.current) return;
@@ -300,11 +307,17 @@ export function TranscriptionWorkspace() {
   function patchForm(recipe: (current: DraftData) => DraftData) {
     if (!draft) return;
     const draftId = draft.id;
-    const source = draft.draft_data;
-    setEdits((current) => {
-      const base = current[draftId] ?? presentDraft(source, catalogs);
-      return { ...current, [draftId]: recipe(base) };
+    const base = edits[draftId] ?? presentDraft(draft.draft_data, catalogs);
+    const linked = applyDiseaseResultLink({
+      previous: base,
+      next: recipe(base),
+      auto: diseaseAuto[draftId] ?? {},
+      diseaseStates: catalogs.diseaseStates,
+      gameResults: catalogs.gameResults,
     });
+    setEdits((current) => ({ ...current, [draftId]: linked.form }));
+    setDiseaseAuto((current) => ({ ...current, [draftId]: linked.auto }));
+    setDiseaseHint(linked.notice);
     setFormErrors([]);
     setNotice(null);
   }
@@ -409,6 +422,12 @@ export function TranscriptionWorkspace() {
       delete remaining[id];
       return remaining;
     });
+    setDiseaseAuto((current) => {
+      const remaining = { ...current };
+      delete remaining[id];
+      return remaining;
+    });
+    setDiseaseHint(null);
   }
 
   async function move(direction: "next" | "previous") {
@@ -416,6 +435,7 @@ export function TranscriptionWorkspace() {
     setPending("move");
     setFormErrors([]);
     setNotice(null);
+    setDiseaseHint(null);
 
     try {
       const response = await fetch("/api/pandemic/drafts/lock", {
@@ -766,33 +786,33 @@ export function TranscriptionWorkspace() {
               {diseases.map((disease) => {
                 const inactive = disease.key === "purple_disease" && !modeAllowsPurple(form.game_mode_code);
                 return (
-                  <CodeSelect
+                  <DiseaseStateControl
                     key={disease.key}
                     label={disease.label}
                     swatch={disease.dot}
-                    optional={inactive || disease.optional}
                     disabled={inactive}
                     value={inactive ? null : form[disease.key]}
-                    options={sortDiseaseStates(catalogs.diseaseStates || [])}
-                    onChange={(value) =>
-                      updateForm({ ...form, [disease.key]: value ?? null })
-                    }
+                    states={catalogs.diseaseStates || []}
+                    onChange={(value) => updateForm({ ...form, [disease.key]: value })}
                   />
                 );
               })}
-              <CodeSelect
-                label="Barva kmene"
-                optional={!modeAllowsVirulentStrain(form.game_mode_code)}
+              <StrainColorControl
                 disabled={!modeAllowsVirulentStrain(form.game_mode_code)}
                 value={
                   modeAllowsVirulentStrain(form.game_mode_code) ? form.virulent_strain_color : null
                 }
                 options={catalogs.virulentStrainColors || []}
                 onChange={(virulent_strain_color) =>
-                  updateForm({ ...form, virulent_strain_color: virulent_strain_color ?? null })
+                  updateForm({ ...form, virulent_strain_color })
                 }
               />
             </div>
+            {diseaseHint ? (
+              <p role="status" className="text-sm text-emerald-200">
+                {diseaseHint}
+              </p>
+            ) : null}
             <Field label="Poznámka">
               <textarea
                 value={form.note ?? ""}
