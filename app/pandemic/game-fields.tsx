@@ -129,7 +129,7 @@ export function GameCodeSelect({
 }
 
 const pillClassName =
-  "inline-flex min-h-9 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed";
+  "flex min-h-9 w-full min-w-0 items-center justify-center whitespace-nowrap rounded-full border px-2 py-1.5 text-center text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed";
 
 function moveRadio(current: number, delta: number, length: number) {
   if (length === 0) return 0;
@@ -181,7 +181,7 @@ export function DiseaseStateControl({
         <div
           role="radiogroup"
           aria-label={label}
-          className="flex flex-wrap gap-1.5"
+          className="grid grid-cols-3 gap-1.5"
           onKeyDown={onKeyDown}
         >
           {options.map((option, index) => {
