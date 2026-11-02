@@ -139,6 +139,7 @@ export type StatsGameFilter = {
 };
 
 export type RecentPlayer = {
+  id: string | null;
   name: string;
   role: string;
 };
@@ -407,6 +408,7 @@ export function describeRecentGame(
     mode: names.mode(game.game_mode_code),
     difficulty: names.difficulty(game.difficulty_code),
     players: orderedSeats.map((seat) => ({
+      id: seat.player_id,
       name: names.player(seat.player_id),
       role: names.role(seat.role_code),
     })),
