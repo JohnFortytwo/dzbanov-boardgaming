@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CardPreview } from "./card-preview";
-import { SubCropImage, type CropBox } from "./sub-crop-image";
+import { CropViewProvider, SubCropImage, type CropBox } from "./sub-crop-image";
 import {
   emptyDraftData,
   emptyPlayer,
@@ -500,7 +500,8 @@ export function TranscriptionWorkspace() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 py-6">
+    <CropViewProvider resetKey={draft?.id ?? null}>
+      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 py-6">
       <Link
         href="/pandemic"
         className="mb-4 text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
@@ -569,6 +570,7 @@ export function TranscriptionWorkspace() {
         >
           <SectionBlock
             title="Datum"
+            viewId="date"
             src={form.card_image_url}
             box={cropBoxes.date}
             alt={`Datum na kartě hry ${draft.game_order}`}
@@ -587,6 +589,7 @@ export function TranscriptionWorkspace() {
 
           <SectionBlock
             title="Výsledek, obtížnost a režim"
+            viewId="outcome"
             src={form.card_image_url}
             box={cropBoxes.outcome}
             alt={`Výsledek a obtížnost na kartě hry ${draft.game_order}`}
@@ -622,6 +625,7 @@ export function TranscriptionWorkspace() {
 
           <SectionBlock
             title="Hráči a role"
+            viewId="players"
             src={form.card_image_url}
             box={cropBoxes.players}
             alt={`Hráči a role na kartě hry ${draft.game_order}`}
@@ -778,6 +782,7 @@ export function TranscriptionWorkspace() {
 
           <SectionBlock
             title="Stavy nemocí a kmen"
+            viewId="diseases"
             src={form.card_image_url}
             box={cropBoxes.diseases}
             alt={`Stavy nemocí na kartě hry ${draft.game_order}`}
@@ -869,7 +874,8 @@ export function TranscriptionWorkspace() {
           />
         </form>
       ) : null}
-    </main>
+      </main>
+    </CropViewProvider>
   );
 }
 
@@ -939,6 +945,9 @@ function CropOffsetBar({
       </div>
       <p className="mt-2 text-xs text-zinc-500">
         Kladné X posune výřez doprava, kladné Y dolů. Posun zůstane i na další kartě.
+        <span className="mt-1 block">
+          Kolečko nad výřezem zvětší všechny najednou a tažení je posune. Dvojklik vrátí 100 %.
+        </span>
         {error ? <span className="mt-1 block text-red-300">{error}</span> : null}
       </p>
     </section>
@@ -1068,12 +1077,14 @@ function sortByName<T>(items: T[], label: (item: T) => string) {
 
 function SectionBlock({
   title,
+  viewId,
   src,
   box,
   alt,
   children,
 }: {
   title: string;
+  viewId: string;
   src: string | null;
   box: CropBox;
   alt: string;
@@ -1087,7 +1098,7 @@ function SectionBlock({
       <div className="mt-3 grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-3">{children}</div>
         <div className="w-3/4 lg:w-full">
-          <SubCropImage src={src} box={box} alt={alt} />
+          <SubCropImage src={src} box={box} alt={alt} viewId={viewId} />
         </div>
       </div>
     </section>
