@@ -944,9 +944,10 @@ function CropOffsetBar({
         </button>
       </div>
       <p className="mt-2 text-xs text-zinc-500">
-        Kladné X posune výřez doprava, kladné Y dolů. Posun zůstane i na další kartě.
+        Kladné X posune výřez doprava, kladné Y dolů. Posun zůstane i na další kartě.{" "}
         <span className="mt-1 block">
-          Kolečko nad výřezem zvětší všechny najednou a tažení je posune. Dvojklik vrátí 100 %.
+          Kolečko nad výřezem zvětší i zmenší všechny najednou, tažení ukáže zbytek karty. Dvojklik
+          vrátí výřez.
         </span>
         {error ? <span className="mt-1 block text-red-300">{error}</span> : null}
       </p>

@@ -12,8 +12,8 @@ import {
 } from "react";
 import { resolveScanImageUrl } from "@/lib/pandemic/scan-image";
 
-const MIN_SCALE = 1;
 const MAX_SCALE = 4;
+const FLOOR_SCALE = 0.05;
 const REST_PAN = { x: 0, y: 0 };
 
 export type CropBox = {
@@ -24,7 +24,7 @@ export type CropBox = {
 };
 
 type Pan = { x: number; y: number };
-type FrameSize = { w: number; h: number };
+type FrameMetrics = { w: number; h: number; box: CropBox };
 type CropView = { scale: number; pan: Pan; key: string | null };
 
 type CropViewApi = {
@@ -33,7 +33,7 @@ type CropViewApi = {
   zoomBy: (delta: number) => void;
   movePan: (pan: Pan) => void;
   reset: () => void;
-  rememberFrame: (id: string, size: FrameSize | null) => void;
+  rememberFrame: (id: string, size: FrameMetrics | null) => void;
   reclamp: () => void;
 };
 
@@ -43,24 +43,61 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-// Shared pan has to stay inside every frame, so the limit is the strictest one.
-function panLimit(frames: Map<string, FrameSize>, scale: number): Pan {
-  if (scale <= 1) return REST_PAN;
-  let maxX = Number.POSITIVE_INFINITY;
-  let maxY = Number.POSITIVE_INFINITY;
+// Scale 1 fills the frame with the crop. Smaller scales reveal the rest of the scan.
+function minimumScale(frames: Map<string, FrameMetrics>) {
+  let min = 1;
+  let found = false;
   for (const frame of frames.values()) {
-    maxX = Math.min(maxX, ((scale - 1) * frame.w) / 2);
-    maxY = Math.min(maxY, ((scale - 1) * frame.h) / 2);
+    if (frame.box.w <= 0 || frame.box.h <= 0) continue;
+    found = true;
+    min = Math.min(min, frame.box.w / 100, frame.box.h / 100);
   }
-  if (!Number.isFinite(maxX) || !Number.isFinite(maxY)) return REST_PAN;
-  return { x: maxX, y: maxY };
+  if (!found) return FLOOR_SCALE;
+  return clamp(min, FLOOR_SCALE, 1);
 }
 
-function clampPan(frames: Map<string, FrameSize>, pan: Pan, scale: number): Pan {
-  const limit = panLimit(frames, scale);
+function imageSpan(frameSize: number, origin: number, length: number, scale: number) {
+  const start = frameSize * (0.5 - ((origin + length / 2) * scale) / length);
+  const size = frameSize * scale * (100 / length);
+  return { start, end: start + size };
+}
+
+function axisLimit(start: number, end: number, frameSize: number) {
+  const size = end - start;
+  let min = size >= frameSize ? frameSize - end : -start;
+  let max = size >= frameSize ? -start : frameSize - end;
+  if (min > max) {
+    const swap = min;
+    min = max;
+    max = swap;
+  }
+  // The crop-centered view stays reachable even when a frame would rather recenter.
+  return { min: Math.min(min, 0), max: Math.max(max, 0) };
+}
+
+// One pan is shared, so each frame can still reach its own scan without a gap the others cannot follow.
+function clampPan(frames: Map<string, FrameMetrics>, pan: Pan, scale: number): Pan {
+  let minX = Number.NEGATIVE_INFINITY;
+  let maxX = Number.POSITIVE_INFINITY;
+  let minY = Number.NEGATIVE_INFINITY;
+  let maxY = Number.POSITIVE_INFINITY;
+  let count = 0;
+  for (const frame of frames.values()) {
+    if (frame.w < 2 || frame.h < 2 || frame.box.w <= 0 || frame.box.h <= 0) continue;
+    count += 1;
+    const x = imageSpan(frame.w, frame.box.x, frame.box.w, scale);
+    const y = imageSpan(frame.h, frame.box.y, frame.box.h, scale);
+    const limitX = axisLimit(x.start, x.end, frame.w);
+    const limitY = axisLimit(y.start, y.end, frame.h);
+    minX = Math.max(minX, limitX.min);
+    maxX = Math.min(maxX, limitX.max);
+    minY = Math.max(minY, limitY.min);
+    maxY = Math.min(maxY, limitY.max);
+  }
+  if (count === 0 || minX > maxX || minY > maxY) return { ...pan, x: 0, y: 0 };
   return {
-    x: clamp(pan.x, -limit.x, limit.x),
-    y: clamp(pan.y, -limit.y, limit.y),
+    x: clamp(pan.x, minX, maxX),
+    y: clamp(pan.y, minY, maxY),
   };
 }
 
@@ -76,7 +113,7 @@ export function CropViewProvider({
   children: ReactNode;
 }) {
   const [view, setView] = useState<CropView>({ scale: 1, pan: REST_PAN, key: resetKey });
-  const frames = useRef(new Map<string, FrameSize>());
+  const frames = useRef(new Map<string, FrameMetrics>());
   const scale = view.key === resetKey ? view.scale : 1;
   const pan = view.key === resetKey ? view.pan : REST_PAN;
 
@@ -85,8 +122,12 @@ export function CropViewProvider({
       setView((current) => {
         const baseScale = current.key === resetKey ? current.scale : 1;
         const basePan = current.key === resetKey ? current.pan : REST_PAN;
-        const nextScale = clamp(Number((baseScale + delta).toFixed(2)), MIN_SCALE, MAX_SCALE);
-        const nextPan = nextScale === 1 ? REST_PAN : clampPan(frames.current, basePan, nextScale);
+        const nextScale = clamp(
+          Number((baseScale + delta).toFixed(2)),
+          minimumScale(frames.current),
+          MAX_SCALE,
+        );
+        const nextPan = clampPan(frames.current, basePan, nextScale);
         if (current.key === resetKey && nextScale === current.scale && samePan(nextPan, current.pan)) {
           return current;
         }
@@ -101,10 +142,6 @@ export function CropViewProvider({
       setView((current) => {
         const baseScale = current.key === resetKey ? current.scale : 1;
         const basePan = current.key === resetKey ? current.pan : REST_PAN;
-        if (baseScale <= 1) {
-          if (current.key === resetKey && current.scale === 1 && samePan(current.pan, REST_PAN)) return current;
-          return { scale: 1, pan: REST_PAN, key: resetKey };
-        }
         const nextPan = clampPan(frames.current, next, baseScale);
         if (current.key === resetKey && samePan(nextPan, basePan)) return current;
         return { scale: baseScale, pan: nextPan, key: resetKey };
@@ -120,14 +157,14 @@ export function CropViewProvider({
     });
   }, [resetKey]);
 
-  const rememberFrame = useCallback((id: string, size: FrameSize | null) => {
+  const rememberFrame = useCallback((id: string, size: FrameMetrics | null) => {
     if (!size || size.w < 2 || size.h < 2) frames.current.delete(id);
     else frames.current.set(id, size);
   }, []);
 
   const reclamp = useCallback(() => {
     setView((current) => {
-      if (current.key !== resetKey || current.scale <= 1) return current;
+      if (current.key !== resetKey) return current;
       const nextPan = clampPan(frames.current, current.pan, current.scale);
       if (samePan(nextPan, current.pan)) return current;
       return { ...current, pan: nextPan };
@@ -181,9 +218,14 @@ export function SubCropImage({
     const node = frameRef.current;
     if (!node || !rememberFrame || !reclamp) return;
     const measure = () => {
-      rememberFrame(viewId, { w: node.clientWidth, h: node.clientHeight });
+      rememberFrame(viewId, {
+        w: node.clientWidth,
+        h: node.clientHeight,
+        box: { x: box.x, y: box.y, w: box.w, h: box.h },
+      });
     };
     measure();
+    reclamp();
     const observer = new ResizeObserver(() => {
       measure();
       reclamp();
@@ -193,7 +235,7 @@ export function SubCropImage({
       observer.disconnect();
       rememberFrame(viewId, null);
     };
-  }, [rememberFrame, reclamp, viewId]);
+  }, [rememberFrame, reclamp, viewId, box.x, box.y, box.w, box.h]);
 
   useEffect(() => {
     const node = frameRef.current;
@@ -213,18 +255,22 @@ export function SubCropImage({
     <div
       ref={frameRef}
       data-crop-view={viewId}
-      title={interactive ? "Kolečko zvětší všechny výřezy, tažení je posune. Dvojklik vrátí 100 %." : undefined}
+      title={
+        interactive
+          ? "Kolečko zvětší i zmenší všechny výřezy, tažení ukáže zbytek karty. Dvojklik vrátí výřez."
+          : undefined
+      }
       className={`relative w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/70 select-none ${
-        !interactive ? "" : scale > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
+        interactive ? "cursor-grab active:cursor-grabbing" : ""
       }`}
-      style={{ aspectRatio, touchAction: scale > 1 ? "none" : "pan-y" }}
+      style={{ aspectRatio, touchAction: interactive ? "none" : "pan-y" }}
       onDoubleClick={() => {
         if (!interactive || !view) return;
         dragRef.current = null;
         view.reset();
       }}
       onPointerDown={(event) => {
-        if (!interactive || !view || event.button !== 0 || scale <= 1) return;
+        if (!interactive || !view || event.button !== 0) return;
         dragRef.current = {
           pointerId: event.pointerId,
           startX: event.clientX,
@@ -250,37 +296,29 @@ export function SubCropImage({
       }}
     >
       {url && !broken ? (
-        <div
-          className="absolute inset-0"
-          style={
-            scale === 1 && pan.x === 0 && pan.y === 0
-              ? undefined
-              : {
-                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-                  transformOrigin: "center center",
-                }
-          }
-        >
-          {/* The crop is a CSS transform of the original scan, so the bitmap must stay unresized. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={url}
-            alt={alt}
-            draggable={false}
-            onLoad={(event) => {
-              const image = event.currentTarget;
-              setNatural({ url, width: image.naturalWidth, height: image.naturalHeight });
-            }}
-            onError={() => {
-              console.error("Výstřižek se nepodařilo načíst:", url);
-              setFailedUrl(url);
-            }}
-            className="absolute top-0 left-0 h-full w-full max-w-none origin-top-left"
-            style={{
-              transform: `scale(${100 / width}, ${100 / height}) translate(${-box.x}%, ${-box.y}%)`,
-            }}
-          />
-        </div>
+        // Full scan, sized so scale 1 fills this frame with the crop. The bitmap stays unresized.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt={alt}
+          draggable={false}
+          onLoad={(event) => {
+            const image = event.currentTarget;
+            setNatural({ url, width: image.naturalWidth, height: image.naturalHeight });
+          }}
+          onError={() => {
+            console.error("Výstřižek se nepodařilo načíst:", url);
+            setFailedUrl(url);
+          }}
+          className="absolute max-w-none"
+          style={{
+            width: `${(scale * 10000) / width}%`,
+            height: `${(scale * 10000) / height}%`,
+            left: `${50 - ((box.x + width / 2) * scale * 100) / width}%`,
+            top: `${50 - ((box.y + height / 2) * scale * 100) / height}%`,
+            transform: pan.x === 0 && pan.y === 0 ? undefined : `translate(${pan.x}px, ${pan.y}px)`,
+          }}
+        />
       ) : (
         <p className="absolute inset-0 flex items-center justify-center px-4 text-center text-sm text-zinc-500">
           {broken ? "Výstřižek se nepodařilo načíst." : "K této sekci není náhled."}
