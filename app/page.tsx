@@ -8,6 +8,7 @@ import { DonateModal } from "@/app/components/DonateModal";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { loadOwnNickname } from "@/lib/profile";
+import { loadTermsChoice } from "@/lib/terms-server";
 import { createClient } from "@/lib/supabase/server";
 
 export default function Home() {
@@ -36,7 +37,10 @@ async function BoardgamingHome() {
   }
 
   const userId = typeof data.claims.sub === "string" ? data.claims.sub : "";
-  const nickname = await loadOwnNickname(supabase, userId);
+  const [nickname, termsChoice] = await Promise.all([
+    loadOwnNickname(supabase, userId),
+    loadTermsChoice(supabase),
+  ]);
 
   return (
     <div className="relative isolate flex min-h-full flex-1 flex-col overflow-hidden bg-zinc-950 text-zinc-100">
@@ -48,7 +52,7 @@ async function BoardgamingHome() {
 
       <div className="absolute right-6 top-6 z-10 flex flex-col items-end gap-2">
         <SignedInUser nickname={nickname} />
-        <AccountLinks />
+        <AccountLinks termsChoice={termsChoice} />
       </div>
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-6 py-20">

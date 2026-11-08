@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { TermsConsent } from "@/app/components/TermsConsent";
 import { UserManual } from "@/app/components/UserManual";
 import { logout } from "@/app/login/actions";
+import type { TermsChoice } from "@/lib/terms";
 
 const accountLinkClass =
   "inline-flex items-center rounded-full border border-emerald-400/30 bg-transparent px-4 py-2 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10 hover:text-emerald-200";
 
-export function AccountLinks() {
+export function AccountLinks({ termsChoice }: { termsChoice: TermsChoice | null }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
+      <TermsConsent initialChoice={termsChoice} />
       <UserManual />
       <Link href="/jmeno" className={accountLinkClass}>
         Změnit jméno

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { AccountLinks } from "@/app/components/account-links";
 import { SignedInUser } from "@/app/components/SignedInUser";
 import { loadOwnNickname } from "@/lib/profile";
+import { loadTermsChoice } from "@/lib/terms-server";
 import { createClient } from "@/lib/supabase/server";
 import { PasswordForm } from "./password-form";
 
@@ -32,7 +33,10 @@ async function PasswordContent() {
   }
 
   const userId = typeof data.claims.sub === "string" ? data.claims.sub : "";
-  const nickname = await loadOwnNickname(supabase, userId);
+  const [nickname, termsChoice] = await Promise.all([
+    loadOwnNickname(supabase, userId),
+    loadTermsChoice(supabase),
+  ]);
 
   return (
     <div className="relative isolate flex min-h-full flex-1 flex-col overflow-hidden bg-zinc-950 text-zinc-100">
@@ -45,7 +49,7 @@ async function PasswordContent() {
       <header className="relative z-10 flex flex-wrap items-start justify-end gap-4 px-6 pt-6">
         <div className="flex flex-col items-end gap-2">
           <SignedInUser nickname={nickname} />
-          <AccountLinks />
+          <AccountLinks termsChoice={termsChoice} />
         </div>
       </header>
 

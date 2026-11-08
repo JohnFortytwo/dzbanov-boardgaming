@@ -12,6 +12,7 @@ export const BADGE_IDS = [
   "pandemic_delete",
   "donate_beer",
   "donate_kobliha",
+  "terms_accepted",
 ] as const;
 
 export type BadgeId = (typeof BADGE_IDS)[number];
@@ -73,6 +74,13 @@ export const BADGES: readonly Badge[] = [
     title: "Kobliha pro Garta",
     description:
       "Dal jsi Gartovi koblihu. Žádná brána, žádný poplatek, jen cukr na správném místě.",
+  },
+  {
+    id: "terms_accepted",
+    src: "/Images/TERMS.jpg",
+    title: "Zpečetěný pakt",
+    description:
+      "Přijal jsi všeobecné smluvní a herní podmínky. Pečeť drží, kostky jsou vrženy.",
   },
 ];
 

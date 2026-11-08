@@ -72,8 +72,8 @@ export function BadgeBoard() {
       ) : earned.length === 0 ? (
         <div className="rounded-3xl border border-white/10 bg-white/5 px-6 py-8">
           <p className="text-base leading-7 text-zinc-300">
-            Zatím žádný odznak. Zapiš partii, zajdi do Dračího doupěte, nebo se
-            zastav u donate brány.
+            Zatím žádný odznak. Zapiš partii, zajdi do Dračího doupěte, zastav se u
+            donate brány, nebo přijmi smluvní podmínky.
           </p>
           <p className="mt-3 text-sm text-zinc-500">Ve hře je {BADGES.length} odznaků.</p>
         </div>
