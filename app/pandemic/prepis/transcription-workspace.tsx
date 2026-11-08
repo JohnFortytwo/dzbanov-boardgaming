@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CardPreview } from "./card-preview";
-import { CropViewProvider, SubCropImage, type CropBox } from "./sub-crop-image";
+import { CropViewProvider, SubCropImage, useCropViewReset, type CropBox } from "./sub-crop-image";
 import {
   emptyDraftData,
   emptyPlayer,
@@ -25,7 +25,6 @@ import {
 } from "@/lib/pandemic/drafts";
 import { announceBadgeFromPayload } from "@/lib/badges-client";
 import { applyDiseaseResultLink, type DiseaseAutoFill } from "@/lib/pandemic/disease-link";
-import { DiseaseStateControl, StrainColorControl } from "../game-fields";
 
 const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -791,23 +790,29 @@ export function TranscriptionWorkspace() {
               {diseases.map((disease) => {
                 const inactive = disease.key === "purple_disease" && !modeAllowsPurple(form.game_mode_code);
                 return (
-                  <DiseaseStateControl
+                  <CodeSelect
                     key={disease.key}
                     label={disease.label}
                     swatch={disease.dot}
                     disabled={inactive}
                     value={inactive ? null : form[disease.key]}
-                    states={catalogs.diseaseStates || []}
+                    options={catalogs.diseaseStates || []}
                     onChange={(value) => updateForm({ ...form, [disease.key]: value })}
                   />
                 );
               })}
-              <StrainColorControl
+              <CodeSelect
+                label="Barva kmene"
                 disabled={!modeAllowsVirulentStrain(form.game_mode_code)}
                 value={
                   modeAllowsVirulentStrain(form.game_mode_code) ? form.virulent_strain_color : null
                 }
-                options={catalogs.virulentStrainColors || []}
+                options={sortWithPriority(catalogs.virulentStrainColors || [], [
+                  "Žlutá",
+                  "Červená",
+                  "Modrá",
+                  "Černá",
+                ])}
                 onChange={(virulent_strain_color) =>
                   updateForm({ ...form, virulent_strain_color })
                 }
@@ -896,6 +901,8 @@ function CropOffsetBar({
   onApply: () => void;
   onReset: () => void;
 }) {
+  const resetView = useCropViewReset();
+
   return (
     <section className="mb-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
       <div className="flex flex-wrap items-end gap-3">
@@ -942,12 +949,22 @@ function CropOffsetBar({
         >
           Reset
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            onApply();
+            resetView();
+          }}
+          className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white"
+        >
+          Reset pohledu
+        </button>
       </div>
       <p className="mt-2 text-xs text-zinc-500">
         Kladné X posune výřez doprava, kladné Y dolů. Posun zůstane i na další kartě.{" "}
         <span className="mt-1 block">
-          Kolečko nad výřezem zvětší i zmenší všechny najednou, tažení ukáže zbytek karty. Dvojklik
-          vrátí výřez.
+          Kolečko nad výřezem zvětší i zmenší všechny najednou, tažení je posune i mimo kartu.
+          Reset pohledu vrátí zoom a posun myší na výřez podle vyplněného X a Y.
         </span>
         {error ? <span className="mt-1 block text-red-300">{error}</span> : null}
       </p>
