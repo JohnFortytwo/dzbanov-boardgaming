@@ -105,8 +105,7 @@ async function BoardgamingHome() {
               Odznaky
             </h2>
             <p className="mt-3 flex-1 text-base leading-7 text-zinc-400">
-              Přehled získaných odznaků. Úspěch i selhání, z Pandemicu i z
-              Dračího doupěte.
+              Přehled získaných odznaků. Džbánov si je pamatuje za tebe.
             </p>
 
             <Link

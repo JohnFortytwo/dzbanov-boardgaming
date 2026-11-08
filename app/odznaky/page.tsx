@@ -14,7 +14,7 @@ export default function OdznakyPage() {
         Odznaky
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-        Úspěchy i selhání. Tady jsou odznaky, které už máš.
+        Tady jsou odznaky, které už máš.
       </p>
       <BadgeBoard />
     </main>
