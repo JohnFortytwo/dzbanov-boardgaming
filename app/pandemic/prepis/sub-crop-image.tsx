@@ -143,11 +143,12 @@ export function SubCropImage({
   useEffect(() => {
     const node = frameRef.current;
     if (!node || !zoomBy || !interactive) return;
+    const zoom = zoomBy;
 
     function onWheel(event: WheelEvent) {
       event.preventDefault();
       if (event.deltaY === 0) return;
-      zoomBy(event.deltaY < 0 ? 0.2 : -0.2);
+      zoom(event.deltaY < 0 ? 0.2 : -0.2);
     }
 
     node.addEventListener("wheel", onWheel, { passive: false });
