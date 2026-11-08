@@ -146,6 +146,8 @@ export function TranscriptionWorkspace() {
   const saving = pending !== null;
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [discardStep, setDiscardStep] = useState<null | "warn" | "confirm">(null);
+  const [discardError, setDiscardError] = useState<string | null>(null);
   const [diseaseHint, setDiseaseHint] = useState<string | null>(null);
   const [diseaseAuto, setDiseaseAuto] = useState<Record<string, DiseaseAutoFill>>({});
   const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
@@ -158,6 +160,8 @@ export function TranscriptionWorkspace() {
 
   useEffect(() => {
     setDiseaseHint(null);
+    setDiscardError(null);
+    setDiscardStep(null);
   }, [draft?.id]);
 
   useEffect(() => {
@@ -455,16 +459,26 @@ export function TranscriptionWorkspace() {
     }
   }
 
-  async function reject() {
+  function openDiscard() {
     if (!draft || saving) return;
-    const confirmed = window.confirm(
-      "Tahle karta se do databáze nezapíše. Draft i výstřižek se smažou. Pokračovat?",
-    );
-    if (!confirmed) return;
+    setDiscardError(null);
+    setDiscardStep("warn");
+  }
+
+  function closeDiscard() {
+    if (pending === "reject") return;
+    setDiscardError(null);
+    setDiscardStep(null);
+  }
+
+  async function reject() {
+    if (!draft || saving || discardStep !== "confirm") return;
+    const gameOrder = draft.game_order;
 
     setPending("reject");
     setFormErrors([]);
     setNotice(null);
+    setDiscardError(null);
 
     try {
       const response = await fetch("/api/pandemic/drafts", {
@@ -478,21 +492,21 @@ export function TranscriptionWorkspace() {
         image_warning?: string | null;
       };
       if (!response.ok) {
-        setFormErrors([payload.error ?? "Hru se nepodařilo smazat."]);
+        setDiscardError(payload.error ?? "Hru se nepodařilo smazat.");
         return;
       }
 
       forgetEdit(draft.id);
+      setDiscardStep(null);
       applyQueue(payload);
+      const discarded = `Karta ${gameOrder} je zahozená. V aplikaci po ní nezůstala záloha.`;
       setNotice(
         payload.image_warning
-          ? "Hra byla zamítnuta a smazána z přepisu. Výstřižek v úložišti se nepodařilo odstranit."
-          : payload.image_deleted
-            ? "Hra byla zamítnuta a smazána včetně výstřižku."
-            : "Hra byla zamítnuta a smazána z přepisu.",
+          ? `${discarded} Výstřižek v úložišti se nepodařilo odstranit.`
+          : discarded,
       );
     } catch {
-      setFormErrors(["Hru se nepodařilo smazat. Zkuste to znovu."]);
+      setDiscardError("Hru se nepodařilo smazat. Zkuste to znovu.");
     } finally {
       setPending(null);
     }
@@ -531,7 +545,7 @@ export function TranscriptionWorkspace() {
           onPrevious={() => void move("previous")}
           onNext={() => void move("next")}
           onApprove={() => void approve()}
-          onReject={() => void reject()}
+          onReject={openDiscard}
         />
       ) : null}
 
@@ -875,12 +889,214 @@ export function TranscriptionWorkspace() {
             onPrevious={() => void move("previous")}
             onNext={() => void move("next")}
             onApprove={() => void approve()}
-            onReject={() => void reject()}
+            onReject={openDiscard}
           />
         </form>
       ) : null}
+      {discardStep && draft ? (
+        <DiscardDraftDialog
+          step={discardStep}
+          gameOrder={draft.game_order}
+          playedAt={formatDraftDay(form.played_at)}
+          playerNames={draftPlayerNames(form, catalogs.players)}
+          pending={pending === "reject"}
+          error={discardError}
+          onCancel={closeDiscard}
+          onContinue={() => {
+            setDiscardError(null);
+            setDiscardStep("confirm");
+          }}
+          onBack={() => {
+            setDiscardError(null);
+            setDiscardStep("warn");
+          }}
+          onConfirm={() => void reject()}
+        />
+      ) : null}
       </main>
     </CropViewProvider>
+  );
+}
+
+function formatDraftDay(value: string | null) {
+  if (!value) return null;
+  const [year, month, day] = value.slice(0, 10).split("-");
+  if (!year || !month || !day || year.length !== 4) return null;
+  const parsedDay = Number(day);
+  const parsedMonth = Number(month);
+  const parsedYear = Number(year);
+  if (!parsedDay || !parsedMonth || !parsedYear) return null;
+  return `${parsedDay}. ${parsedMonth}. ${parsedYear}`;
+}
+
+function draftPlayerNames(form: DraftData, players: PlayerOption[]) {
+  return form.players
+    .map((player) => {
+      const matched = players.find((item) => item.id === player.matched_player_id);
+      return (matched?.name || player.raw_name || "").trim();
+    })
+    .filter(Boolean);
+}
+
+function DiscardDraftDialog({
+  step,
+  gameOrder,
+  playedAt,
+  playerNames,
+  pending,
+  error,
+  onCancel,
+  onContinue,
+  onBack,
+  onConfirm,
+}: {
+  step: "warn" | "confirm";
+  gameOrder: number;
+  playedAt: string | null;
+  playerNames: string[];
+  pending: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onContinue: () => void;
+  onBack: () => void;
+  onConfirm: () => void;
+}) {
+  const [acknowledged, setAcknowledged] = useState(false);
+  const safeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setAcknowledged(false);
+    safeRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !pending) onCancel();
+      if (event.key !== "Enter") return;
+      if (event.target instanceof HTMLButtonElement) return;
+      event.preventDefault();
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [pending, onCancel]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/75"
+        onClick={() => {
+          if (!pending) onCancel();
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="discard-draft-title"
+        className="relative z-10 w-full max-w-lg rounded-3xl border border-red-400/30 bg-zinc-950 p-6 shadow-2xl"
+      >
+        <h2 id="discard-draft-title" className="text-lg font-semibold text-white">
+          {step === "warn"
+            ? "Zahodit tuhle historickou hru?"
+            : `Opravdu zahodit kartu ${gameOrder}?`}
+        </h2>
+
+        {step === "warn" ? (
+          <div className="mt-3 space-y-3 text-sm leading-6 text-zinc-300">
+            <p>
+              Tahle akce je nevratná. Karta i její fotka zmizí z aplikace a žádná záloha
+              neexistuje. Hru už nikdo nezapíše do databáze.
+            </p>
+            <p>
+              Zahazujte ji jen tehdy, když jste si jistí, že ji nejde zapsat ani dohledat.
+              Třeba když je obrázek úplně prázdný, nebo je na kartě tak málo údajů, že partii
+              nejde zrekonstruovat.
+            </p>
+            <p>
+              Když jen chybí kus skenu, kartu nezahazujte. Nechte ji ve frontě a řekněte
+              Gartovi, o kterou hru jde, ať ji najde v papírech.
+            </p>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm leading-6 text-zinc-300">
+            Po potvrzení se smaže rozpracovaný přepis i výstřižek. Záloha není. Tahle hra se
+            do databáze nikdy nedostane.
+          </p>
+        )}
+
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200">
+          <p>Karta {gameOrder}</p>
+          {playedAt ? <p className="mt-1">Datum {playedAt}</p> : null}
+          {playerNames.length > 0 ? (
+            <p className="mt-1">Hráči {playerNames.join(", ")}</p>
+          ) : null}
+        </div>
+
+        {step === "confirm" ? (
+          <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-zinc-200">
+            <input
+              type="checkbox"
+              checked={acknowledged}
+              disabled={pending}
+              onChange={(event) => setAcknowledged(event.target.checked)}
+              className="mt-1 size-4 accent-red-500"
+            />
+            Potvrzuji, že tuhle hru nejde zapsat ani dohledat v papírech.
+          </label>
+        ) : null}
+
+        {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+          {step === "warn" ? (
+            <>
+              <button
+                ref={safeRef}
+                type="button"
+                onClick={onCancel}
+                disabled={pending}
+                className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:opacity-60"
+              >
+                Nechat kartu
+              </button>
+              <button
+                type="button"
+                onClick={onContinue}
+                disabled={pending}
+                className="inline-flex h-9 items-center justify-center rounded-full border border-red-400/40 bg-red-500/10 px-4 text-sm font-semibold text-red-100 transition hover:border-red-300/60 hover:bg-red-500/20 disabled:opacity-60"
+              >
+                Chci ji přesto zahodit
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onConfirm}
+                disabled={!acknowledged || pending}
+                className="inline-flex h-9 items-center justify-center rounded-full bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {pending ? "Mažu…" : "Zahodit natrvalo"}
+              </button>
+              <button
+                ref={safeRef}
+                type="button"
+                onClick={onBack}
+                disabled={pending}
+                className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 px-4 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:text-white disabled:opacity-60"
+              >
+                Zpět
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

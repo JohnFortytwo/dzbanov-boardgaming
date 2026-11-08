@@ -8,6 +8,34 @@ import { TERMS_BODY, TERMS_TITLE, type TermsChoice } from "@/lib/terms";
 const linkClass =
   "inline-flex items-center rounded-full border border-amber-400/30 bg-transparent px-4 py-2 text-xs font-medium text-amber-200 transition hover:border-amber-400/60 hover:bg-amber-500/10 hover:text-amber-100";
 
+function TermsDocument({ text }: { text: string }) {
+  const blocks = text.split("\n\n");
+
+  return (
+    <div className="space-y-4 font-serif">
+      {blocks.map((block, index) => {
+        const breakAt = block.indexOf("\n");
+        const heading = breakAt === -1 ? "" : block.slice(0, breakAt);
+        if (!heading.startsWith("Článek ")) {
+          return (
+            <p key={index} className="whitespace-pre-wrap">
+              {block}
+            </p>
+          );
+        }
+
+        return (
+          <p key={heading}>
+            <strong className="font-bold">{heading}</strong>
+            <br />
+            {block.slice(breakAt + 1)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | null }) {
   const [choice, setChoice] = useState(initialChoice);
   const [mode, setMode] = useState<"closed" | "gate" | "review">(
@@ -98,10 +126,10 @@ export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | n
   const forced = mode === "gate";
   const kicker = forced ? "Než půjdeš dál" : choice === "accepted" ? "Už přijato" : "Zatím odmítnuto";
   const note = forced
-    ? "Přijetí přidělí odznak. Odmítnutí tě pustí dál a okno se příště neukáže."
+    ? "Dokud si nevybereš, okno zůstane."
     : choice === "accepted"
       ? "Přijato. Tenhle text už je jen ke čtení."
-      : "Odmítnuto. Přijetí pořád přidělí odznak Zpečetěný pakt.";
+      : "Odmítnuto. Podmínky jsi poslal do prdele a vývojáře hned za nimi.";
 
   return (
     <>
@@ -134,7 +162,7 @@ export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | n
 
             <div className="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8">
               <article className="rounded-2xl border border-stone-400/30 bg-[#f6f1e7] px-5 py-4 text-[15px] leading-7 text-stone-900 shadow-inner">
-                <p className="whitespace-pre-wrap font-serif">{TERMS_BODY}</p>
+                <TermsDocument text={TERMS_BODY} />
               </article>
             </div>
 
