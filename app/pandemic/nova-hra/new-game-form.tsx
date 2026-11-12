@@ -36,9 +36,32 @@ import type { RecentGame } from "@/lib/pandemic/stats";
 const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
 const ROLE_SINK = ["bio", "lokál", "pilot", "rejža", "vir"];
 const SETUP_PRESETS = [
-  { id: "leg-klasika", label: "LEG Klasika", difficulty: "legendarni", mode: "klasika" },
-  { id: "vn-zhoubak", label: "VN Zhoubák", difficulty: "velmi narocna", mode: "zhoubny kmen" },
-  { id: "vn-mutace", label: "VN Mutace", difficulty: "velmi narocna", mode: "mutace" },
+  {
+    id: "leg-klasika",
+    label: "LEG Klasika",
+    difficulty: "legendarni",
+    mode: "klasika",
+    idle: "border-amber-300/60 bg-amber-400/15 text-amber-100 hover:border-amber-200 hover:bg-amber-400/25",
+    selected:
+      "border-amber-200 bg-amber-400 text-zinc-950 shadow-[0_10px_28px_-12px_rgba(251,191,36,0.95)]",
+  },
+  {
+    id: "vn-zhoubak",
+    label: "VN Zhoubák",
+    difficulty: "velmi narocna",
+    mode: "zhoubny kmen",
+    idle: "border-red-400/55 bg-red-500/15 text-red-100 hover:border-red-300 hover:bg-red-500/25",
+    selected: "border-red-300 bg-red-500 text-white shadow-[0_10px_28px_-12px_rgba(239,68,68,0.95)]",
+  },
+  {
+    id: "vn-mutace",
+    label: "VN Mutace",
+    difficulty: "velmi narocna",
+    mode: "mutace",
+    idle: "border-purple-400/55 bg-purple-500/15 text-purple-100 hover:border-purple-300 hover:bg-purple-500/30",
+    selected:
+      "border-purple-300 bg-purple-500 text-white shadow-[0_10px_28px_-12px_rgba(168,85,247,0.95)]",
+  },
 ] as const;
 
 function catalogCode(options: CodeLabel[], folded: string) {
@@ -340,13 +363,23 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
                   type="button"
                   aria-pressed={selected}
                   onClick={() => applyPreset(preset)}
-                  className={
-                    selected
-                      ? "inline-flex h-9 items-center rounded-full border border-emerald-300 bg-emerald-400 px-3 text-xs font-semibold text-zinc-950"
-                      : "inline-flex h-9 items-center rounded-full border border-white/15 bg-white/5 px-3 text-xs font-medium text-zinc-200 transition hover:border-emerald-400/40 hover:text-white"
-                  }
+                  className={`inline-grid h-9 place-items-center rounded-full border px-4 text-xs font-semibold transition ${
+                    selected ? preset.selected : preset.idle
+                  }`}
                 >
-                  {preset.label}
+                  {SETUP_PRESETS.map((item) => (
+                    <span
+                      key={item.id}
+                      aria-hidden={item.id !== preset.id}
+                      className={
+                        item.id === preset.id
+                          ? "col-start-1 row-start-1"
+                          : "invisible col-start-1 row-start-1"
+                      }
+                    >
+                      {item.label}
+                    </span>
+                  ))}
                 </button>
               );
             })}
