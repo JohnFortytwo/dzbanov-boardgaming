@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { earnedBadgeIds, HEADER_BADGE_LIMIT, sampleBadges, type BadgeId } from "@/lib/badges";
 import { loadUserBadges, subscribeBadges } from "@/lib/badges-client";
 
-export function SignedInUser({ nickname }: { nickname: string }) {
+export function SignedInUser() {
   const [owned, setOwned] = useState<BadgeId[]>([]);
   const [featured, setFeatured] = useState<BadgeId | null>(null);
 
@@ -46,13 +46,10 @@ export function SignedInUser({ nickname }: { nickname: string }) {
     [owned, featured],
   );
 
+  if (visible.length === 0) return null;
+
   return (
     <div className="flex items-center justify-end gap-2">
-      {nickname ? (
-        <p className="max-w-48 truncate text-xs font-medium text-zinc-300" title={nickname}>
-          {nickname}
-        </p>
-      ) : null}
       {visible.map((badge) => (
         <Link
           key={badge.id}
@@ -66,7 +63,7 @@ export function SignedInUser({ nickname }: { nickname: string }) {
             alt=""
             width={64}
             height={64}
-            className="size-16 rounded-full object-cover"
+            className="size-10 rounded-full object-cover sm:size-16"
           />
           <span
             role="tooltip"

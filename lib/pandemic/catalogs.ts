@@ -1,7 +1,7 @@
 import { createClient as createAdminClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { sortDiseaseStates } from "@/lib/pandemic/disease-states";
-import type { CodeLabel, PandemicCatalogs, PlayerOption } from "@/lib/pandemic/drafts";
+import { isHiddenRoleCode, type CodeLabel, type PandemicCatalogs, type PlayerOption } from "@/lib/pandemic/drafts";
 
 const CODE_TABLES = [
   ["roles", "roles"],
@@ -48,22 +48,32 @@ async function loadCodes(
   });
 }
 
-async function readCatalogs(supabase: SupabaseClient): Promise<PandemicCatalogs> {
-  const { data: playerRows, error: playerError } = await supabase
+async function loadPlayers(supabase: SupabaseClient): Promise<PlayerOption[]> {
+  const flagged = await supabase
     .from("players")
-    .select("id, name")
+    .select("id, name, is_active")
     .order("name", { ascending: true });
 
-  if (playerError) {
-    throw new Error(`Seznam hráčů se nepodařilo načíst. ${playerError.message}`);
+  let rows: Array<{ id?: unknown; name?: unknown; is_active?: unknown }> | null = flagged.data;
+  if (flagged.error) {
+    const plain = await supabase.from("players").select("id, name").order("name", { ascending: true });
+    if (plain.error) {
+      throw new Error(`Seznam hráčů se nepodařilo načíst. ${plain.error.message}`);
+    }
+    rows = plain.data;
   }
 
-  const players: PlayerOption[] = (playerRows ?? []).flatMap((row) => {
+  return (rows ?? []).flatMap((row) => {
+    if (row.is_active === false) return [];
     const id = typeof row.id === "string" ? row.id : "";
     const name = typeof row.name === "string" ? row.name.trim() : "";
     if (!id || !name) return [];
     return [{ id, name }];
   });
+}
+
+async function readCatalogs(supabase: SupabaseClient): Promise<PandemicCatalogs> {
+  const players = await loadPlayers(supabase);
 
   const codeLists = await Promise.all(
     CODE_TABLES.map(async ([table, key]) => [key, await loadCodes(supabase, table)] as const),
@@ -83,6 +93,7 @@ async function readCatalogs(supabase: SupabaseClient): Promise<PandemicCatalogs>
     catalogs[key] = values;
   }
   catalogs.diseaseStates = sortDiseaseStates(catalogs.diseaseStates);
+  catalogs.roles = catalogs.roles.filter((role) => !isHiddenRoleCode(role.code));
 
   return catalogs;
 }

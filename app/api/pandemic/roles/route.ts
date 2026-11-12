@@ -1,11 +1,20 @@
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { roleCodeFromName } from "@/lib/pandemic/drafts";
+import { hiddenRoleCode, roleCodeFromName } from "@/lib/pandemic/drafts";
 
 const supabaseAdmin = createAdminClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
+
+type RoleRow = { code: string; name_cs: string | null };
+
+function rolePayload(row: RoleRow, fallbackName: string) {
+  return {
+    code: row.code,
+    name_cs: typeof row.name_cs === "string" && row.name_cs.trim() ? row.name_cs.trim() : fallbackName,
+  };
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -15,7 +24,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Nejste přihlášeni." }, { status: 401 });
   }
 
-  let body: { name?: string };
+  let body: { name?: string; catalog?: boolean };
   try {
     body = await request.json();
   } catch {
@@ -27,24 +36,32 @@ export async function POST(request: Request) {
     return Response.json({ error: "Název role je povinný." }, { status: 400 });
   }
 
-  const code = roleCodeFromName(name);
-  const { data: existing } = await supabaseAdmin
+  const catalog = body.catalog !== false;
+  const listedCode = roleCodeFromName(name);
+  const onceCode = hiddenRoleCode(name);
+  const { data: existing, error: listError } = await supabaseAdmin
     .from("roles")
     .select("code, name_cs")
-    .eq("code", code)
-    .maybeSingle();
+    .in("code", [listedCode, onceCode]);
 
-  if (existing?.code) {
-    return Response.json({
-      role: {
-        code: existing.code,
-        name_cs: typeof existing.name_cs === "string" && existing.name_cs.trim()
-          ? existing.name_cs
-          : name,
-      },
-    });
+  if (listError) {
+    return Response.json({ error: `Roli se nepodařilo uložit. ${listError.message}` }, { status: 400 });
   }
 
+  const rows = (existing ?? []).filter(
+    (row): row is RoleRow => typeof row.code === "string" && row.code.length > 0,
+  );
+  const listed = rows.find((row) => row.code === listedCode);
+  const once = rows.find((row) => row.code === onceCode);
+
+  if (listed) {
+    return Response.json({ role: rolePayload(listed, name) });
+  }
+  if (!catalog && once) {
+    return Response.json({ role: rolePayload(once, name) });
+  }
+
+  const code = catalog ? listedCode : onceCode;
   const { data, error } = await supabaseAdmin
     .from("roles")
     .insert({ code, name_cs: name })
@@ -59,9 +76,6 @@ export async function POST(request: Request) {
   }
 
   return Response.json({
-    role: {
-      code: data.code,
-      name_cs: typeof data.name_cs === "string" && data.name_cs.trim() ? data.name_cs : name,
-    },
+    role: rolePayload({ code: data.code, name_cs: typeof data.name_cs === "string" ? data.name_cs : name }, name),
   });
 }

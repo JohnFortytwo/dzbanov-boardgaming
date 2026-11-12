@@ -176,19 +176,22 @@ export const DEFAULT_RECENT_GAME_LIMIT: RecentGameLimit = 5;
 export const MAX_RECENT_GAMES = 20;
 
 export const STATS_RANGE_OPTIONS = [
-  { id: "all", limit: null, label: "Celá historie" },
-  { id: "1000", limit: 1000, label: "1000 her" },
-  { id: "500", limit: 500, label: "500 her" },
-  { id: "100", limit: 100, label: "100 her" },
-  { id: "50", limit: 50, label: "50 her" },
-  { id: "10", limit: 10, label: "10 her" },
+  { id: "all", label: "Celá historie" },
+  { id: "1000", label: "1000 her" },
+  { id: "500", label: "500 her" },
+  { id: "100", label: "100 her" },
+  { id: "meetup", label: "Sraz" },
+  { id: "last-day", label: "Posl. den" },
 ] as const;
 
-export type StatsRangeId = (typeof STATS_RANGE_OPTIONS)[number]["id"];
-export const DEFAULT_STATS_RANGE: StatsRangeId = "1000";
+export type StatsPresetId = (typeof STATS_RANGE_OPTIONS)[number]["id"];
+export type StatsRange =
+  | { kind: "preset"; id: StatsPresetId }
+  | { kind: "count"; count: number };
+export const DEFAULT_STATS_RANGE: StatsPresetId = "1000";
 
 export type PandemicStatsBundle = {
-  ranges: Record<StatsRangeId, PandemicStats>;
+  ranges: Record<StatsPresetId, PandemicStats>;
   recentGames: RecentGame[];
 };
 
@@ -253,6 +256,7 @@ const RESULT_ORDER = [
   "prohra - kostky",
   "prohra - karty",
   "prohra - pandemie",
+  "prohra - pravidla",
 ];
 
 const DISEASES = [
@@ -281,7 +285,8 @@ function labelMap(rows: CodeName[]) {
   }
   return (code: string | null) => {
     if (!code) return "Neuvedeno";
-    return labels.get(code) ?? labels.get(foldCode(code)) ?? code;
+    const visible = code.startsWith("~") ? code.slice(1) : code;
+    return labels.get(code) ?? labels.get(foldCode(code)) ?? labels.get(visible) ?? visible;
   };
 }
 
@@ -307,13 +312,45 @@ function byPlayedThenSavedDesc(left: StatsGame, right: StatsGame) {
   return bySavedAtDesc(left, right);
 }
 
-export function statsRangeLimit(rangeId: StatsRangeId): number | null {
-  return STATS_RANGE_OPTIONS.find((option) => option.id === rangeId)?.limit ?? null;
+function playedDay(game: StatsGame): string | null {
+  const day = game.played_at?.slice(0, 10) ?? "";
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
 }
 
-export function windowSource(source: StatsSource, limit: number | null): StatsSource {
-  if (limit === null || source.games.length <= limit) return source;
-  const games = [...source.games].sort(byPlayedThenSavedDesc).slice(0, limit);
+function shiftDay(day: string, delta: number): string {
+  const [year, month, date] = day.split("-").map(Number);
+  const utc = new Date(Date.UTC(year, month - 1, date));
+  utc.setUTCDate(utc.getUTCDate() + delta);
+  return utc.toISOString().slice(0, 10);
+}
+
+export function latestPlayedDay(games: readonly StatsGame[]): string | null {
+  let latest = "";
+  for (const game of games) {
+    const day = playedDay(game);
+    if (day && day > latest) latest = day;
+  }
+  return latest || null;
+}
+
+export function meetupDays(games: readonly StatsGame[]): string[] {
+  const latest = latestPlayedDay(games);
+  if (!latest) return [];
+  const played = new Set<string>();
+  for (const game of games) {
+    const day = playedDay(game);
+    if (day) played.add(day);
+  }
+  const days: string[] = [];
+  for (let offset = 0; ; offset += 1) {
+    const day = shiftDay(latest, -offset);
+    if (!played.has(day)) break;
+    days.push(day);
+  }
+  return days;
+}
+
+function sourceWithGames(source: StatsSource, games: StatsGame[]): StatsSource {
   const ids = new Set(games.map((game) => game.id));
   return {
     ...source,
@@ -321,6 +358,36 @@ export function windowSource(source: StatsSource, limit: number | null): StatsSo
     seats: source.seats.filter((seat) => ids.has(seat.game_id)),
     roleChanges: source.roleChanges.filter((change) => ids.has(change.game_id)),
   };
+}
+
+export function windowSource(source: StatsSource, limit: number | null): StatsSource {
+  if (limit === null || source.games.length <= limit) return source;
+  const games = [...source.games].sort(byPlayedThenSavedDesc).slice(0, limit);
+  return sourceWithGames(source, games);
+}
+
+export function selectStatsWindow(source: StatsSource, range: StatsRange): StatsSource {
+  if (range.kind === "count") return windowSource(source, range.count);
+  if (range.id === "all") return source;
+  if (range.id === "1000" || range.id === "500" || range.id === "100") {
+    return windowSource(source, Number(range.id));
+  }
+  if (range.id === "last-day") {
+    const day = latestPlayedDay(source.games);
+    if (!day) return sourceWithGames(source, []);
+    return sourceWithGames(
+      source,
+      source.games.filter((game) => playedDay(game) === day),
+    );
+  }
+  const days = new Set(meetupDays(source.games));
+  return sourceWithGames(
+    source,
+    source.games.filter((game) => {
+      const day = playedDay(game);
+      return day != null && days.has(day);
+    }),
+  );
 }
 
 export function filterStatsSource(source: StatsSource, filter: StatsGameFilter): StatsSource {
@@ -797,11 +864,12 @@ export function buildPandemicStats(
 }
 
 export function buildPandemicStatsBundle(source: StatsSource): PandemicStatsBundle {
-  const ranges = {} as Record<StatsRangeId, PandemicStats>;
+  const ranges = {} as Record<StatsPresetId, PandemicStats>;
   for (const option of STATS_RANGE_OPTIONS) {
-    ranges[option.id] = buildPandemicStats(windowSource(source, option.limit), {
-      recentLimit: option.limit === null ? MAX_RECENT_GAMES : 0,
-    });
+    ranges[option.id] = buildPandemicStats(
+      selectStatsWindow(source, { kind: "preset", id: option.id }),
+      { recentLimit: option.id === "all" ? MAX_RECENT_GAMES : 0 },
+    );
   }
   return {
     ranges,

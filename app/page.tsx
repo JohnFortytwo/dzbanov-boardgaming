@@ -2,11 +2,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { AccountLinks } from "@/app/components/account-links";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { SiteHeader } from "@/app/components/site-header";
 import { DonateModal } from "@/app/components/DonateModal";
 import { DraciDoupeModal } from "@/app/components/DraciDoupeModal";
-import { SignedInUser } from "@/app/components/SignedInUser";
 import { loadOwnNickname } from "@/lib/profile";
 import { loadTermsChoice } from "@/lib/terms-server";
 import { createClient } from "@/lib/supabase/server";
@@ -50,12 +49,9 @@ async function BoardgamingHome() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black_38%,transparent_78%)]" />
       </div>
 
-      <div className="absolute right-6 top-6 z-10 flex flex-col items-end gap-2">
-        <SignedInUser nickname={nickname} />
-        <AccountLinks termsChoice={termsChoice} />
-      </div>
+      <SiteHeader nickname={nickname} termsChoice={termsChoice} showLogo={false} />
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-6 py-20">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-6 py-16 sm:py-20">
         <p className="mb-5 text-xs font-medium uppercase tracking-[0.28em] text-emerald-400/85">
           Herní ekosystém
         </p>

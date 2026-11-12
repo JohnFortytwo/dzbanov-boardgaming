@@ -12,12 +12,13 @@ import {
   buildPandemicStats,
   buildTimeline,
   filterStatsSource,
+  latestPlayedDay,
   listNotedGames,
-  statsRangeLimit,
+  meetupDays,
+  selectStatsWindow,
   summarizeCrews,
   summarizePlayers,
   summarizeRoles,
-  windowSource,
   type ChangeRow,
   type ChangeSideRow,
   type CountRow,
@@ -28,7 +29,8 @@ import {
   type RoleLens,
   type RoleRow,
   type StatsGameFilter,
-  type StatsRangeId,
+  type StatsPresetId,
+  type StatsRange,
   type StatsSource,
   type TimelineBucket,
 } from "@/lib/pandemic/stats";
@@ -66,11 +68,37 @@ function formatSaved(value: string | null) {
   return savedFormat.format(date);
 }
 
-function rangeDescription(rangeId: StatsRangeId, inRange: number, total: number) {
-  if (rangeId === "all") {
+function rangeDescription(
+  range: StatsRange,
+  games: Parameters<typeof meetupDays>[0],
+  inRange: number,
+  total: number,
+) {
+  if (range.kind === "count") {
+    if (total < range.count) {
+      return `Ostatní tabulky berou posledních ${integerFormat.format(range.count)} odehraných her. V databázi je jich ${integerFormat.format(total)}, takže jde o celou historii.`;
+    }
+    return `Ostatní tabulky počítají posledních ${integerFormat.format(inRange)} odehraných her podle data partie. Když se datum shoduje, rozhoduje čas uložení. Úvodní karty zůstávají za celou historii.`;
+  }
+  if (range.id === "all") {
     return `Ostatní tabulky počítají celou historii, ${integerFormat.format(total)} platných partií. Úvodní karty se nemění.`;
   }
-  const limit = Number(rangeId);
+  if (range.id === "meetup") {
+    const days = meetupDays(games);
+    if (days.length === 0) {
+      return "Sraz bere poslední nepřerušenou řadu kalendářních dnů. Žádná partie nemá datum hry.";
+    }
+    const newest = days[0];
+    const oldest = days[days.length - 1];
+    const span = newest === oldest ? formatDay(newest) : `${formatDay(oldest)} – ${formatDay(newest)}`;
+    return `Sraz bere ${integerFormat.format(inRange)} her z poslední nepřerušené řady dnů (${span}). Den bez partie řadu ukončí.`;
+  }
+  if (range.id === "last-day") {
+    const day = latestPlayedDay(games);
+    if (!day) return "Poslední den bere hry z nejnovějšího data partie. Žádná partie nemá datum.";
+    return `Poslední den bere ${integerFormat.format(inRange)} her odehraných ${formatDay(day)}.`;
+  }
+  const limit = Number(range.id);
   if (total < limit) {
     return `Ostatní tabulky berou posledních ${integerFormat.format(limit)} odehraných her. V databázi je jich ${integerFormat.format(total)}, takže jde o celou historii.`;
   }
@@ -88,7 +116,9 @@ const ROLE_LENS_NOTE: Record<RoleLens, string> = {
 
 export function StatsDashboard({ source }: { source: StatsSource }) {
   const [recentLimit, setRecentLimit] = useState<RecentGameLimit>(DEFAULT_RECENT_GAME_LIMIT);
-  const [rangeId, setRangeId] = useState<StatsRangeId>(DEFAULT_STATS_RANGE);
+  const [presetId, setPresetId] = useState<StatsPresetId>(DEFAULT_STATS_RANGE);
+  const [customCount, setCustomCount] = useState<number | null>(null);
+  const [customText, setCustomText] = useState("");
   const [roleLens, setRoleLens] = useState<RoleLens>("any");
   const [roleFilter, setRoleFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
   const [playerFilter, setPlayerFilter] = useState<StatsGameFilter>(EMPTY_FILTER);
@@ -107,7 +137,16 @@ export function StatsDashboard({ source }: { source: StatsSource }) {
   const [noteOrder, setNoteOrder] = useState<string[] | null>(null);
 
   const headline = useMemo(() => buildPandemicStats(source), [source]);
-  const windowed = useMemo(() => windowSource(source, statsRangeLimit(rangeId)), [source, rangeId]);
+  const range: StatsRange =
+    customCount != null ? { kind: "count", count: customCount } : { kind: "preset", id: presetId };
+  const windowed = useMemo(
+    () =>
+      selectStatsWindow(
+        source,
+        customCount != null ? { kind: "count", count: customCount } : { kind: "preset", id: presetId },
+      ),
+    [source, presetId, customCount],
+  );
   const stats = useMemo(() => buildPandemicStats(windowed, { recentLimit: 0 }), [windowed]);
   const playerCountChoices = useMemo(() => seatCounts(windowed), [windowed]);
   const roleRows = useMemo(
@@ -300,15 +339,42 @@ export function StatsDashboard({ source }: { source: StatsSource }) {
               name="stats-range"
               legend="Rozsah ostatních tabulek"
               tone="heading"
-              value={rangeId}
+              value={customCount == null ? presetId : null}
               options={STATS_RANGE_OPTIONS.map((option) => ({
                 value: option.id,
                 label: option.label,
               }))}
-              onChange={setRangeId}
+              onChange={(id) => {
+                setPresetId(id);
+                setCustomCount(null);
+                setCustomText("");
+              }}
+              trailing={
+                <input
+                  inputMode="numeric"
+                  autoComplete="off"
+                  aria-label="Počet her"
+                  value={customText}
+                  onChange={(event) => {
+                    const cleaned = event.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 4);
+                    setCustomText(cleaned);
+                    if (!cleaned) {
+                      setCustomCount(null);
+                      return;
+                    }
+                    const count = Number(cleaned);
+                    if (count > 0) setCustomCount(count);
+                  }}
+                  className={`h-9 w-16 rounded-full border text-center text-sm outline-none transition focus:ring-2 focus:ring-emerald-400/70 ${
+                    customCount != null
+                      ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-100"
+                      : "border-white/10 bg-white/5 text-zinc-200"
+                  }`}
+                />
+              }
             />
             <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-500">
-              {rangeDescription(rangeId, stats.games, headline.games)}
+              {rangeDescription(range, source.games, stats.games, headline.games)}
             </p>
           </section>
 
@@ -665,13 +731,15 @@ function ChoicePills<T extends string | number>({
   options,
   onChange,
   tone = "label",
+  trailing,
 }: {
   name: string;
   legend: string;
-  value: T;
+  value: T | null;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
   tone?: "label" | "heading";
+  trailing?: ReactNode;
 }) {
   return (
     <form onSubmit={(event) => event.preventDefault()}>
@@ -685,9 +753,9 @@ function ChoicePills<T extends string | number>({
         >
           {legend}
         </legend>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           {options.map((option) => {
-            const checked = option.value === value;
+            const checked = value != null && option.value === value;
             return (
               <label
                 key={String(option.value)}
@@ -709,6 +777,7 @@ function ChoicePills<T extends string | number>({
               </label>
             );
           })}
+          {trailing}
         </div>
       </fieldset>
     </form>

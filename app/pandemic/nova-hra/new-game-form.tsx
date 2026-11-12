@@ -23,6 +23,7 @@ import {
   modeAllowsVirulentStrain,
   prepareDraft,
   roleChangeOrigin,
+  sortGameResults,
   type CodeLabel,
   type DraftData,
   type DraftPlayer,
@@ -34,6 +35,18 @@ import type { RecentGame } from "@/lib/pandemic/stats";
 
 const PLAYER_PRIORITY = ["Dorian", "Gart", "Usha", "Ruiner", "Thunder", "Zelwa"];
 const ROLE_SINK = ["bio", "lokál", "pilot", "rejža", "vir"];
+const SETUP_PRESETS = [
+  { id: "leg-klasika", label: "LEG Klasika", difficulty: "legendarni", mode: "klasika" },
+  { id: "vn-zhoubak", label: "VN Zhoubák", difficulty: "velmi narocna", mode: "zhoubny kmen" },
+  { id: "vn-mutace", label: "VN Mutace", difficulty: "velmi narocna", mode: "mutace" },
+] as const;
+
+function catalogCode(options: CodeLabel[], folded: string) {
+  return (
+    options.find((option) => foldCode(option.code) === folded || foldCode(option.name_cs) === folded)
+      ?.code ?? null
+  );
+}
 
 const addRowClassName =
   "inline-flex h-10 items-center justify-center rounded-full border border-emerald-200/80 bg-emerald-500 px-5 text-sm font-semibold text-zinc-950 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.95)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-zinc-500 disabled:shadow-none";
@@ -79,7 +92,7 @@ function freshForm(): DraftData {
   };
 }
 
-async function postCatalog(url: string, body: { name: string }) {
+async function postCatalog(url: string, body: { name: string; catalog: boolean }) {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -142,8 +155,8 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
     });
   }
 
-  async function createPlayer(name: string) {
-    const payload = await postCatalog("/api/pandemic/players", { name });
+  async function createPlayer(name: string, catalog: boolean) {
+    const payload = await postCatalog("/api/pandemic/players", { name, catalog });
     const player = payload.player;
     if (!player?.id || !player.name) {
       throw new Error("Hráče se nepodařilo uložit.");
@@ -156,8 +169,8 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
     }));
   }
 
-  async function createRole(name: string) {
-    const payload = await postCatalog("/api/pandemic/roles", { name });
+  async function createRole(name: string, catalog: boolean) {
+    const payload = await postCatalog("/api/pandemic/roles", { name, catalog });
     const role = payload.role;
     if (!role?.code) {
       throw new Error("Roli se nepodařilo uložit.");
@@ -210,6 +223,33 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
 
   const seatedPlayers = playersInGame(form, catalogs.players);
   const canLoadLineup = !form.players.some((player) => player.matched_player_id);
+  const selectedPreset =
+    SETUP_PRESETS.find((preset) => {
+      const difficulty = catalogCode(catalogs.difficulties, preset.difficulty);
+      const mode = catalogCode(catalogs.gameModes, preset.mode);
+      return (
+        difficulty != null &&
+        mode != null &&
+        form.difficulty_code === difficulty &&
+        form.game_mode_code === mode
+      );
+    })?.id ?? null;
+
+  function applyPreset(preset: (typeof SETUP_PRESETS)[number]) {
+    const difficulty_code = catalogCode(catalogs.difficulties, preset.difficulty);
+    const game_mode_code = catalogCode(catalogs.gameModes, preset.mode);
+    if (!difficulty_code || !game_mode_code) {
+      setErrors(["Tuhle kombinaci se nepodařilo najít v číselníku."]);
+      return;
+    }
+    updateForm({
+      ...form,
+      difficulty_code,
+      game_mode_code,
+      purple_disease: modeAllowsPurple(game_mode_code) ? form.purple_disease : null,
+      virulent_strain_color: modeAllowsVirulentStrain(game_mode_code) ? form.virulent_strain_color : null,
+    });
+  }
 
   async function loadLastLineup() {
     if (loadingLineup || !canLoadLineup) return;
@@ -287,9 +327,31 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
             <GameCodeSelect
               label="Výsledek"
               value={form.result_code}
-              options={sortWithPriority(catalogs.gameResults, ["Výhra"])}
+              options={sortGameResults(catalogs.gameResults)}
               onChange={(result_code) => updateForm({ ...form, result_code })}
             />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {SETUP_PRESETS.map((preset) => {
+              const selected = selectedPreset === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => applyPreset(preset)}
+                  className={
+                    selected
+                      ? "inline-flex h-9 items-center rounded-full border border-emerald-300 bg-emerald-400 px-3 text-xs font-semibold text-zinc-950"
+                      : "inline-flex h-9 items-center rounded-full border border-white/15 bg-white/5 px-3 text-xs font-medium text-zinc-200 transition hover:border-emerald-400/40 hover:text-white"
+                  }
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <GameCodeSelect
               label="Obtížnost"
               value={form.difficulty_code}
@@ -315,9 +377,21 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_24px_80px_-32px_rgba(16,185,129,0.45)] backdrop-blur-xl sm:p-5">
-          <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
-            Hráči a role
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-400/85">
+              Hráči a role
+            </h2>
+            {canLoadLineup ? (
+              <button
+                type="button"
+                disabled={loadingLineup}
+                onClick={() => void loadLastLineup()}
+                className="inline-flex h-10 items-center rounded-full border border-emerald-400/30 px-4 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10 disabled:cursor-wait disabled:opacity-60"
+              >
+                {loadingLineup ? "Načítám hráče…" : "Načíst hráče z poslední hry"}
+              </button>
+            ) : null}
+          </div>
           <div className="mt-4 space-y-3">
             {form.players.map((player, playerIndex) => (
               <div
@@ -353,16 +427,6 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
             ))}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            {canLoadLineup ? (
-              <button
-                type="button"
-                disabled={loadingLineup}
-                onClick={() => void loadLastLineup()}
-                className="inline-flex h-10 items-center rounded-full border border-emerald-400/30 px-4 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10 disabled:cursor-wait disabled:opacity-60"
-              >
-                {loadingLineup ? "Načítám hráče…" : "Načíst hráče z poslední hry"}
-              </button>
-            ) : null}
             <button
               type="button"
               disabled={form.players.length >= 5}
@@ -376,8 +440,18 @@ export function NewGameForm({ catalogs: initialCatalogs }: { catalogs: PandemicC
             >
               Přidat hráče
             </button>
-            <QuickCreate label="+ Nový hráč" placeholder="Jméno hráče" onCreate={createPlayer} />
-            <QuickCreate label="+ Nová role" placeholder="Název role" onCreate={createRole} />
+            <QuickCreate
+              label="+ Nový hráč"
+              placeholder="Jméno hráče"
+              prompt="Uložit hráče jen do této hry, nebo ho přidat do číselníku?"
+              onCreate={createPlayer}
+            />
+            <QuickCreate
+              label="+ Nová role"
+              placeholder="Název role"
+              prompt="Uložit roli jen do této hry, nebo ji přidat do číselníku?"
+              onCreate={createRole}
+            />
           </div>
 
           <div className="mt-6 space-y-3 border-t border-white/10 pt-4">

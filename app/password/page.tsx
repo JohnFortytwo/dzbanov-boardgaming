@@ -2,8 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { AccountLinks } from "@/app/components/account-links";
-import { SignedInUser } from "@/app/components/SignedInUser";
+import { SiteHeader } from "@/app/components/site-header";
 import { loadOwnNickname } from "@/lib/profile";
 import { loadTermsChoice } from "@/lib/terms-server";
 import { createClient } from "@/lib/supabase/server";
@@ -46,12 +45,7 @@ async function PasswordContent() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black_38%,transparent_78%)]" />
       </div>
 
-      <header className="relative z-10 flex flex-wrap items-start justify-end gap-4 px-6 pt-6">
-        <div className="flex flex-col items-end gap-2">
-          <SignedInUser nickname={nickname} />
-          <AccountLinks termsChoice={termsChoice} />
-        </div>
-      </header>
+      <SiteHeader nickname={nickname} termsChoice={termsChoice} />
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-6 py-20">
         <h1 className="text-center text-3xl font-semibold tracking-tight text-white">

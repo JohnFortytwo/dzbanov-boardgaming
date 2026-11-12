@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, useTransition, type Ref } from "react";
 import { saveTermsChoice } from "@/app/terms/actions";
 import { announceBadge } from "@/lib/badges-client";
 import { TERMS_BODY, TERMS_TITLE, type TermsChoice } from "@/lib/terms";
@@ -36,7 +36,17 @@ function TermsDocument({ text }: { text: string }) {
   );
 }
 
-export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | null }) {
+export type TermsConsentHandle = { open: () => void };
+
+export function TermsConsent({
+  ref,
+  initialChoice,
+  showButton = true,
+}: {
+  ref?: Ref<TermsConsentHandle>;
+  initialChoice: TermsChoice | null;
+  showButton?: boolean;
+}) {
   const [choice, setChoice] = useState(initialChoice);
   const [mode, setMode] = useState<"closed" | "gate" | "review">(
     initialChoice === null ? "gate" : "closed",
@@ -51,6 +61,13 @@ export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | n
     setChoice(initialChoice);
     setMode((current) => (current === "gate" ? "closed" : current));
   }, [initialChoice]);
+
+  useImperativeHandle(ref, () => ({
+    open() {
+      setError(null);
+      setMode(choice === null ? "gate" : "review");
+    },
+  }), [choice]);
 
   useEffect(() => {
     if (mode === "closed") return;
@@ -133,9 +150,11 @@ export function TermsConsent({ initialChoice }: { initialChoice: TermsChoice | n
 
   return (
     <>
-      <button type="button" onClick={open} className={linkClass}>
-        Podmínky
-      </button>
+      {showButton ? (
+        <button type="button" onClick={open} className={linkClass}>
+          Podmínky
+        </button>
+      ) : null}
 
       {mode !== "closed" ? (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6">

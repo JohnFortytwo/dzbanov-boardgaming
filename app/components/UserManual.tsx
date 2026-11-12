@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 
 const INGEST_COMMAND = "python scripts/ingest_pdf.py";
 
@@ -11,7 +11,15 @@ git push origin main`;
 
 const DEV_COMMAND = "npm run dev";
 
-export function UserManual() {
+export type UserManualHandle = { open: () => void };
+
+export function UserManual({
+  ref,
+  showButton = true,
+}: {
+  ref?: Ref<UserManualHandle>;
+  showButton?: boolean;
+} = {}) {
   const [open, setOpen] = useState(false);
   const [copyState, setCopyState] = useState<{
     id: string;
@@ -24,6 +32,12 @@ export function UserManual() {
       if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
     };
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    open() {
+      setOpen(true);
+    },
+  }), []);
 
   useEffect(() => {
     if (!open) return;
@@ -59,13 +73,15 @@ export function UserManual() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center rounded-full border border-sky-400/30 bg-transparent px-4 py-2 text-xs font-medium text-sky-300 transition hover:border-sky-400/60 hover:bg-sky-500/10 hover:text-sky-200"
-      >
-        Návod
-      </button>
+      {showButton ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center rounded-full border border-sky-400/30 bg-transparent px-4 py-2 text-xs font-medium text-sky-300 transition hover:border-sky-400/60 hover:bg-sky-500/10 hover:text-sky-200"
+        >
+          Návod
+        </button>
+      ) : null}
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">

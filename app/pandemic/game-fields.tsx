@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type KeyboardEvent, type ReactNode } from "react";
-import { foldCode, type CodeLabel, type PlayerOption } from "@/lib/pandemic/drafts";
+import { displayRoleCode, foldCode, type CodeLabel, type PlayerOption } from "@/lib/pandemic/drafts";
 import { diseaseStatePills } from "@/lib/pandemic/disease-link";
 
 export const fieldClassName =
@@ -18,7 +18,7 @@ export const diseaseFields = [
 export function roleOptionLabels(roles: CodeLabel[]): CodeLabel[] {
   return roles.map((role) => ({
     code: role.code,
-    name_cs: role.code.toUpperCase(),
+    name_cs: displayRoleCode(role.code).toUpperCase(),
   }));
 }
 
@@ -343,29 +343,45 @@ export function GamePlayerSelect({
   );
 }
 
+const quickGhostClass =
+  "inline-flex h-9 items-center rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white";
+const quickEmeraldClass =
+  "inline-flex h-9 items-center rounded-full border border-emerald-400/30 px-3 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10";
+
 export function QuickCreate({
   label,
   placeholder,
+  prompt,
   onCreate,
+  tabIndex,
 }: {
   label: string;
   placeholder: string;
-  onCreate: (name: string) => Promise<void>;
+  prompt: string;
+  onCreate: (name: string, catalog: boolean) => Promise<void>;
+  tabIndex?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [catalog, setCatalog] = useState<boolean | null>(null);
   const [name, setName] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function close() {
+    setOpen(false);
+    setCatalog(null);
+    setName("");
+    setError(null);
+  }
+
   async function submit() {
     const trimmed = name.trim();
-    if (!trimmed || pending) return;
+    if (!trimmed || pending || catalog == null) return;
     setPending(true);
     setError(null);
     try {
-      await onCreate(trimmed);
-      setName("");
-      setOpen(false);
+      await onCreate(trimmed, catalog);
+      close();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Uložení se nezdařilo.");
     } finally {
@@ -377,21 +393,46 @@ export function QuickCreate({
     return (
       <button
         type="button"
+        tabIndex={tabIndex}
         onClick={() => setOpen(true)}
-        className="inline-flex h-9 shrink-0 items-center rounded-full border border-emerald-400/30 px-3 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10"
+        className={`${quickEmeraldClass} shrink-0`}
       >
         {label}
       </button>
     );
   }
 
+  if (catalog == null) {
+    return (
+      <div className="basis-full space-y-2">
+        <p className="text-xs leading-5 text-zinc-400">{prompt}</p>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" tabIndex={tabIndex} onClick={() => setCatalog(false)} className={quickEmeraldClass}>
+            Jen do této hry
+          </button>
+          <button type="button" tabIndex={tabIndex} onClick={() => setCatalog(true)} className={quickEmeraldClass}>
+            Přidat do číselníku
+          </button>
+          <button type="button" tabIndex={tabIndex} onClick={close} className={quickGhostClass}>
+            Zrušit
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="basis-full space-y-2">
+      <p className="text-xs leading-5 text-zinc-400">
+        {catalog ? "Přidá se do číselníku." : "Platí jen pro tuhle hru."}
+      </p>
       <div className="flex flex-wrap gap-2">
         <input
           value={name}
           autoFocus
+          autoComplete="off"
           placeholder={placeholder}
+          tabIndex={tabIndex}
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -403,21 +444,14 @@ export function QuickCreate({
         />
         <button
           type="button"
+          tabIndex={tabIndex}
           disabled={pending || name.trim().length === 0}
           onClick={() => void submit()}
           className="inline-flex h-9 items-center rounded-full bg-emerald-500 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:opacity-60"
         >
           {pending ? "Ukládám…" : "Přidat"}
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            setError(null);
-            setName("");
-          }}
-          className="inline-flex h-9 items-center rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
-        >
+        <button type="button" tabIndex={tabIndex} onClick={close} className={quickGhostClass}>
           Zrušit
         </button>
       </div>

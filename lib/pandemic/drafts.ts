@@ -260,6 +260,38 @@ export function roleCodeFromName(name: string) {
   return ROLE_ALIAS_TO_CODE[foldCode(trimmed)] ?? trimmed.toLocaleLowerCase("cs");
 }
 
+export const HIDDEN_ROLE_PREFIX = "~";
+
+export function hiddenRoleCode(name: string) {
+  return `${HIDDEN_ROLE_PREFIX}${roleCodeFromName(name)}`;
+}
+
+export function isHiddenRoleCode(code: string) {
+  return code.startsWith(HIDDEN_ROLE_PREFIX);
+}
+
+export function displayRoleCode(code: string) {
+  return isHiddenRoleCode(code) ? code.slice(HIDDEN_ROLE_PREFIX.length) : code;
+}
+
+export function sortGameResults(options: CodeLabel[]): CodeLabel[] {
+  const win = (option: CodeLabel) => {
+    const code = foldCode(option.code);
+    const name = foldCode(option.name_cs);
+    return code === "vyhra" || name === "vyhra";
+  };
+  const rulesLoss = (option: CodeLabel) => {
+    const code = foldCode(option.code);
+    const name = foldCode(option.name_cs);
+    return code === "prohra - pravidla" || name === "prohra - pravidla";
+  };
+  return [
+    ...options.filter(win),
+    ...options.filter((option) => !win(option) && !rulesLoss(option)),
+    ...options.filter((option) => rulesLoss(option) && !win(option)),
+  ];
+}
+
 function uniqueRole(roles: CodeLabel[]): CodeLabel | null {
   const unique = [...new Map(roles.map((role) => [role.code, role])).values()];
   return unique.length === 1 ? unique[0] : null;

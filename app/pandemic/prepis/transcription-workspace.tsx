@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CardPreview } from "./card-preview";
 import { CropViewProvider, SubCropImage, useCropViewReset, type CropBox } from "./sub-crop-image";
 import {
+  displayRoleCode,
   emptyDraftData,
   emptyPlayer,
   foldCode,
@@ -13,6 +14,7 @@ import {
   presentDraft,
   prepareDraft,
   roleChangeOrigin,
+  sortGameResults,
   type CodeLabel,
   type CardContent,
   type DraftData,
@@ -25,6 +27,7 @@ import {
 } from "@/lib/pandemic/drafts";
 import { announceBadgeFromPayload } from "@/lib/badges-client";
 import { applyDiseaseResultLink, type DiseaseAutoFill } from "@/lib/pandemic/disease-link";
+import { QuickCreate } from "@/app/pandemic/game-fields";
 
 const fieldClassName =
   "scheme-dark h-9 w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3 text-[13px] text-white outline-none ring-emerald-400/40 transition focus:border-emerald-400/40 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60";
@@ -185,7 +188,24 @@ export function TranscriptionWorkspace() {
     setHeldByOthers(payload.held_by_others);
     setHasPrevious(payload.has_previous);
     setHasNext(payload.has_next);
-    if (payload.catalogs) setCatalogs(payload.catalogs);
+    if (payload.catalogs) {
+      const incoming = payload.catalogs;
+      setCatalogs((current) => {
+        const playerIds = new Set(incoming.players.map((player) => player.id));
+        const roleCodes = new Set(incoming.roles.map((role) => role.code));
+        return {
+          ...incoming,
+          players: sortByName(
+            [...incoming.players, ...current.players.filter((player) => !playerIds.has(player.id))],
+            (player) => player.name,
+          ),
+          roles: sortByName(
+            [...incoming.roles, ...current.roles.filter((role) => !roleCodes.has(role.code))],
+            (role) => role.name_cs,
+          ),
+        };
+      });
+    }
   }
 
   async function loadQueue() {
@@ -347,8 +367,8 @@ export function TranscriptionWorkspace() {
     }));
   }
 
-  async function createPlayer(name: string) {
-    const payload = await postCatalog("/api/pandemic/players", { name });
+  async function createPlayer(name: string, catalog: boolean) {
+    const payload = await postCatalog("/api/pandemic/players", { name, catalog });
     const player = payload.player;
     if (!player?.id || !player.name) {
       throw new Error("Hráče se nepodařilo uložit.");
@@ -362,8 +382,8 @@ export function TranscriptionWorkspace() {
     }));
   }
 
-  async function createRole(name: string) {
-    const payload = await postCatalog("/api/pandemic/roles", { name });
+  async function createRole(name: string, catalog: boolean) {
+    const payload = await postCatalog("/api/pandemic/roles", { name, catalog });
     const role = payload.role;
     if (!role?.code) {
       throw new Error("Roli se nepodařilo uložit.");
@@ -610,7 +630,7 @@ export function TranscriptionWorkspace() {
             <CodeSelect
               label="Výsledek"
               value={form.result_code}
-              options={sortWithPriority(catalogs.gameResults, ["Výhra"])}
+              options={sortGameResults(catalogs.gameResults)}
               onChange={(result_code) => updateForm({ ...form, result_code })}
             />
             <CodeSelect
@@ -708,11 +728,15 @@ export function TranscriptionWorkspace() {
               <QuickCreate
                 label="+ Nový hráč"
                 placeholder="Jméno hráče"
+                prompt="Uložit hráče jen do této hry, nebo ho přidat do číselníku?"
+                tabIndex={skipTab}
                 onCreate={createPlayer}
               />
               <QuickCreate
                 label="+ Nová role"
                 placeholder="Název role"
+                prompt="Uložit roli jen do této hry, nebo ji přidat do číselníku?"
+                tabIndex={skipTab}
                 onCreate={createRole}
               />
             </div>
@@ -1283,7 +1307,7 @@ function playersInGame(form: DraftData, players: PlayerOption[]) {
   return selected.length > 0 ? selected : players;
 }
 
-async function postCatalog(url: string, body: { name: string }) {
+async function postCatalog(url: string, body: { name: string; catalog: boolean }) {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1357,7 +1381,7 @@ function Field({
 function roleLabels(roles: CodeLabel[]): CodeLabel[] {
   return roles.map((role) => ({
     code: role.code,
-    name_cs: role.code.toUpperCase(),
+    name_cs: displayRoleCode(role.code).toUpperCase(),
   }));
 }
 
@@ -1491,92 +1515,6 @@ function PlayerSelect({
           </option>
         ))}
       </select>
-    </div>
-  );
-}
-
-function QuickCreate({
-  label,
-  placeholder,
-  onCreate,
-}: {
-  label: string;
-  placeholder: string;
-  onCreate: (name: string) => Promise<void>;
-}) {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit() {
-    const trimmed = name.trim();
-    if (!trimmed || pending) return;
-    setPending(true);
-    setError(null);
-    try {
-      await onCreate(trimmed);
-      setName("");
-      setOpen(false);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Uložení se nezdařilo.");
-    } finally {
-      setPending(false);
-    }
-  }
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        tabIndex={skipTab}
-        onClick={() => setOpen(true)}
-        className="inline-flex h-9 shrink-0 items-center rounded-full border border-emerald-400/30 px-3 text-xs font-medium text-emerald-300 transition hover:border-emerald-400/60 hover:bg-emerald-500/10"
-      >
-        {label}
-      </button>
-    );
-  }
-
-  return (
-    <div className="basis-full space-y-2">
-      <div className="flex flex-wrap gap-2">
-        <input
-          value={name}
-          autoFocus
-          placeholder={placeholder}
-          onChange={(event) => setName(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              void submit();
-            }
-          }}
-          className={`${fieldClassName} min-w-48 flex-1`}
-        />
-        <button
-          type="button"
-          tabIndex={skipTab}
-          disabled={pending || name.trim().length === 0}
-          onClick={() => void submit()}
-          className="inline-flex h-9 items-center rounded-full bg-emerald-500 px-4 text-xs font-semibold text-zinc-950 transition hover:bg-emerald-400 disabled:opacity-60"
-        >
-          {pending ? "Ukládám…" : "Přidat"}
-        </button>
-        <button
-          type="button"
-          tabIndex={skipTab}
-          onClick={() => {
-            setOpen(false);
-            setError(null);
-            setName("");
-          }}
-          className="inline-flex h-9 items-center rounded-full border border-white/10 px-4 text-xs font-medium text-zinc-300 transition hover:border-white/20 hover:text-white"
-        >
-          Zrušit
-        </button>
-      </div>
-      {error ? <p className="text-xs text-red-300">{error}</p> : null}
     </div>
   );
 }

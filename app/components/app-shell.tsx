@@ -1,10 +1,7 @@
 import { Suspense, type ReactNode } from "react";
-import Link from "next/link";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { AccountLinks } from "@/app/components/account-links";
-import { BrandLogo } from "@/app/components/brand-logo";
-import { SignedInUser } from "@/app/components/SignedInUser";
+import { SiteHeader } from "@/app/components/site-header";
 import { loadOwnNickname } from "@/lib/profile";
 import { loadTermsChoice } from "@/lib/terms-server";
 import { createClient } from "@/lib/supabase/server";
@@ -46,15 +43,7 @@ async function Shell({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[64px_64px] mask-[radial-gradient(ellipse_at_center,black_38%,transparent_78%)]" />
       </div>
 
-      <header className="relative z-10 flex flex-wrap items-start justify-between gap-4 px-6 pt-6">
-        <Link href="/" className="inline-flex shrink-0 rounded-md transition hover:opacity-80">
-          <BrandLogo variant="header" />
-        </Link>
-        <div className="flex flex-col items-end gap-2">
-          <SignedInUser nickname={nickname} />
-          <AccountLinks termsChoice={termsChoice} />
-        </div>
-      </header>
+      <SiteHeader nickname={nickname} termsChoice={termsChoice} />
 
       {children}
     </div>
